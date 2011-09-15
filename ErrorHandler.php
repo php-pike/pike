@@ -45,6 +45,14 @@ class Pike_ErrorHandler
      */
     public static function dispatch($errno, $errstr, $errfile, $errline)
     {
-        throw new Pike_ErrorException($errstr, 0, $errno, $errfile, $errline);
+        /**
+         * Ignore errors for the statement that caused the error that has "@" prepended.
+         * This will cause the return value of error_reporting() to be an integer 0.
+         *
+         * @link http://anvilstudios.co.za/blog/php/how-to-ignore-errors-in-a-custom-php-error-handler
+         */
+        if (error_reporting() !== 0) {
+            throw new Pike_ErrorException($errstr, 0, $errno, $errfile, $errline);
+        }
     }
 }
