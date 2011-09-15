@@ -50,7 +50,7 @@ class Pike_Application_Resource_Stream extends Zend_Application_Resource_Resourc
     {
         $options = $this->getOptions();
         if (isset($options['streamWrapper'])) {
-            if (!in_array('zend.view', stream_get_wrappers())) {                
+            if (!in_array('zend.view', stream_get_wrappers())) {
                 stream_wrapper_register('zend.view', $options['streamWrapper']); // Pike_View_Stream
             }
 
