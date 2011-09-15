@@ -218,6 +218,7 @@ class Pike_View_Helper_FormatException extends Zend_View_Helper_Abstract
 }
 #exception-container a {
     color: #000;
+    text-decoration: underline;
 }
 #exception-container .selected {
     background-color: #DDDDDD;
