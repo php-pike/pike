@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Copyright (C) 2011 by Pieter Vogelaar (platinadesigns.nl) and Kees Schepers (keesschepers.nl)
  *
@@ -33,14 +32,15 @@
  * @copyright  Copyright (C) 2011 by Pieter Vogelaar (platinadesigns.nl) and Kees Schepers (keesschepers.nl)
  * @license    MIT
  */
-class Pike_Reflection_Resource {
-
+class Pike_Reflection_Resource
+{
     /**
      * Attributes
      *
      * @var array
      */
     protected $_attributes = array();
+
     /**
      * FrontController
      *
@@ -53,9 +53,11 @@ class Pike_Reflection_Resource {
      *
      * @param array $attributes
      */
-    public function __construct(array $attributes = array()) {
-        $defaultAttributes = array('roles', 'human');
-        $this->_attributes = array_keys(array_merge(array_flip($defaultAttributes), array_flip($attributes)));
+    public function __construct(array $attributes = array())
+    {
+        $defaultAttributes = array('roles', 'human', 'humanDescription');
+        $this->_attributes = array_keys(array_merge(array_flip($defaultAttributes),
+            array_flip($attributes)));
     }
 
     /**
@@ -67,7 +69,8 @@ class Pike_Reflection_Resource {
      * @param  string $actionName
      * @return string
      */
-    protected function _getInflectedActionName($actionName) {
+    protected function _getInflectedActionName($actionName)
+    {
         $inflectedActionName = '';
         for ($i = 0; $i < strlen($actionName); $i++) {
             if ($actionName[$i] == strtoupper($actionName[$i])) {
@@ -84,17 +87,19 @@ class Pike_Reflection_Resource {
      *
      * @return array
      */
-    public function toArray() {
+    public function toArray()
+    {
         $resources = array();
         $this->_frontController = Zend_Controller_Front::getInstance();
-        
-        // Retrieve the controller directory        
+
+        // Retrieve the controller directory
         $controllerDirectories = $this->_frontController->getControllerDirectory();
         foreach ($controllerDirectories as $moduleName => $controllerDirectory) {
 
             if ((bool) $this->_frontController->getParam('prefixDefaultModule') || $moduleName !== 'default') {
                 $classPrefix = ucfirst($moduleName) . '_';
             }
+            
             // Iterate over controllers found in the controller directory
             $directoryIterator = new DirectoryIterator($controllerDirectory);
             foreach ($directoryIterator as $file) {
@@ -105,10 +110,10 @@ class Pike_Reflection_Resource {
 
                 // Initialize the reflection of the controller class
                 require_once $file->getPathname();
-                $className = $classPrefix . $file->getBasename('.php');
-                $controllerName = $file->getBasename('Controller.php');                
-                $classReflection = new Zend_Reflection_Class($className);                
-                
+                $className = $file->getBasename('.php');
+                $controllerName = $file->getBasename('Controller.php');
+                $classReflection = new Zend_Reflection_Class($className);
+
                 // Iterate over the public methods of the controller class
                 $methods = $classReflection->getMethods(ReflectionMethod::IS_PUBLIC);
                 foreach ($methods as $method) {
@@ -119,7 +124,7 @@ class Pike_Reflection_Resource {
                         $resourceAttributes = $this->_getResourceAttributesFromActionMethod($method);
                         $actionName = $this->_getInflectedActionName(substr($method->name, 0, -6));
                         $resources[$moduleName][strtolower($controllerName)][$actionName]
-                                = $resourceAttributes;
+                            = $resourceAttributes;
                     }
                 }
             }
@@ -137,7 +142,8 @@ class Pike_Reflection_Resource {
      * @param  string $moduleName
      * @return array
      */
-    public function toFlatArray($moduleName = 'default') {
+    public function toFlatArray($moduleName = 'default')
+    {
         $flatResources = array();
         $resources = $this->toArray();
 
@@ -160,16 +166,17 @@ class Pike_Reflection_Resource {
      * @param  array $resources
      * @return array
      */
-    protected function _excludeErrorHandlerResource($resources) {
+    protected function _excludeErrorHandlerResource($resources)
+    {
         /* @var $errorHandler Zend_Controller_Plugin_ErrorHandler */
         $errorHandler = Zend_Controller_Front::getInstance()->getPlugin('Zend_Controller_Plugin_ErrorHandler');
-
-        // Access is always granted to the error handler, so it can be ignored as resource
-        $module = $errorHandler->getErrorHandlerModule();
-        $controller = $errorHandler->getErrorHandlerController();
-        $action = $errorHandler->getErrorHandlerAction();
-        unset($resources[$module][$controller][$action]);
-
+        if ($errorHandler) {
+            // Access is always granted to the error handler, so it can be ignored as resource
+            $module =  $errorHandler->getErrorHandlerModule();
+            $controller =  $errorHandler->getErrorHandlerController();
+            $action =  $errorHandler->getErrorHandlerAction();
+            unset($resources[$module][$controller][$action]);
+        }
         return $resources;
     }
 
@@ -179,7 +186,8 @@ class Pike_Reflection_Resource {
      * @param  Zend_Reflection_Method $actionMethod
      * @return array
      */
-    protected function _getResourceAttributesFromActionMethod(Zend_Reflection_Method $actionMethod) {
+    protected function _getResourceAttributesFromActionMethod(Zend_Reflection_Method $actionMethod)
+    {
         $resourceAttributes = array();
         $docComment = $actionMethod->getDocComment();
 
@@ -206,6 +214,39 @@ class Pike_Reflection_Resource {
                             }
                         }
                         break;
+                    case 'humanDescription':
+                        /**
+                         * Zend_Reflection_Docblock_Tag doesn't support multiple lines, so for this
+                         * tag we make an exception and do some parsing to still be able to specify
+                         * a multi line humanDescription tag
+                         */
+                        if ($actionMethod->getDocblock()->hasTag($attribute)) {
+                            $docblock = $actionMethod->getDocblock()->getContents();
+                            $lines = explode("\n", $docblock);
+                            $humanDescription = null;
+                            foreach ($lines as $line) {
+                                if (substr(trim($line), 0, 17) == '@humanDescription') {
+                                    $humanDescription = substr($line, 18);
+                                    continue;
+                                }
+
+                                /**
+                                 * If human description is not NULL, add the follow lines until the line
+                                 * starts with another tag
+                                 */
+                                if (null !== $humanDescription) {
+                                    if (substr(trim($line), 0, 1) == '@') {
+                                        break;
+                                    } else {
+                                        $humanDescription .= trim($line);
+                                    }
+                                }
+                            }
+
+                            $humanDescription = str_replace('.', '. ', $humanDescription);
+                            $resourceAttributes[$attribute] = $humanDescription;
+                        }
+                        break;
                     default:
                         if ($actionMethod->getDocblock()->hasTag($attribute)) {
                             $tagValue = $actionMethod->getDocblock()->getTag($attribute)->getDescription();
@@ -219,5 +260,4 @@ class Pike_Reflection_Resource {
 
         return $resourceAttributes;
     }
-
 }
