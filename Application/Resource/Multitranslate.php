@@ -74,5 +74,4 @@ class Pike_Application_Resource_MultiTranslate extends Zend_Application_Resource
         Zend_Registry::set('Zend_Translate', $translate);
         return $translate;
     }
-
 }
