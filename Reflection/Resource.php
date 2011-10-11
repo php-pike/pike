@@ -61,25 +61,20 @@ class Pike_Reflection_Resource
     }
 
     /**
-     * Returns the inflected action name
+     * Returns the inflected name
      *
      * CamelCase actions are converted to lowercase with the "-" seperator to follow
      * the default behaviour.
      *
-     * @param  string $actionName
+     * @param  string $name
      * @return string
      */
-    protected function _getInflectedActionName($actionName)
+    protected function _getInflectedName($name)
     {
-        $inflectedActionName = '';
-        for ($i = 0; $i < strlen($actionName); $i++) {
-            if ($actionName[$i] == strtoupper($actionName[$i])) {
-                $inflectedActionName .= '-' . strtolower($actionName[$i]);
-            } else {
-                $inflectedActionName .= strtolower($actionName[$i]);
-            }
-        }
-        return strtolower($inflectedActionName);
+        $inflector = new Zend_Filter_Inflector(':string');
+        $inflector->addRules(array(':string' => array('Word_CamelCaseToDash', 'StringToLower')));
+        $inflectedName = $inflector->filter(array('string' => $name));
+        return $inflectedName;
     }
 
     /**
@@ -96,10 +91,6 @@ class Pike_Reflection_Resource
         $controllerDirectories = $this->_frontController->getControllerDirectory();
         foreach ($controllerDirectories as $moduleName => $controllerDirectory) {
 
-            if ((bool) $this->_frontController->getParam('prefixDefaultModule') || $moduleName !== 'default') {
-                $classPrefix = ucfirst($moduleName) . '_';
-            }
-            
             // Iterate over controllers found in the controller directory
             $directoryIterator = new DirectoryIterator($controllerDirectory);
             foreach ($directoryIterator as $file) {
@@ -111,8 +102,13 @@ class Pike_Reflection_Resource
                 // Initialize the reflection of the controller class
                 require_once $file->getPathname();
                 $className = $file->getBasename('.php');
-                $controllerName = $file->getBasename('Controller.php');
+                $controllerName = $this->_getInflectedName($file->getBasename('Controller.php'));
                 $classReflection = new Zend_Reflection_Class($className);
+
+                $resourceAttributes = $this->_getResourceAttributes($classReflection);
+                if (count($resourceAttributes) > 0) {
+                    $resources[$moduleName][$controllerName]['_attributes'] = $resourceAttributes;
+                }
 
                 // Iterate over the public methods of the controller class
                 $methods = $classReflection->getMethods(ReflectionMethod::IS_PUBLIC);
@@ -121,9 +117,9 @@ class Pike_Reflection_Resource
 
                     // Ignore methods that don't have an "Action" suffix
                     if ($method->class == $className && substr($method->name, -6) == 'Action') {
-                        $resourceAttributes = $this->_getResourceAttributesFromActionMethod($method);
-                        $actionName = $this->_getInflectedActionName(substr($method->name, 0, -6));
-                        $resources[$moduleName][strtolower($controllerName)][$actionName]
+                        $resourceAttributes = $this->_getResourceAttributes($method);
+                        $actionName = $this->_getInflectedName(substr($method->name, 0, -6));
+                        $resources[$moduleName][$controllerName][$actionName]
                             = $resourceAttributes;
                     }
                 }
@@ -149,6 +145,8 @@ class Pike_Reflection_Resource
 
         foreach ($resources[$moduleName] as $controllerName => $controller) {
             foreach ($controller as $actionName => $action) {
+                if ($actionName == '_attributes') continue;
+
                 $value = ucfirst($actionName);
                 if (isset($action['human']) && $action['human'] != '') {
                     $value = $action['human'];
@@ -181,15 +179,15 @@ class Pike_Reflection_Resource
     }
 
     /**
-     * Returns an array with resource attributes for the specified method
+     * Returns an array with resource attributes for the specified reflection object
      *
-     * @param  Zend_Reflection_Method $actionMethod
+     * @param  Zend_Reflection_Class|Zend_Reflection_Method $reflection
      * @return array
      */
-    protected function _getResourceAttributesFromActionMethod(Zend_Reflection_Method $actionMethod)
+    protected function _getResourceAttributes($reflection)
     {
         $resourceAttributes = array();
-        $docComment = $actionMethod->getDocComment();
+        $docComment = $reflection->getDocComment();
 
         if ($docComment) {
             foreach ($this->_attributes as $attribute) {
@@ -197,14 +195,14 @@ class Pike_Reflection_Resource
                     case 'short_description':
                     case 'long_description':
                         $methodName = 'get' . ucfirst(str_replace('_description', 'Description', $attribute));
-                        $description = $actionMethod->getDocblock()->$methodName();
+                        $description = $reflection->getDocblock()->$methodName();
                         if ($description != '') {
                             $resourceAttributes[$attribute] = $description;
                         }
                         break;
                     case 'roles':
-                        if ($actionMethod->getDocblock()->hasTag($attribute)) {
-                            $tagValue = $actionMethod->getDocblock()->getTag($attribute)->getDescription();
+                        if ($reflection->getDocblock()->hasTag($attribute)) {
+                            $tagValue = $reflection->getDocblock()->getTag($attribute)->getDescription();
                             if (trim($tagValue) != '') {
                                 $roles = explode('|', $tagValue);
                                 foreach ($roles as &$role) {
@@ -220,8 +218,8 @@ class Pike_Reflection_Resource
                          * tag we make an exception and do some parsing to still be able to specify
                          * a multi line humanDescription tag
                          */
-                        if ($actionMethod->getDocblock()->hasTag($attribute)) {
-                            $docblock = $actionMethod->getDocblock()->getContents();
+                        if ($reflection->getDocblock()->hasTag($attribute)) {
+                            $docblock = $reflection->getDocblock()->getContents();
                             $lines = explode("\n", $docblock);
                             $humanDescription = null;
                             foreach ($lines as $line) {
@@ -238,7 +236,9 @@ class Pike_Reflection_Resource
                                     if (substr(trim($line), 0, 1) == '@') {
                                         break;
                                     } else {
-                                        $humanDescription .= trim($line);
+                                        if ('' != trim($line)) {
+                                            $humanDescription .= ' ' . trim($line);
+                                        }
                                     }
                                 }
                             }
@@ -248,8 +248,8 @@ class Pike_Reflection_Resource
                         }
                         break;
                     default:
-                        if ($actionMethod->getDocblock()->hasTag($attribute)) {
-                            $tagValue = $actionMethod->getDocblock()->getTag($attribute)->getDescription();
+                        if ($reflection->getDocblock()->hasTag($attribute)) {
+                            $tagValue = $reflection->getDocblock()->getTag($attribute)->getDescription();
                             if (trim($tagValue) != '') {
                                 $resourceAttributes[$attribute] = $tagValue;
                             }
