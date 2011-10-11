@@ -198,8 +198,17 @@ class Pike_Validate_DateCompare extends Zend_Validate_Abstract
             return false;
         }
 
-        $date1 = new Zend_Date(strtotime($valueSystemDate));
-        $date2 = new Zend_Date(strtotime($tokenSystemDate));
+        $valueSystemTime = strtotime($valueSystemDate);
+        $tokenSystemTime = strtotime($tokenSystemDate);
+
+        // If one of the two is invalid and result in FALSE, return silently. The date validator
+        // of the field in question will handle the invalid date first
+        if ($valueSystemTime === false || $tokenSystemTime === false) {
+            return false;
+        }
+
+        $date1 = new Zend_Date($valueSystemTime);
+        $date2 = new Zend_Date($tokenSystemTime);
 
         if ($this->getCompare() === '<') {
             if ($date1->compare($date2) < 0 || $date1->equals($date2)) {
