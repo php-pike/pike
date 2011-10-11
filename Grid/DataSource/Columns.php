@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright (C) 2011 by Pieter Vogelaar (Platina Designs) and Kees Schepers (SkyConcepts)
+ * Copyright (C) 2011 by Pieter Vogelaar (platinadesigns.nl) and Kees Schepers (keesschepers.nl)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,23 +25,27 @@
  * The column class keeps in track of all column details (including dynamic ones)
  *
  */
-class Pike_Grid_Datasource_Columns extends ArrayObject
+class Pike_Grid_DataSource_Columns extends ArrayObject
 {
-
+    /**
+     * Constructor
+     *
+     * @param array $columns
+     */
     public function __construct(array $columns = array())
     {
         foreach ($columns as $column) {
             $this->add($column);
-        }                     
+        }
     }
 
     /**
      *
      * Adds a column to the internal index.
      *
-     * @param mixed $column     Either the name or an array with options
-     * @param string $label     The friendlyname used for this column as heading
-     * @param string $sidx      The fieldname to be used when sorting is isseud thru the grid
+     * @param mixed   $column   Either the name or an array with options
+     * @param string  $label    The friendlyname used for this column as heading
+     * @param string  $sidx     The fieldname to be used when sorting is isseud thru the grid
      * @param integer $position The position number, can be any number.
      */
     public function add($column, $label = null, $sidx = null, $position = null, $data = null)
@@ -60,9 +64,13 @@ class Pike_Grid_Datasource_Columns extends ArrayObject
             /**
              * Default data drawing callback
              */
-            if(!is_callable($data)) {
-                $column['data'] = function($row) use ($column) {
-                    return $row[$column['name']];
+            if (!is_callable($data)) {
+                $column['data'] = function($row) use ($column, $data) {
+                    if (null !== $data) {
+                        return $data;
+                    } else {
+                        return isset($row[$column['name']]) ? $row[$column['name']] : null;
+                    }
                 };
             } else {
                 $column['data'] = $data;
@@ -75,7 +83,6 @@ class Pike_Grid_Datasource_Columns extends ArrayObject
     }
 
     /**
-     *
      * @param string $name
      * @return boolean
      */
@@ -85,47 +92,52 @@ class Pike_Grid_Datasource_Columns extends ArrayObject
     }
 
     /**
-     *
      * Retrieve a column like it's an object property.
      *
      * @param  string $column
      * @return array
      */
-    public function __get($column) {
-        if($this->offsetExists($column)) {
+    public function __get($column)
+    {
+        if ($this->offsetExists($column)) {
             return $this->offsetGet($column);
         } else {
-            throw new Pike_Exception('Unknown column ('.$column.')');
+            throw new Pike_Exception('Unknown column (' . $column . ')');
         }
     }
 
-    
+
     /**
+     * Sorts items as we would expect them, just before the iterator is returned
      *
-     * Sort items quickly before the iterator is given back as we expect to
-     * 
      * @return ArrayIterator
      */
-    public function getIterator() {
+    public function getIterator()
+    {
         $this->uasort(function($first, $second) {
-            if($first['position'] > $second['position']) {
-                return 1;
-            } elseif($first['position'] < $second['position']) {
-                return -1;
+            if (isset($first['position']) && isset($second['position'])) {
+                if ($first['position'] > $second['position']) {
+                    return 1;
+                } elseif($first['position'] < $second['position']) {
+                    return -1;
+                } else {
+                    return 0;
+                }
             } else {
                 return 0;
             }
         });
-        
+
         return parent::getIterator();
     }
-    
+
     /**
+     * Returns the columns
      *
      * @return array
      */
     public function getColumns()
-    {        
+    {
         return $this->getArrayCopy();
     }
 }

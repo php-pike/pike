@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright (C) 2011 by Pieter Vogelaar (Platina Designs) and Kees Schepers (SkyConcepts)
+ * Copyright (C) 2011 by Pieter Vogelaar (platinadesigns.nl) and Kees Schepers (keesschepers.nl)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,7 +24,7 @@
 
 use Doctrine\ORM\Query;
 
-class Pike_Grid_Datasource_Doctrine_Paginate
+class Pike_Grid_DataSource_Doctrine_Paginate
 {
     /**
      * @param Query $query
@@ -86,16 +86,19 @@ class Pike_Grid_Datasource_Doctrine_Paginate
         /* @var $countQuery Query */
         $countQuery = self::cloneQuery($query);
 
+//        $hints = array_merge_recursive($hints, array(
+//            Query::HINT_CUSTOM_TREE_WALKERS => array('Pike_Grid_DataSource_Doctrine_HavingWalker')
+//        ));
+
         $hints = array_merge_recursive($hints, array(
-            Query::HINT_CUSTOM_TREE_WALKERS => array('Pike_Grid_Datasource_Doctrine_CountWalker')
+            Query::HINT_CUSTOM_TREE_WALKERS => array('Pike_Grid_DataSource_Doctrine_CountWalker')
         ));
 
-        foreach($hints as $name=>$value)
+        foreach ($hints as $name => $value) {
             $countQuery->setHint($name, $value);
-
+        }
 
         $countQuery->setFirstResult(null)->setMaxResults(null);
-
         $countQuery->setParameters($query->getParameters());
 
         return $countQuery;
@@ -112,14 +115,18 @@ class Pike_Grid_Datasource_Doctrine_Paginate
         $subQuery = self::cloneQuery($query);
 
         $hints = array();
-        $hints[Query::HINT_CUSTOM_TREE_WALKERS] = array('Pike_Grid_Datasource_Doctrine_LimitSubqueryWalker');
+        $hints[Query::HINT_CUSTOM_TREE_WALKERS] = array('Pike_Grid_DataSource_Doctrine_LimitSubqueryWalker');
         $hints = array_merge_recursive($phints, $hints);
 
-        foreach($hints as $name => $hint) $subQuery->setHint($name, $hint);
+        foreach ($hints as $name => $hint) {
+            $subQuery->setHint($name, $hint);
+        }
 
-        $subQuery->setFirstResult($offset)
-            ->setMaxResults($itemCountPerPage)
-            ->setParameters($query->getParameters());
+        $subQuery->setParameters($query->getParameters());
+
+        if ($itemCountPerPage >= 0) {
+            $subQuery->setFirstResult($offset)->setMaxResults($itemCountPerPage);
+        }
 
         return $subQuery;
     }
@@ -132,30 +139,32 @@ class Pike_Grid_Datasource_Doctrine_Paginate
      */
     static public function createWhereInQuery(Query $query, array $ids, $namespace = 'pgid', array $phints = array())
     {
-        // don't do this for an empty id array
+        $whereInQuery = clone $query;
+
+        $whereInQuery->setParameters($query->getParameters());
+
+        $hints = array();
         if (count($ids) > 0) {
-            $whereInQuery = clone $query;
-
-            $whereInQuery->setParameters($query->getParameters());
-
-            $hints = array();
-            $hints[Query::HINT_CUSTOM_TREE_WALKERS] = array('Pike_Grid_Datasource_Doctrine_WhereInWalker');
+            $hints[Query::HINT_CUSTOM_TREE_WALKERS] = array('Pike_Grid_DataSource_Doctrine_WhereInWalker');
             $hints['id.count'] = count($ids);
             $hints['pg.ns'] = $namespace;
+        }
 
-            $hints = array_merge_recursive($phints, $hints);
+        $hints = array_merge_recursive($phints, $hints);
 
-            foreach($hints as $name => $hint) $whereInQuery->setHint($name, $hint);
+        foreach ($hints as $name => $hint) {
+            $whereInQuery->setHint($name, $hint);
+        }
 
-            $whereInQuery->setFirstResult(null)->setMaxResults(null);
+        $whereInQuery->setFirstResult(null)->setMaxResults(null);
+
+        if (count($ids) > 0) {
             foreach ($ids as $i => $id) {
                 $i = $i+1;
                 $whereInQuery->setParameter("{$namespace}_{$i}", $id);
             }
-
-            return $whereInQuery;
-        } else {
-            return $query;
         }
+
+        return $whereInQuery;
     }
 }

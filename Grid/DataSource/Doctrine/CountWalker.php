@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright (C) 2011 by Pieter Vogelaar (Platina Designs) and Kees Schepers (SkyConcepts)
+ * Copyright (C) 2011 by Pieter Vogelaar (platinadesigns.nl) and Kees Schepers (keesschepers.nl)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -35,7 +35,7 @@ use Doctrine\ORM\Query\TreeWalkerAdapter,
     Doctrine\ORM\Query\AST\PathExpression,
     Doctrine\ORM\Query\AST\AggregateExpression;
 
-class Pike_Grid_Datasource_Doctrine_CountWalker extends TreeWalkerAdapter
+class Pike_Grid_DataSource_Doctrine_CountWalker extends TreeWalkerAdapter
 {
 
     /**
@@ -64,7 +64,7 @@ class Pike_Grid_Datasource_Doctrine_CountWalker extends TreeWalkerAdapter
                 break;
             }
         }
-        
+
         $pathExpression = new PathExpression(
                         PathExpression::TYPE_STATE_FIELD | PathExpression::TYPE_SINGLE_VALUED_ASSOCIATION, $parentName,
                         $parent['metadata']->getSingleIdentifierFieldName()
@@ -82,7 +82,7 @@ class Pike_Grid_Datasource_Doctrine_CountWalker extends TreeWalkerAdapter
 
         // GROUP BY will break things, we are trying to get a count of all
         $AST->groupByClause = null;
-                
+
     }
 
 }

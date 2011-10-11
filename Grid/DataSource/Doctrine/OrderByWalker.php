@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright (C) 2011 by Pieter Vogelaar (Platina Designs) and Kees Schepers (SkyConcepts)
+ * Copyright (C) 2011 by Pieter Vogelaar (platinadesigns.nl) and Kees Schepers (keesschepers.nl)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -34,9 +34,8 @@ use Doctrine\ORM\Query\TreeWalkerAdapter,
  * This class walks a selectstatement. It will cause a orderby to be replaced
  * with the field the user wants to sort on.
  */
-class Pike_Grid_Datasource_Doctrine_OrderByWalker extends TreeWalkerAdapter
+class Pike_Grid_DataSource_Doctrine_OrderByWalker extends TreeWalkerAdapter
 {
-
     /**
      * Walks down a SelectStatement AST node, modify the orderby clause if the user
      * wants to sort his results.
@@ -77,9 +76,5 @@ class Pike_Grid_Datasource_Doctrine_OrderByWalker extends TreeWalkerAdapter
         } else {
             $AST->orderByClause->orderByItems = $orderByItems;
         }
-
-
     }
-
-
 }

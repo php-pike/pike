@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright (C) 2011 by Pieter Vogelaar (Platina Designs) and Kees Schepers (SkyConcepts)
+ * Copyright (C) 2011 by Pieter Vogelaar (platinadesigns.nl) and Kees Schepers (keesschepers.nl)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -19,43 +19,30 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
+ *
+ * LICENSE DOCTRINEEXTENSIONS
+ *
+ * This source file is subject to the new BSD license that is bundled
+ * with this package in the file LICENSE.txt.
+ * If you did not receive a copy of the license and are unable to
+ * obtain it through the world-wide-web, please send an email
+ * to kontakt@beberlei.de so I can send you a copy immediately.
  */
 
-/**
- * This interface should be implemented by datasources for usage in Pike_Grid
- */
-interface Pike_Grid_Datasource_Interface
+use Doctrine\ORM\Query\TreeWalkerAdapter,
+    Doctrine\ORM\Query\AST\SelectStatement,
+    Doctrine\ORM\Query\AST\SelectExpression,
+    Doctrine\ORM\Query\AST\PathExpression,
+    Doctrine\ORM\Query\AST\AggregateExpression;
+
+class Pike_Grid_DataSource_Doctrine_HavingWalker extends TreeWalkerAdapter
 {
-    /*
-     * Returns a JSON encoded string of the data to be send
-     */
-    public function getJSON();
-
     /**
-     * Returns an array indicating on which field and which order the grid is by default sorted on.
-     */
-    public function getDefaultSorting();
-
-    /**
-     * Set the jqGrid posted params
-     */
-    public function setParameters(array $params);
-
-    /**
-     * Specifies how many data is returned per 'page'
-     */
-    public function setResultsPerPage($num);
-
-    /**
-     * Defines what happends when the grid is sorted by the server. Return value depends on the
-     * type of datasource.
+     * Walks down a having clause
      *
+     * @param type $havingClause
      */
-    public function setEventSort(Closure $function);
-
-    /**
-     * Defines what happends when the user filters data with jqGrid and send to the server. Return
-     * value depends on the type of datasource
-     */
-    public function setEventFilter(Closure $function);
+//    public function walkHavingClause($havingClause)
+//    {
+//    }
 }

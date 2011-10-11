@@ -1,7 +1,6 @@
 <?php
-
 /**
- * Copyright (C) 2011 by Pieter Vogelaar (Platina Designs) and Kees Schepers (SkyConcepts)
+ * Copyright (C) 2011 by Pieter Vogelaar (platinadesigns.nl) and Kees Schepers (keesschepers.nl)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -37,9 +36,8 @@ use Doctrine\ORM\Query\TreeWalkerAdapter,
  * Adds LIKE parts to the original query to search the database for rows on the
  * given phrases.
  */
-class Pike_Grid_Datasource_Doctrine_WhereLikeWalker extends TreeWalkerAdapter
+class Pike_Grid_DataSource_Doctrine_WhereLikeWalker extends TreeWalkerAdapter
 {
-
     /**
      * Adds WHERE like to the query for search operations
      *
@@ -49,15 +47,14 @@ class Pike_Grid_Datasource_Doctrine_WhereLikeWalker extends TreeWalkerAdapter
      */
     public function walkSelectStatement(SelectStatement $AST)
     {
-
         $fields = $this->_getQuery()->getHint('fields');
         $operator = $this->_getQuery()->getHint('groupOp');
 
-        foreach($fields as $field) {
+        foreach ($fields as $field) {
             $fieldIdentifier = null;
             $fieldName = $field->field;
 
-            if(false !== strpos($field->field, '.')) {
+            if (false !== strpos($field->field, '.')) {
                 $fieldParts = explode('.',$field->field);
                 $fieldName = $fieldParts[1];
                 $fieldIdentifier = $fieldParts[0];
