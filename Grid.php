@@ -66,11 +66,6 @@ class Pike_Grid
     protected $_url;
 
     /**
-     * @var string
-     */
-    protected $_caption;
-
-    /**
      * @var array
      */
     protected $_attributes = array();
@@ -126,7 +121,8 @@ class Pike_Grid
      */
     public function setDefaults()
     {
-        $this->setAttribute('hidegrid', false);
+        $this->setAttribute('hidegrid', false)
+             ->setAttribute('autowidth', true);
     }
 
     /**
@@ -202,8 +198,7 @@ class Pike_Grid
      */
     public function setCaption($caption)
     {
-        $this->_caption = $caption;
-        return $this;
+        return $this->setAttribute('caption', $caption);
     }
 
     /**
@@ -304,21 +299,6 @@ class Pike_Grid
     }
 
     /**
-     * Sets the grid width
-     *
-     * @param  string $width
-     * @return Pike_Grid
-     */
-    public function setWidth($width = 'auto')
-    {
-        if (!is_numeric($width)) {
-            $width = 'auto';
-        }
-
-        return $this;
-    }
-
-    /**
      * Sets a grid method that will be exeucted after the grid is constructed in the client
      *
      * @param  string $name
@@ -379,7 +359,7 @@ EOF;
             'datatype' => 'json',
             'mtype' => 'post',
             'rowNum' => $this->_recordsPerPage,
-            'autoWidth' => true,
+            'autowidth' => true,
             'pager' => $this->_pagerId,
             'height' => $this->_height,
             'viewrecords' => true,
@@ -402,20 +382,11 @@ EOF;
             $settings['sortorder'] = strtolower($defaultSorting['direction']);
         }
 
-        if (!is_null($this->_caption)) {
-            $settings['caption'] = $this->_caption;
-        }
-
-        switch ($this->_width) {
-            case 'auto' :
-                $settings['autowidth'] = true;
-                break;
-            default : //width in pixels?
-                $settings['width'] = (int) $this->_width;
-                break;
-        }
-
         $settings = array_merge($settings, $this->_attributes);
+
+        if (isset($settings['width']) && '' != $settings['width']) {
+            $settings['autowidth'] = false;
+        }
 
         $json = Zend_Json::prettyPrint(Zend_Json::encode($settings, false, array('enableJsonExprFinder' => true)));
 
@@ -461,13 +432,15 @@ EOF;
     protected function _fixCursorForNonSortableColumns()
     {
         $javaScript = <<<EOF
-var cm = $("#{$this->_id}")[0].p.colModel;
-$.each($("#{$this->_id}")[0].grid.headers, function(index, value) {
-    var cmi = cm[index], colName = cmi.name;
-    if (!cmi.sortable && colName !== 'rn' && colName !== 'cb' && colName !== 'subgrid') {
-        $('div.ui-jqgrid-sortable', value.el).css({ cursor: "default" });
-    }
-});
+if ($("#{$this->_id}").length) {
+    var cm = $("#{$this->_id}")[0].p.colModel;
+    $.each($("#{$this->_id}")[0].grid.headers, function(index, value) {
+        var cmi = cm[index], colName = cmi.name;
+        if (!cmi.sortable && colName !== 'rn' && colName !== 'cb' && colName !== 'subgrid') {
+            $('div.ui-jqgrid-sortable', value.el).css({ cursor: "default" });
+        }
+    });
+}
 EOF;
 
         return $javaScript;
