@@ -19,14 +19,6 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
- *
- * LICENSE DOCTRINEEXTENSIONS
- *
- * This source file is subject to the new BSD license that is bundled
- * with this package in the file LICENSE.txt.
- * If you did not receive a copy of the license and are unable to
- * obtain it through the world-wide-web, please send an email
- * to kontakt@beberlei.de so I can send you a copy immediately.
  */
 
 use Doctrine\ORM\Query\TreeWalkerAdapter,
@@ -37,6 +29,11 @@ use Doctrine\ORM\Query\TreeWalkerAdapter,
 
 class Pike_Grid_DataSource_Doctrine_CountWalker extends TreeWalkerAdapter
 {
+    /**
+     *
+     * @var SelectStatement
+     */
+    protected $_AST;
 
     /**
      * Walks down a SelectStatement AST node, modifying it to retrieve a COUNT
@@ -46,11 +43,33 @@ class Pike_Grid_DataSource_Doctrine_CountWalker extends TreeWalkerAdapter
      */
     public function walkSelectStatement(SelectStatement $AST)
     {
+        $this->_AST = $AST;
+
+        $this->_AST->selectClause->selectExpressions = array();
+
+        $this->_addCountComponent();
+
+        if(null === $this->_AST->havingClause) {
+            // GROUP BY will break things, we are trying to get a count of all
+            $this->_AST->groupByClause = null;
+        }
+
+        // ORDER BY is not needed, only increases query execution through unnecessary sorting.
+        $this->_AST->orderByClause = null;
+
+    }
+
+    /**
+     * Adds the count(field) component to the query
+     */
+    protected function _addCountComponent()
+    {
         $parent = null;
         $parentName = null;
 
-
-
+        /**
+         * Find the identifier field of the root entity (at the FROM component)
+         */
         foreach ($this->_getQueryComponents() AS $dqlAlias => $qComp) {
 
             // skip mixed data in query
@@ -65,24 +84,19 @@ class Pike_Grid_DataSource_Doctrine_CountWalker extends TreeWalkerAdapter
             }
         }
 
+        /**
+         * Add a aggegrate expression (COUNT) with the identifier field that was found to
+         * count total amount of results.
+         */
         $pathExpression = new PathExpression(
                         PathExpression::TYPE_STATE_FIELD | PathExpression::TYPE_SINGLE_VALUED_ASSOCIATION, $parentName,
                         $parent['metadata']->getSingleIdentifierFieldName()
         );
         $pathExpression->type = PathExpression::TYPE_STATE_FIELD;
 
-        $AST->selectClause->selectExpressions = array(
-            new SelectExpression(
+        $this->_AST->selectClause->selectExpressions[] = new SelectExpression(
                     new AggregateExpression('count', $pathExpression, true), null
-            )
         );
-
-        // ORDER BY is not needed, only increases query execution through unnecessary sorting.
-        $AST->orderByClause = null;
-
-        // GROUP BY will break things, we are trying to get a count of all
-        $AST->groupByClause = null;
-
     }
 
 }

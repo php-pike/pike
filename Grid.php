@@ -90,20 +90,35 @@ class Pike_Grid
     protected $_rowClickEvent;
 
     /**
-     * Pike_Grid needs to know the datasource in order to generate the initial column names etc.
-     *
      * @param Pike_Grid_DataSource_Interface $dataSource
      * @param array                          $options
      */
-    public function __construct(Pike_Grid_DataSource_Interface $dataSource, array $options = array())
+    public function __construct(Pike_Grid_DataSource_Interface $dataSource = null)
     {
         $id = rand(0, 3000);
 
         $this->setId('pgrid' . $id);
-        $this->_dataSource = $dataSource;
+
+        if($dataSource instanceof Pike_Grid_DataSource_Interface) {
+            $this->setDataSource($dataSource);
+        }
+
         $this->_url = $_SERVER['REQUEST_URI'];
 
         $this->setDefaults();
+    }
+
+    /**
+     *
+     * Pike_Grid needs to know the datasource in order to generate the initial column names etc.
+     *
+     * @param Pike_Grid_DataSource_Interface $dataSource
+     * @return Pike_Grid
+     */
+    public function setDataSource(Pike_Grid_DataSource_Interface $dataSource) {
+        $this->_dataSource = $dataSource;
+
+        return $this;
     }
 
     /**
@@ -351,8 +366,10 @@ EOF;
 
     /**
      * Returns a jqGrid declaration with all required settings
+     *
+     * @param boolean $pretty Wether to print the javascript readable
      */
-    public function getJavascript()
+    public function getJavascript($pretty=false)
     {
         $settings = array(
             'url' => $this->_url,
@@ -388,7 +405,11 @@ EOF;
             $settings['autowidth'] = false;
         }
 
-        $json = Zend_Json::prettyPrint(Zend_Json::encode($settings, false, array('enableJsonExprFinder' => true)));
+        $json = Zend_Json::encode($settings, false, array('enableJsonExprFinder' => true));
+
+        if($pretty) {
+            $json = Zend_Json::prettyPrint($json);
+        }
 
         $output = 'var lastsel;' . PHP_EOL;
         $output .= '$("#' . $this->_id . '").jqGrid(' . $json . ');' . PHP_EOL;

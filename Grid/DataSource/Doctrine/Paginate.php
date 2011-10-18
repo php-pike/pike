@@ -19,7 +19,6 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
- *
  */
 
 use Doctrine\ORM\Query;
@@ -30,7 +29,7 @@ class Pike_Grid_DataSource_Doctrine_Paginate
      * @param Query $query
      * @return Query
      */
-    static protected function cloneQuery(Query $query)
+    protected static function cloneQuery(Query $query)
     {
         $reflector = new ReflectionClass($query);
         $attribute = $reflector->getProperty('_paramTypes');
@@ -47,52 +46,30 @@ class Pike_Grid_DataSource_Doctrine_Paginate
     }
 
     /**
-     * @param Query $query
-     * @return int
-     */
-    static public function count(Query $query)
-    {
-        return self::createCountQuery($query)->getSingleScalarResult();
-    }
-
-    /**
-     * @param Query $query
-     * @return int
-     */
-    static public function getTotalQueryResults(Query $query, array $hints = array())
-    {
-        return self::createCountQuery($query, $hints)->getSingleScalarResult();
-    }
-
-    /**
-     * Given the Query it returns a new query that is a paginatable query using a modified subselect.
+     * Return the total amount of results
+     *
+     * Test if the query has a having clause, if so then execute a count query with the original
+     * query wrapped in the from component. Both situations give back the total number of records
+     * found.
      *
      * @param Query $query
-     * @return Query
+     * @return int
      */
-    static public function getPaginateQuery(Query $query, $offset, $itemCountPerPage, array $hints = array())
-    {
-        $ids = array_map('current', self::createLimitSubQuery($query, $offset, $itemCountPerPage, $hints)->getScalarResult());
-
-        return self::createWhereInQuery($query, $ids, 'pgid', $hints);
-    }
-
-    /**
-     * @param Query $query
-     * @return Query
-     */
-    static public function createCountQuery(Query $query, array $hints = array())
+    public static function getTotalQueryResults(Query $query, array $hints = array())
     {
         /* @var $countQuery Query */
         $countQuery = self::cloneQuery($query);
 
-//        $hints = array_merge_recursive($hints, array(
-//            Query::HINT_CUSTOM_TREE_WALKERS => array('Pike_Grid_DataSource_Doctrine_HavingWalker')
-//        ));
+        if (null !== $countQuery->getAST()->havingClause) {
+            $stmt = $countQuery->getEntityManager()->getConnection()
+                ->executeQuery('SELECT COUNT(*) FROM (' . $countQuery->getSQL() . ') results');
 
-        $hints = array_merge_recursive($hints, array(
-            Query::HINT_CUSTOM_TREE_WALKERS => array('Pike_Grid_DataSource_Doctrine_CountWalker')
-        ));
+            return $stmt->fetchColumn();
+        } else {
+            $hints = array_merge_recursive($hints, array(
+                Query::HINT_CUSTOM_TREE_WALKERS => array('Pike_Grid_DataSource_Doctrine_CountWalker')
+            ));
+        }
 
         foreach ($hints as $name => $value) {
             $countQuery->setHint($name, $value);
@@ -101,70 +78,21 @@ class Pike_Grid_DataSource_Doctrine_Paginate
         $countQuery->setFirstResult(null)->setMaxResults(null);
         $countQuery->setParameters($query->getParameters());
 
-        return $countQuery;
+        return current($countQuery->getSingleResult());
     }
 
     /**
+     * Given the Query it returns a new query that is a paginatable query using a modified subselect.
+     *
      * @param Query $query
-     * @param int $offset
-     * @param int $itemCountPerPage
      * @return Query
      */
-    static public function createLimitSubQuery(Query $query, $offset, $itemCountPerPage, array $phints = array())
+    public static function getPaginateQuery(Query $query, $offset, $itemCountPerPage, array $hints = array())
     {
-        $subQuery = self::cloneQuery($query);
-
-        $hints = array();
-        $hints[Query::HINT_CUSTOM_TREE_WALKERS] = array('Pike_Grid_DataSource_Doctrine_LimitSubqueryWalker');
-        $hints = array_merge_recursive($phints, $hints);
-
         foreach ($hints as $name => $hint) {
-            $subQuery->setHint($name, $hint);
+            $query->setHint($name, $hint);
         }
 
-        $subQuery->setParameters($query->getParameters());
-
-        if ($itemCountPerPage >= 0) {
-            $subQuery->setFirstResult($offset)->setMaxResults($itemCountPerPage);
-        }
-
-        return $subQuery;
-    }
-
-    /**
-     * @param Query $query
-     * @param array $ids
-     * @param string $namespace
-     * @return Query
-     */
-    static public function createWhereInQuery(Query $query, array $ids, $namespace = 'pgid', array $phints = array())
-    {
-        $whereInQuery = clone $query;
-
-        $whereInQuery->setParameters($query->getParameters());
-
-        $hints = array();
-        if (count($ids) > 0) {
-            $hints[Query::HINT_CUSTOM_TREE_WALKERS] = array('Pike_Grid_DataSource_Doctrine_WhereInWalker');
-            $hints['id.count'] = count($ids);
-            $hints['pg.ns'] = $namespace;
-        }
-
-        $hints = array_merge_recursive($phints, $hints);
-
-        foreach ($hints as $name => $hint) {
-            $whereInQuery->setHint($name, $hint);
-        }
-
-        $whereInQuery->setFirstResult(null)->setMaxResults(null);
-
-        if (count($ids) > 0) {
-            foreach ($ids as $i => $id) {
-                $i = $i+1;
-                $whereInQuery->setParameter("{$namespace}_{$i}", $id);
-            }
-        }
-
-        return $whereInQuery;
+        return $query->setFirstResult($offset)->setMaxResults($itemCountPerPage);
     }
 }
