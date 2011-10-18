@@ -99,7 +99,7 @@ class Pike_Grid
 
         $this->setId('pgrid' . $id);
 
-        if($dataSource instanceof Pike_Grid_DataSource_Interface) {
+        if ($dataSource instanceof Pike_Grid_DataSource_Interface) {
             $this->setDataSource($dataSource);
         }
 
@@ -115,7 +115,8 @@ class Pike_Grid
      * @param Pike_Grid_DataSource_Interface $dataSource
      * @return Pike_Grid
      */
-    public function setDataSource(Pike_Grid_DataSource_Interface $dataSource) {
+    public function setDataSource(Pike_Grid_DataSource_Interface $dataSource)
+    {
         $this->_dataSource = $dataSource;
 
         return $this;
@@ -200,8 +201,15 @@ class Pike_Grid
         if ($amount === -1) {
             $amount = 9999999;
         }
-        $this->_dataSource->setResultsPerPage($amount);
+
+        if (null === $this->_dataSource) {
+            throw new Pike_Exception('No data source defined');
+        } else {
+            $this->_dataSource->setResultsPerPage($amount);
+        }
+
         $this->_recordsPerPage = $amount;
+        
         return $this;
     }
 
