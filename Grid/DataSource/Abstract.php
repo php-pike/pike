@@ -185,8 +185,8 @@ class Pike_Grid_DataSource_Abstract
     {
         foreach ($this->columns as $index => $column) {
             if (array_key_exists('data', $column)) {
-                if (is_callable($column['data'])) {
-                    $row[$index] = $this->_escape($column['data']($row), $column['name']);
+                if (is_callable($column['data'], false, $method)) {
+                    $row[$index] = $this->_escape(call_user_func($column['data'], $row), $column['name']);
                 } else {
                     // Replace all column tokens that are possibly available in the column data
                     array_walk($row, function($value, $key) use (&$column) {

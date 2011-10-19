@@ -216,8 +216,9 @@ class Pike_Grid
     /**
      * Sets the caption
      *
-     * @param  string $caption
-     * @return Pike_Grid
+     * @param      string $caption
+     * @return     Pike_Grid
+     * @deprecated Use setAttribute instead.
      */
     public function setCaption($caption)
     {
