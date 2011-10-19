@@ -82,18 +82,18 @@ class Pike_View_Stream extends Zend_View_Stream
         $data = preg_replace('/<\?(?!xml|php|=)/s', '<?php ', $data);
 
         // Convert "<?php echo $var" to "<?php echo $this->escape($var)"
-        $data = preg_replace('/\<\?php\s*\n*\s*echo\s*\n*\s*(.*?);*\s*\n*\s*\?>/',
+        $data = preg_replace('/\<\?php\s*\n*\s*echo\s*\n*\s*(.*?);*\s*\n*\s*\?>/m',
             '<?php echo $this->escape((string)$1); ?>', $data);
 
         // Convert "<?= $var" to "<?php echo $this->escape($var)"
-        $data = preg_replace('/\<\?\=\s*\n*\s*(.*?);*\s*\n*\s*\?>/',
+        $data = preg_replace('/\<\?\=\s*\n*\s*(.*?);*\s*\n*\s*\?>/m',
             '<?php echo $this->escape((string)$1); ?>', $data);
 
         // Convert raw value that are defined as "<?=~", but are converted with the line above to
         // "<?php echo $this->escape(~$var)". Convert these cases to "<?php echo $var"
-        $data = preg_replace('/\<\?php\s*\n*\s*echo\s*\n*\s*\$this-\>escape\(\(string\)~(.*?)\);*\s*\n*\s*\?>/',
+        $data = preg_replace('/\<\?php\s*\n*\s*echo\s*\n*\s*\$this-\>escape\(\(string\)~(.*?)\);*\s*\n*\s*\?>/m',
             '<?php echo $1; ?>', $data);
-        $data = preg_replace('/\<\?=~\s*\n*\s*(.*?);*\s*\n*\s*\?>/',
+        $data = preg_replace('/\<\?=~\s*\n*\s*(.*?);*\s*\n*\s*\?>/m',
             '<?php echo $1; ?>', $data);
 
         return $data;
