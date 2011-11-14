@@ -160,6 +160,8 @@ class Pike_View_Helper_FormatException extends Zend_View_Helper_Abstract
     {
         $output = '<table class="definition-table">';
         foreach ($array as $key => $value) {
+            $value = is_array($value) ? var_export($value) : $value;
+
             $output .= '<tr>';
             $output .= '<td class="term">'. $this->view->escape($key) .':</td>';
             $output .= '<td class="description">'. $this->view->escape($value) .'</td>';
