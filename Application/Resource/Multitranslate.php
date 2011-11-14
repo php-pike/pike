@@ -36,7 +36,9 @@ class Pike_Application_Resource_MultiTranslate extends Zend_Application_Resource
 {
     public function init()
     {
-        $config = Zend_Registry::get('config');
+
+        $applicationConfig = $this->getBootstrap()->getApplication()->getOptions();
+
         $options = $this->getOptions();
         $translate = new Zend_Translate($options['default']);
 
@@ -44,7 +46,7 @@ class Pike_Application_Resource_MultiTranslate extends Zend_Application_Resource
          * Add translate logger
          */
         if (isset($options['logger'])) {
-            $loggerOptions = $config->resources->log->$options['logger']->toArray();
+            $loggerOptions = $applicationConfig['resources']['log'][$options['logger']];
             $logger = new Zend_Log();
             $logger->addWriter($loggerOptions);
 
