@@ -10,11 +10,11 @@
  * Compares two dates
  *
  * Usage:
- * $element->addValidator(new Buza_Validate_DateCompare('startdate')); // exact match
- * $element->addValidator(new Buza_Validate_DateCompare('startdate', 'enddate')); // between dates
- * $element->addValidator(new Buza_Validate_DateCompare('startdate', '<')); // not later
- * $element->addValidator(new Buza_Validate_DateCompare('startdate', '>')); // not earlier
- * $element->addValidator(new Buza_Validate_DateCompare('startdate', true, 'm-d-Y')); // not later
+ * $element->addValidator(new Pike_Validate_DateCompare('startdate')); // exact match
+ * $element->addValidator(new Pike_Validate_DateCompare('startdate', 'enddate')); // between dates
+ * $element->addValidator(new Pike_Validate_DateCompare('startdate', '<')); // not later
+ * $element->addValidator(new Pike_Validate_DateCompare('startdate', '>')); // not earlier
+ * $element->addValidator(new Pike_Validate_DateCompare('startdate', true, 'm-d-Y')); // not later
  *     and specified element has value in date format m-d-Y
  *
  * @category   PiKe
@@ -29,11 +29,13 @@ class Pike_Validate_DateCompare extends Zend_Validate_Abstract
      *
      * @const string
      */
-    const NOT_SAME      = 'notSame';
+    const NOT_SAME = 'notSame';
     const MISSING_TOKEN = 'missingToken';
-    const NOT_LATER     = 'notLater';
-    const NOT_EARLIER   = 'notEarlier';
-    const NOT_BETWEEN   = 'notBetween';
+    const NOT_LATER = 'notLater';
+    const NOT_LATER_OR_EQUALS = 'notLaterOrEquals';
+    const NOT_EARLIER = 'notEarlier';
+    const NOT_EARLIER_OR_EQUALS = 'notEarlierOrEquals';
+    const NOT_BETWEEN = 'notBetween';
     const INVALID_VALUE = 'invalidValue';
     const INVALID_TOKEN = 'invalidToken';
 
@@ -43,20 +45,20 @@ class Pike_Validate_DateCompare extends Zend_Validate_Abstract
      * @var array
      */
     protected $_messageTemplates = array(
-        self::NOT_SAME      => "The date '%value%' does not match the given '%token%'",
-        self::NOT_BETWEEN   => "The date '%value%' is not in the valid range",
-        self::NOT_LATER     => "The date '%value%' is not later than '%token%'",
-        self::NOT_EARLIER   => "The date '%value%' is not earlier than '%token%'",
+        self::NOT_SAME => "The date '%value%' does not match the given '%token%'",
+        self::NOT_BETWEEN => "The date '%value%' is not in the valid range",
+        self::NOT_LATER => "The date '%value%' is not later than '%token%'",
+        self::NOT_LATER_OR_EQUALS => "The date '%value%' is not later or equals than '%token%'",
+        self::NOT_EARLIER => "The date '%value%' is not earlier than '%token%'",
+        self::NOT_EARLIER_OR_EQUALS => "The date '%value%' is not earlier or equals than '%token%'",
         self::MISSING_TOKEN => 'No date was provided to match against',
         self::INVALID_VALUE => "The date '%value%' is not valid",
         self::INVALID_TOKEN => "The date '%token%' is not valid"
     );
-
     /**
      * @var array
      */
     protected $_messageVariables = array('token' => '_tokenValue');
-
     /**
      * Token to validate against
      *
@@ -86,7 +88,7 @@ class Pike_Validate_DateCompare extends Zend_Validate_Abstract
      * Sets token against which to compare
      *
      * @param  mixed $token
-     * @return Buza_Validate_DateCompare
+     * @return Pike_Validate_DateCompare
      */
     public function setToken($token)
     {
@@ -109,7 +111,7 @@ class Pike_Validate_DateCompare extends Zend_Validate_Abstract
      * Sets token value
      *
      * @param  mixed $value
-     * @return Buza_Validate_DateCompare
+     * @return Pike_Validate_DateCompare
      */
     public function setTokenValue($value)
     {
@@ -121,7 +123,7 @@ class Pike_Validate_DateCompare extends Zend_Validate_Abstract
      * Sets compare against which to compare
      *
      * @param  mixed $compare
-     * @return Buza_Validate_DateCompare
+     * @return Pike_Validate_DateCompare
      */
     public function setCompare($compare)
     {
@@ -144,7 +146,7 @@ class Pike_Validate_DateCompare extends Zend_Validate_Abstract
      * Set input date format
      *
      * @param  string $format
-     * @return Buza_Validate_DateCompare
+     * @return Pike_Validate_DateCompare
      */
     public function setInputDateFormat($format)
     {
@@ -184,7 +186,7 @@ class Pike_Validate_DateCompare extends Zend_Validate_Abstract
 
         $valueSystemDate = DateTime::createFromFormat($this->getInputDateFormat(), $value);
         if ($valueSystemDate instanceof DateTime) {
-            $valueSystemDate = $valueSystemDate->format('Y-m-d H:i:s');
+            $valueSystemDate->setTime(0, 0, 0);
         } else {
             $this->_error(self::INVALID_VALUE);
             return false;
@@ -192,45 +194,53 @@ class Pike_Validate_DateCompare extends Zend_Validate_Abstract
 
         $tokenSystemDate = DateTime::createFromFormat($this->getInputDateFormat(), $token->getValue());
         if ($tokenSystemDate instanceof DateTime) {
-            $tokenSystemDate = $tokenSystemDate->format('Y-m-d H:i:s');
+            $tokenSystemDate->setTime(0, 0, 0);
         } else {
             $this->_error(self::INVALID_TOKEN);
             return false;
         }
 
-        $valueSystemTime = strtotime($valueSystemDate);
-        $tokenSystemTime = strtotime($tokenSystemDate);
+        $date1 = new Zend_Date($valueSystemDate->getTimestamp());
+        $date2 = new Zend_Date($tokenSystemDate->getTimestamp());
 
-        // If one of the two is invalid and result in FALSE, return silently. The date validator
-        // of the field in question will handle the invalid date first
-        if ($valueSystemTime === false || $tokenSystemTime === false) {
-            return false;
-        }
-
-        $date1 = new Zend_Date($valueSystemTime);
-        $date2 = new Zend_Date($tokenSystemTime);
-
-        if ($this->getCompare() === '<') {
-            if ($date1->compare($date2) < 0 || $date1->equals($date2)) {
-                $this->_error(self::NOT_LATER);
-                return false;
-            }
-        } else if ($this->getCompare() === '>') {
-            if ($date1->compare($date2) > 0 || $date1->equals($date2)) {
-                $this->_error(self::NOT_EARLIER);
-                return false;
-            }
-        } else if ($this->getCompare() === null) {
-            if (!$date1->equals($date2)) {
-                $this->_error(self::NOT_SAME);
-                return false;
-            }
-        } else {
-            $date3 = new Zend_Date($this->getCompare());
-            if ($date1->compare($date2) < 0 || $date1->compare($date3) > 0) {
-                $this->_error(self::NOT_BETWEEN);
-                return false;
-            }
+        switch ($this->getCompare()) {
+            case '<' :
+                if ($date1->compare($date2) < 0 || $date1->equals($date2)) {
+                    $this->_error(self::NOT_LATER);
+                    return false;
+                }
+                break;
+            case '<=' :
+                if ($date1->compare($date2) < 0 && !$date1->equals($date2)) {
+                    $this->_error(self::NOT_LATER_OR_EQUALS);
+                    return false;
+                }
+                break;
+            case '>' :
+                if ($date1->compare($date2) > 0 || $date1->equals($date2)) {
+                    $this->_error(self::NOT_EARLIER);
+                    return false;
+                }
+                break;
+            case '>=' :
+                if ($date1->compare($date2) > 0 || !$date1->equals($date2)) {
+                    $this->_error(self::NOT_EARLIER_OR_EQUALS);
+                    return false;
+                }
+                break;
+            case null :
+                if (!$date1->equals($date2)) {
+                    $this->_error(self::NOT_SAME);
+                    return false;
+                }
+                break;
+            default :
+                $date3 = new Zend_Date($this->getCompare());
+                if ($date1->compare($date2) < 0 || $date1->compare($date3) > 0) {
+                    $this->_error(self::NOT_BETWEEN);
+                    return false;
+                }
+                break;
         }
 
         return true;
