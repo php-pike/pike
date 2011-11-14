@@ -110,16 +110,25 @@ class Pike_Grid
 
     /**
      *
-     * Pike_Grid needs to know the datasource in order to generate the initial column names etc.
+     * Pike_Grid needs to know the data source in order to generate the initial column names etc.
      *
-     * @param Pike_Grid_DataSource_Interface $dataSource
+     * @param  Pike_Grid_DataSource_Interface $dataSource
      * @return Pike_Grid
      */
     public function setDataSource(Pike_Grid_DataSource_Interface $dataSource)
     {
         $this->_dataSource = $dataSource;
-
         return $this;
+    }
+
+    /**
+     * Returns the data source
+     * 
+     * @return Pike_Grid_DataSource_Interface
+     */
+    public function getDataSource()
+    {
+        return $this->_dataSource;
     }
 
     /**
@@ -209,7 +218,7 @@ class Pike_Grid
         }
 
         $this->_recordsPerPage = $amount;
-        
+
         return $this;
     }
 
@@ -249,13 +258,21 @@ class Pike_Grid
         }
 
         // If no specific column position is defined, fallback on the order of the possible
-        // specified showColumns.
+        // specified showColumns property.
         if (!is_numeric($position) && count($this->_showColumns) > 0) {
             $position = array_search($name, $this->_showColumns);
         }
 
-        // Add column to the data source
-        $this->_dataSource->columns->add($name, $label, $sidx, $position, $data);
+        if (isset($this->_dataSource->columns[$name])) {
+            $attributes = array_merge(
+                array('data' => $data, 'label' => $label, 'sidx' => $sidx),
+                $attributes
+            );
+        } else {
+            // Add column to the data source
+            $this->_dataSource->columns->add($name, $label, $sidx, $position, $data);
+        }
+
 
         // Set the sortable attribute to false if no sort index is specified
         if (null === $sidx) {
@@ -307,7 +324,7 @@ class Pike_Grid
      */
     public function showColumns(array $columns)
     {
-        $this->_showColumns = $columns;
+        $this->_dataSource->columns->showColumns = $columns;
         return $this;
     }
 
@@ -381,13 +398,13 @@ EOF;
     public function getJavascript($pretty=false)
     {
         $settings = array(
-            'url' => $this->_url,
-            'datatype' => 'json',
-            'mtype' => 'post',
-            'rowNum' => $this->_recordsPerPage,
-            'autowidth' => true,
-            'pager' => $this->_pagerId,
-            'height' => $this->_height,
+            'url'         => $this->_url,
+            'datatype'    => 'json',
+            'mtype'       => 'post',
+            'rowNum'      => $this->_recordsPerPage,
+            'autowidth'   => true,
+            'pager'       => $this->_pagerId,
+            'height'      => $this->_height,
             'viewrecords' => true,
         );
 
@@ -395,7 +412,8 @@ EOF;
             unset($column['data']);
 
             // If show columns is set, show only the defined columns
-            if (count($this->_showColumns) > 0 && !in_array($column['name'], $this->_showColumns)) {
+            if (count($this->_dataSource->columns->showColumns) > 0
+                && !in_array($column['name'], $this->_dataSource->columns->showColumns)) {                
                 $column['hidden'] = true;
             }
 

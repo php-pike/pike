@@ -28,6 +28,13 @@
 class Pike_Grid_DataSource_Columns extends ArrayObject
 {
     /**
+     * If specified, only these columns will be visible in the grid
+     * 
+     * @var array
+     */
+    public $showColumns = array();
+
+    /**
      * Constructor
      *
      * @param array $columns
@@ -40,8 +47,7 @@ class Pike_Grid_DataSource_Columns extends ArrayObject
     }
 
     /**
-     *
-     * Adds a column to the internal index.
+     * Adds a column to the internal index
      *
      * @param mixed   $column   Either the name or an array with options
      * @param string  $label    The friendlyname used for this column as heading
@@ -83,16 +89,16 @@ class Pike_Grid_DataSource_Columns extends ArrayObject
     }
 
     /**
-     * @param string $name
+     * @param  string $name
      * @return boolean
      */
     public function __isset($name)
     {
-        return array_key_exists($name, $this->offsetExists($name));
+        return $this->offsetExists($name);
     }
 
     /**
-     * Retrieve a column like it's an object property.
+     * Retrieves a column like it's an object property
      *
      * @param  string $column
      * @return array
@@ -106,7 +112,6 @@ class Pike_Grid_DataSource_Columns extends ArrayObject
         }
     }
 
-
     /**
      * Sorts items as we would expect them, just before the iterator is returned
      *
@@ -114,6 +119,20 @@ class Pike_Grid_DataSource_Columns extends ArrayObject
      */
     public function getIterator()
     {
+        if (count($this->showColumns) > 0) {
+            $columns = $this->getArrayCopy();
+
+            foreach ($columns as &$column) {
+                if (!in_array($column['name'], $this->showColumns)) {
+                    $column['position'] = 0;
+                } else {
+                    $column['position'] = array_search($column['name'], $this->showColumns);
+                }
+            }
+
+            $this->exchangeArray($columns);
+        }
+        
         $this->uasort(function($first, $second) {
             if (isset($first['position']) && isset($second['position'])) {
                 if ($first['position'] > $second['position']) {

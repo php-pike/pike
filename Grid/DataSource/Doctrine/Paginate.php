@@ -61,10 +61,14 @@ class Pike_Grid_DataSource_Doctrine_Paginate
         $countQuery = self::cloneQuery($query);
 
         if (null !== $countQuery->getAST()->havingClause) {
-            $stmt = $countQuery->getEntityManager()->getConnection()
-                ->executeQuery('SELECT COUNT(*) FROM (' . $countQuery->getSQL() . ') results');
+            $sql = 'SELECT COUNT(*) FROM (' . $countQuery->getSQL() . ') results';
 
-            return $stmt->fetchColumn();
+            $stmt = $countQuery->getEntityManager()->getConnection()
+                ->executeQuery($sql, array_reverse(array_values($countQuery->getParameters())));
+
+            $count = $stmt->fetchColumn();
+
+            return $count;
         } else {
             $hints = array_merge_recursive($hints, array(
                 Query::HINT_CUSTOM_TREE_WALKERS => array('Pike_Grid_DataSource_Doctrine_CountWalker')

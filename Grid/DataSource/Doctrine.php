@@ -46,7 +46,7 @@ class Pike_Grid_DataSource_Doctrine
     public function __construct($source)
     {
         parent::__construct();
-        
+
         switch($source) {
             case ($source instanceof Doctrine\ORM\QueryBuilder) :
                 $this->_query = $source->getQuery();
