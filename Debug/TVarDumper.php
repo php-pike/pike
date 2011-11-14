@@ -26,7 +26,7 @@
  * But it's better to use Pike_Debug::dump($var) that makes use of this class.
  *
  * @author Qiang Xue <qiang.xue@gmail.com>
- * @author Pieter Vogelaar <ps.vogelaar@platinadesigns.nl>
+ * @author Pieter Vogelaar <pieter@pietervogelaar.nl>
  * @version $Id: TVarDumper.php 2541 2008-10-21 15:05:13Z qiang.xue $
  * @package System.Util
  * @since 3.0

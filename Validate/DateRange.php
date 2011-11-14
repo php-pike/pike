@@ -1,7 +1,7 @@
 <?php
 /**
  * @category   PiKe
- * @copyright  Copyright (C) 2011 by Pieter Vogelaar (platinadesigns.nl) and Kees Schepers (keesschepers.nl)
+ * @copyright  Copyright (C) 2011 by Pieter Vogelaar (pietervogelaar.nl) and Kees Schepers (keesschepers.nl)
  * @package    Validate
  * @license    MIT
  */
@@ -15,7 +15,7 @@
  * $element->addValidator(new Pike_Validate_DateRange(array('lt' => '2011-09-20', 'gt' => '2011-10-20')); //date should be between 2011-09-20 AND  2011-10-20
  *
  * @category   PiKe
- * @copyright  Copyright (C) 2011 by Pieter Vogelaar (platinadesigns.nl) and Kees Schepers (keesschepers.nl)
+ * @copyright  Copyright (C) 2011 by Pieter Vogelaar (pietervogelaar.nl) and Kees Schepers (keesschepers.nl)
  * @package    Validate
  * @license    MIT
  */

@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright (C) 2011 by Pieter Vogelaar (platinadesigns.nl) and Kees Schepers (keesschepers.nl)
+ * Copyright (C) 2011 by Pieter Vogelaar (pietervogelaar.nl) and Kees Schepers (keesschepers.nl)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,7 +20,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  *
- * @copyright  Copyright (C) 2011 by Pieter Vogelaar (platinadesigns.nl) and Kees Schepers (keesschepers.nl)
+ * @copyright  Copyright (C) 2011 by Pieter Vogelaar (pietervogelaar.nl) and Kees Schepers (keesschepers.nl)
  * @license    MIT
  */
 
@@ -57,14 +57,24 @@
  *                      APPLICATION_PATH "/../library/Pike/View/Helper/Navigation"
  *
  * @category   PiKe
- * @copyright  Copyright (C) 2011 by Pieter Vogelaar (platinadesigns.nl) and Kees Schepers (keesschepers.nl)
+ * @copyright  Copyright (C) 2011 by Pieter Vogelaar (pietervogelaar.nl) and Kees Schepers (keesschepers.nl)
  * @license    MIT
  */
 class Pike_View_Helper_Navigation_PikeMenu extends Zend_View_Helper_Navigation_Menu
 {
-
+    /**
+     * Roles
+     * 
+     * @var array
+     */
     protected $_roles = array();
 
+    /**
+     * Pike menu
+     * 
+     * @param  Zend_Navigation_Container $container
+     * @return Pike_View_Helper_Navigation_PikeMenu
+     */
     public function PikeMenu(Zend_Navigation_Container $container = null)
     {
         if (null !== $container) {
@@ -74,6 +84,12 @@ class Pike_View_Helper_Navigation_PikeMenu extends Zend_View_Helper_Navigation_M
         return $this;
     }
 
+    /**
+     * Checks if a role has access to the specified page
+     * 
+     * @param  Zend_Navigation_Page $page
+     * @return boolean
+     */
     protected function _acceptAcl(Zend_Navigation_Page $page)
     {
 
@@ -109,11 +125,22 @@ class Pike_View_Helper_Navigation_PikeMenu extends Zend_View_Helper_Navigation_M
         return true;
     }
 
+    /**
+     * Returns the roles
+     * 
+     * @return array
+     */
     public function getRoles()
     {
         return $this->_roles;
     }
 
+    /**
+     * Adds the specified role
+     * 
+     * @param  Zend_Acl_Role_Interface $role
+     * @return Pike_View_Helper_Navigation_PikeMenu 
+     */
     public function addRole($role)
     {
         if (is_string($role) || $role instanceof Zend_Acl_Role_Interface) {
@@ -131,6 +158,12 @@ class Pike_View_Helper_Navigation_PikeMenu extends Zend_View_Helper_Navigation_M
         return $this;
     }
 
+    /**
+     * Sets the specified roles
+     * 
+     * @param  array $roles
+     * @return Pike_View_Helper_Navigation_PikeMenu
+     */
     public function setRoles(array $roles)
     {
 
@@ -140,5 +173,4 @@ class Pike_View_Helper_Navigation_PikeMenu extends Zend_View_Helper_Navigation_M
 
         return $this;
     }
-
 }

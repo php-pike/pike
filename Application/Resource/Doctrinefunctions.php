@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Copyright (C) 2011 by Pieter Vogelaar (platinadesigns.nl) and Kees Schepers (keesschepers.nl)
+ * Copyright (C) 2011 by Pieter Vogelaar (pietervogelaar.nl) and Kees Schepers (keesschepers.nl)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  *
  * @category   PiKe
- * @copyright  Copyright (C) 2011 by Pieter Vogelaar (platinadesigns.nl) and Kees Schepers (keesschepers.nl)
+ * @copyright  Copyright (C) 2011 by Pieter Vogelaar (pietervogelaar.nl) and Kees Schepers (keesschepers.nl)
  * @license    MIT
  */
 
@@ -34,15 +34,16 @@
  * 
  *
  * @category   PiKe
- * @copyright  Copyright (C) 2011 by Pieter Vogelaar (platinadesigns.nl) and Kees Schepers (keesschepers.nl)
+ * @copyright  Copyright (C) 2011 by Pieter Vogelaar (pietervogelaar.nl) and Kees Schepers (keesschepers.nl)
  * @license    MIT
  */
-class Pike_Application_Resource_DoctrineFunctions extends Zend_Application_Resource_ResourceAbstract {
-
-    public function init() {
+class Pike_Application_Resource_DoctrineFunctions extends Zend_Application_Resource_ResourceAbstract
+{
+    public function init()
+    {
         $this->getBootstrap()->bootstrap('doctrine');
         
-        $doctrine = $this->getBootstrap()->getResource('doctrine'); //bisna doctrine container        
+        $doctrine = $this->getBootstrap()->getResource('doctrine'); // Bisna Doctrine container
         $em = $doctrine->getEntityManager();
         $config = $em->getConfiguration();        
         $options = $this->getOptions();
@@ -85,5 +86,4 @@ class Pike_Application_Resource_DoctrineFunctions extends Zend_Application_Resou
             }
         }
     }
-
 }

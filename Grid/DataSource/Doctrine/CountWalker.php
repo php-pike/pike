@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright (C) 2011 by Pieter Vogelaar (platinadesigns.nl) and Kees Schepers (keesschepers.nl)
+ * Copyright (C) 2011 by Pieter Vogelaar (pietervogelaar.nl) and Kees Schepers (keesschepers.nl)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -27,10 +27,14 @@ use Doctrine\ORM\Query\TreeWalkerAdapter,
     Doctrine\ORM\Query\AST\PathExpression,
     Doctrine\ORM\Query\AST\AggregateExpression;
 
+/**
+ * @category   PiKe
+ * @copyright  Copyright (C) 2011 by Pieter Vogelaar (pietervogelaar.nl) and Kees Schepers (keesschepers.nl)
+ * @license    MIT
+ */
 class Pike_Grid_DataSource_Doctrine_CountWalker extends TreeWalkerAdapter
 {
     /**
-     *
      * @var SelectStatement
      */
     protected $_AST;
@@ -44,12 +48,10 @@ class Pike_Grid_DataSource_Doctrine_CountWalker extends TreeWalkerAdapter
     public function walkSelectStatement(SelectStatement $AST)
     {
         $this->_AST = $AST;
-
         $this->_AST->selectClause->selectExpressions = array();
-
         $this->_addCountComponent();
 
-        if(null === $this->_AST->havingClause) {
+        if (null === $this->_AST->havingClause) {
             // GROUP BY will break things, we are trying to get a count of all
             $this->_AST->groupByClause = null;
         }
@@ -89,14 +91,12 @@ class Pike_Grid_DataSource_Doctrine_CountWalker extends TreeWalkerAdapter
          * count total amount of results.
          */
         $pathExpression = new PathExpression(
-                        PathExpression::TYPE_STATE_FIELD | PathExpression::TYPE_SINGLE_VALUED_ASSOCIATION, $parentName,
-                        $parent['metadata']->getSingleIdentifierFieldName()
+            PathExpression::TYPE_STATE_FIELD | PathExpression::TYPE_SINGLE_VALUED_ASSOCIATION, $parentName,
+            $parent['metadata']->getSingleIdentifierFieldName()
         );
         $pathExpression->type = PathExpression::TYPE_STATE_FIELD;
 
         $this->_AST->selectClause->selectExpressions[] = new SelectExpression(
-                    new AggregateExpression('count', $pathExpression, true), null
-        );
+            new AggregateExpression('count', $pathExpression, true), null);
     }
-
 }

@@ -23,6 +23,11 @@
 
 use Doctrine\ORM\Query;
 
+/**
+ * @category   PiKe
+ * @copyright  Copyright (C) 2011 by Pieter Vogelaar (pietervogelaar.nl) and Kees Schepers (keesschepers.nl)
+ * @license    MIT
+ */
 class Pike_Grid_DataSource_Doctrine_Paginate
 {
     /**

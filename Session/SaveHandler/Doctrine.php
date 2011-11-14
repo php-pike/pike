@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright (C) 2011 by Pieter Vogelaar (platinadesigns.nl) and Kees Schepers (keesschepers.nl)
+ * Copyright (C) 2011 by Pieter Vogelaar (pietervogelaar.nl) and Kees Schepers (keesschepers.nl)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,7 +21,7 @@
  * THE SOFTWARE.
  *
  * @category   PiKe
- * @copyright  Copyright (C) 2011 by Pieter Vogelaar (platinadesigns.nl) and Kees Schepers (keesschepers.nl)
+ * @copyright  Copyright (C) 2011 by Pieter Vogelaar (pietervogelaar.nl) and Kees Schepers (keesschepers.nl)
  * @license    MIT
  */
 
@@ -44,7 +44,7 @@
  * And you can enjoy Doctrine even more!
  *
  * @category   PiKe
- * @copyright  Copyright (C) 2011 by Pieter Vogelaar (platinadesigns.nl) and Kees Schepers (keesschepers.nl)
+ * @copyright  Copyright (C) 2011 by Pieter Vogelaar (pietervogelaar.nl) and Kees Schepers (keesschepers.nl)
  * @license    MIT
  */
 class Pike_Session_SaveHandler_Doctrine implements Zend_Session_SaveHandler_Interface
@@ -126,16 +126,21 @@ class Pike_Session_SaveHandler_Doctrine implements Zend_Session_SaveHandler_Inte
         return true;
     }
 
+    /**
+     * Closes the session
+     * 
+     * @return boolean
+     */
     public function close()
     {
         return true;
     }
 
     /**
-     *
-     * Reads the session from the entity. If the session is expired it will be removed
-     * and the function will return an empty string (this is very important, otherwise the
-     * PHP session handler will fail!).
+     * Reads the session from the entity
+     * 
+     * If the session is expired it will be removed and the function will return an
+     * empty string (this is very important, otherwise the PHP session handler will fail!).
      *
      * @param  string $id
      * @return string
@@ -143,7 +148,6 @@ class Pike_Session_SaveHandler_Doctrine implements Zend_Session_SaveHandler_Inte
     public function read($id)
     {
         $return = '';
-
         $entity = $this->_getEntity($id);
 
         if ($entity instanceof Pike_Session_Entity_Interface) {
@@ -165,8 +169,7 @@ class Pike_Session_SaveHandler_Doctrine implements Zend_Session_SaveHandler_Inte
     }
 
     /**
-     *
-     * Writes the session to the entity. If entity doesn't exist it's created.
+     * Writes the session to the entity, if the entity doesn't exist it will be created.
      *
      * @param  string $id
      * @param  string $data Serialized array data
@@ -189,8 +192,7 @@ class Pike_Session_SaveHandler_Doctrine implements Zend_Session_SaveHandler_Inte
     }
 
     /**
-     *
-     * Removes a session entity given by a ID
+     * Removes a session entity with the specified ID
      *
      * @param  string $id
      * @return boolean
