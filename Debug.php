@@ -46,24 +46,28 @@ class Pike_Debug extends Zend_Debug
      * htmlentities() before output and optionally highlights the dump.
      *
      * @param  mixed   $var       The variable to dump.
+     * @param  integer $depth     OPTIONAL The depth of the stack trace to show.
      * @param  string  $label     OPTIONAL Label to prepend to output.
      * @param  boolean $echo      OPTIONAL Echo output if true.
-     * @param  integer $depth     OPTIONAL The depth of the stack trace to show.
      * @param  boolean $highlight OPTIONAL Highlights the dump if true.
      * @return string
      */
-    public static function dump($var, $label = null, $echo = true, $depth = 10, $highlight = false)
+    public static function dump($var, $depth = 10, $label = null, $echo = true, $highlight = false)
     {
         // format the label
         $label = ($label===null) ? '' : rtrim($label) . ' ';
 
-        // var_dump the variable into a buffer and keep the output
-        ob_start();
-        echo Pike_Debug_TVarDumper::dump($var, $depth, $highlight);
-        $output = ob_get_clean();
+        if (is_null($var)) {
+            $output = 'NULL';
+        } else if (is_string($var) && '' == $var) {
+            $output = 'EMPTY STRING';
+        } else {
+            $output = Pike_Debug_TVarDumper::dump($var, $depth, $highlight);
 
-        // neaten the newlines and indents
-        $output = preg_replace("/\]\=\>\n(\s+)/m", "] => ", $output);
+            // neaten the newlines and indents
+            $output = preg_replace("/\]\=\>\n(\s+)/m", "] => ", $output);
+        }
+
         if (self::getSapi() == 'cli') {
             $output = PHP_EOL . $label
                     . PHP_EOL . $output
@@ -82,6 +86,7 @@ class Pike_Debug extends Zend_Debug
         if ($echo) {
             echo($output);
         }
+
         return $output;
     }
 }
