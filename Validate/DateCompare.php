@@ -177,6 +177,12 @@ class Pike_Validate_DateCompare extends Zend_Validate_Abstract
         $this->_setValue((string) $value);
         $token = $this->getToken();
 
+        if ($token instanceof Zend_Form_Element) {
+            if (!$token->isRequired() && strlen($token->getValue()) == 0) {
+                return true;
+            }
+        }
+
         if ($token === null) {
             $this->_error(self::MISSING_TOKEN);
             return false;
