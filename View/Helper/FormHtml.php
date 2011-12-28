@@ -36,6 +36,6 @@ class Pike_View_Helper_FormHtml extends Zend_View_Helper_FormElement
 {
     public function formHtml($name, $value = null, array $attributes = array())
     {
-        return $value . $this->view->formHidden($name, $value, $attributes);
+        return $value;
     }
 }
