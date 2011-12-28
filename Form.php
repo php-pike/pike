@@ -298,16 +298,18 @@ class Pike_Form extends Zend_Form
             }
         }
 
-        $this->addDisplayGroup($this->_submitButtons, 'submitButtons', array(
-            'decorators' => array(
-                'FormElements',
-            )
-        ));
+        if (count($this->_submitButtons) > 0) {
+            $this->addDisplayGroup($this->_submitButtons, 'submitButtons', array(
+                'decorators' => array(
+                    'FormElements',
+                )
+            ));
 
-        $displayGroup = $this->getDisplayGroup('submitButtons');
-        $displayGroup->setOrder(100);
-        $displayGroup->addPrefixPath('Pike_Form_Decorator', 'Pike/Form/Decorator', 'decorator');
-        $displayGroup->addDecorator('SubmitButtons');
+            $displayGroup = $this->getDisplayGroup('submitButtons');
+            $displayGroup->setOrder(100);
+            $displayGroup->addPrefixPath('Pike_Form_Decorator', 'Pike/Form/Decorator', 'decorator');
+            $displayGroup->addDecorator('SubmitButtons');
+        }
     }
 
     /**
