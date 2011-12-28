@@ -53,19 +53,21 @@ class Pike_Form_SubForm_DateRange extends Pike_Form_SubForm
         ));
 
         $element = new Zend_Form_Element_Text('start');
-        $element->setLabel($label);
-        $element->setAttrib('class', 'datepicker');
-        $element->addValidator(new Zend_Validate_Date(array('format' => 'dd-MM-YYYY')), true);
+        $element->setLabel($label)
+                ->setAttrib('class', 'datepicker mask mask-99-99-9999')
+                ->setAttrib('autocomplete', 'off')
+                ->addValidator(new Zend_Validate_Date(array('format' => 'dd-MM-YYYY')), true);
         $this->addElement($element);
 
         $decorator = $element->getDecorator('composite');
         $decorator->addContainerClass('daterange-start');
 
         $element = new Zend_Form_Element_Text('end');
-        $element->setLabel($label);
-        $element->setAttrib('class', 'datepicker');
-        $element->addValidator(new Zend_Validate_Date(array('format' => 'dd-MM-YYYY')), true);
-        $element->addValidator(new Pike_Validate_DateCompare($this->getElement('start'), '<=', 'd-m-Y'));
+        $element->setLabel($label)
+                ->setAttrib('class', 'datepicker mask mask-99-99-9999')
+                ->setAttrib('autocomplete', 'off')
+                ->addValidator(new Zend_Validate_Date(array('format' => 'dd-MM-YYYY')), true)
+                ->addValidator(new Pike_Validate_DateCompare($this->getElement('start'), '<=', 'd-m-Y'));
         $this->addElement($element);
 
         $decorator = $element->getDecorator('composite');
