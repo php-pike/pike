@@ -25,7 +25,7 @@
  * Pike_Grid is the front class. It wants a datasource passed thru the constructor
  * and generates Javascript and HTML for rendering the grid. With a AJAX POST call
  * the data is retrieved.
- * 
+ *
  * @category   PiKe
  * @copyright  Copyright (C) 2011 by Pieter Vogelaar (pietervogelaar.nl) and Kees Schepers (keesschepers.nl)
  * @license    MIT
@@ -36,58 +36,58 @@ class Pike_Grid
      * @var string
      */
     protected $_id;
-
+    
     /**
      * @var string
      */
     protected $_pagerId;
-
+    
     /**
      * @var Pike_Grid_DataSource_Interface
      */
     protected $_dataSource;
-
+    
     /**
      * Amount of rows per 'page' default is 50
      *
      * @var integer
      */
     protected $_recordsPerPage = 50;
-
+    
     /**
      * @var string
      */
     protected $_width = 'auto';
-
+    
     /**
      * @var string
      */
     protected $_height = '100%';
-
+    
     /**
      * @var string
      */
     protected $_url;
-
+    
     /**
      * @var array
      */
     protected $_attributes = array();
-
+    
     /**
      * Grid methods that will be executed after the grid is constructed on the client
      *
      * @var array
      */
     protected $_methods = array();
-
+    
     /**
      * If filled, only those columns will be visible in the grid
      *
      * @var array
      */
     protected $_showColumns = array();
-
+    
     /**
      * @var string
      */
@@ -107,7 +107,7 @@ class Pike_Grid
             $this->setDataSource($dataSource);
         }
 
-        $this->_url = $_SERVER['REQUEST_URI'];
+        $this->_url = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '/';
 
         $this->setDefaults();
     }
@@ -127,7 +127,7 @@ class Pike_Grid
 
     /**
      * Returns the data source
-     * 
+     *
      * @return Pike_Grid_DataSource_Interface
      */
     public function getDataSource()
@@ -151,7 +151,7 @@ class Pike_Grid
     public function setDefaults()
     {
         $this->setAttribute('hidegrid', false)
-             ->setAttribute('autowidth', true);
+            ->setAttribute('autowidth', true);
     }
 
     /**
@@ -175,6 +175,21 @@ class Pike_Grid
     public function getId()
     {
         return $this->_id;
+    }
+
+    /**
+     * Returns an attribute
+     * 
+     * @param  string $attribute
+     * @return mixed
+     */
+    public function getAttribute($attribute)
+    {
+        if (array_key_exists($attribute, $this->_attributes)) {
+            return $this->_attributes[$attribute];
+        } else {
+            return null;
+        }
     }
 
     /**
@@ -269,8 +284,7 @@ class Pike_Grid
 
         if (isset($this->_dataSource->columns[$name])) {
             $attributes = array_merge(
-                array('data' => $data, 'label' => $label, 'sidx' => $sidx),
-                $attributes
+                array('data' => $data, 'label' => $label, 'sidx' => $sidx), $attributes
             );
         } else {
             // Add column to the data source
@@ -399,7 +413,7 @@ EOF;
      *
      * @param boolean $pretty Wether to print the javascript readable
      */
-    public function getJavascript($pretty=false)
+    public function getJavascript($pretty = false)
     {
         $settings = array(
             'url'         => $this->_url,
@@ -417,7 +431,7 @@ EOF;
 
             // If show columns is set, show only the defined columns
             if (count($this->_dataSource->columns->showColumns) > 0
-                && !in_array($column['name'], $this->_dataSource->columns->showColumns)) {                
+                && !in_array($column['name'], $this->_dataSource->columns->showColumns)) {
                 $column['hidden'] = true;
             }
 
@@ -438,7 +452,7 @@ EOF;
 
         $json = Zend_Json::encode($settings, false, array('enableJsonExprFinder' => true));
 
-        if($pretty) {
+        if ($pretty) {
             $json = Zend_Json::prettyPrint($json);
         }
 
@@ -463,7 +477,8 @@ EOF;
     {
         $output = '';
         foreach ($this->_methods as $method => $options) {
-            $jsonOptions = Zend_Json::prettyPrint(Zend_Json::encode($options, false, array('enableJsonExprFinder' => true)));
+            $jsonOptions = Zend_Json::prettyPrint(Zend_Json::encode($options, false,
+                array('enableJsonExprFinder' => true)));
             $output .= sprintf('$("#%s").jqGrid("%s", %s);',
                 $this->_id, $method, $jsonOptions) . PHP_EOL;
         }

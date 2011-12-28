@@ -24,7 +24,7 @@
 /**
  * Abstract version of the data source. In his child is defined and retrieves data from
  * the specified data source for example Zend_Db, Doctrine2, etc.
- * 
+ *
  * @category   PiKe
  * @copyright  Copyright (C) 2011 by Pieter Vogelaar (pietervogelaar.nl) and Kees Schepers (keesschepers.nl)
  * @license    MIT
@@ -150,6 +150,19 @@ class Pike_Grid_DataSource_Abstract
         foreach ($columns as $column) {
             $this->_excludedColumnsFromEscaping[] = $column;
         }
+
+        return $this;
+    }
+
+    /**
+     * Resets the entire list of columns to be excluded from escaping. This will set
+     * the datasource to normal behavior.
+     * 
+     * @return Pike_Grid_DataSource_Abstract
+     */
+    public function resetExcludeColumnsFromEscaping()
+    {
+        $this->_excludedColumnsFromEscaping = array();
 
         return $this;
     }
