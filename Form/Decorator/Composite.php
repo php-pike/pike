@@ -252,7 +252,13 @@ class Pike_Form_Decorator_Composite
         $seperator   = $this->getSeparator();
         $placement   = $this->getPlacement();
         $label       = $this->buildLabel();
-        $input       = $this->buildInput();
+        
+        if ($element instanceof Zend_Form_Element_Captcha) {
+            $input = $content;
+            $content = '';
+        } else {
+            $input = $this->buildInput();
+        }
         $errors      = $this->buildErrors();
         $description = $this->buildDescription();
 
