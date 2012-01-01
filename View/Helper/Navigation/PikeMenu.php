@@ -92,7 +92,11 @@ class Pike_View_Helper_Navigation_PikeMenu extends Zend_View_Helper_Navigation_M
      */
     protected function _acceptAcl(Zend_Navigation_Page $page)
     {
-
+        // Always allow external URLs
+        if (strpos($page->getHref(), '://') !== false) {
+            return true;
+        }
+        
         if (!$acl = $this->getAcl()) {
             // no acl registered means don't use acl
             return true;
@@ -107,19 +111,18 @@ class Pike_View_Helper_Navigation_PikeMenu extends Zend_View_Helper_Navigation_M
         $resource = $page->getResource();
         $privilege = $page->getPrivilege();
 
-
         if ($resource || $privilege) {
             foreach($roles as $role) {
                 if ($acl->hasRole($role)) {
                     if (($resource && $acl->has($resource))) {
-                        if ($acl->isAllowed($role, $resource, $privilege))
+                        if ($acl->isAllowed($role, $resource, $privilege)) {
                             return true;
+                        }
                     }
                 }
             }
 
             return false;
-            // determine using helper role and page resource/privilege
         }
 
         return true;
