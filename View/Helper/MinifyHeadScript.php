@@ -71,6 +71,8 @@ class Pike_View_Helper_MinifyHeadScript extends Zend_View_Helper_FormElement
         $previousType = null;
         $collection = array();
 
+        $this->view->headScript()->getContainer()->ksort();
+            
         foreach ($this->view->headScript()->getContainer() as $offset => $item) {
             $type = isset($item->attributes['src']) ? 'external' : 'inline';
 
@@ -91,7 +93,7 @@ class Pike_View_Helper_MinifyHeadScript extends Zend_View_Helper_FormElement
                 } else {
                     $collection[] = $path;
                 }
-            } else {
+            } else {                
                 $collection[] = $item->source;
             }
 

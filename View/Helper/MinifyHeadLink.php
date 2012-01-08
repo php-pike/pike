@@ -38,6 +38,13 @@
 class Pike_View_Helper_MinifyHeadLink extends Zend_View_Helper_HtmlElement
 {
     /**
+     * $_validAttributes
+     *
+     * @var array
+     */
+    protected $_itemKeys = array('charset', 'href', 'hreflang', 'id', 'media', 'rel', 'rev', 'type', 'title', 'extras');
+    
+    /**
      * Combines all the style sheets available in the head link container for use with Minify
      *
      * If you define a file that must not be minified and is for example the fifth file, the order
@@ -72,10 +79,16 @@ class Pike_View_Helper_MinifyHeadLink extends Zend_View_Helper_HtmlElement
         $previousMedia = null;
         $previousConditionalStylesheet = null;
         $collection = array();
-
+        $nonStylesheetLinks = array();
+        
+        $this->view->headLink()->getContainer()->ksort();
+        
         foreach ($this->view->headLink()->getContainer() as $offset => $item) {
-            if ('stylesheet' != $item->rel) continue;
-
+            if ('stylesheet' != $item->rel) {
+                $nonStylesheetLinks[] = $this->_itemToString($item);
+                continue;
+            }
+            
             $media = $item->media;
             $conditionalStylesheet = $item->conditionalStylesheet;
 
@@ -105,6 +118,8 @@ class Pike_View_Helper_MinifyHeadLink extends Zend_View_Helper_HtmlElement
             $collection = array();
         }
 
+        $output = implode("\n", $nonStylesheetLinks) . "\n" . $output;
+        
         return $output;
     }
 
@@ -180,5 +195,48 @@ class Pike_View_Helper_MinifyHeadLink extends Zend_View_Helper_HtmlElement
         }
 
         return $output;
+    }
+    
+    /**
+     * Create HTML link element from data item
+     *
+     * @param  stdClass $item
+     * @return string
+     */
+    protected function _itemToString(stdClass $item)
+    {
+        $attributes = (array) $item;
+        $link       = '<link ';
+
+        foreach ($this->_itemKeys as $itemKey) {
+            if (isset($attributes[$itemKey])) {
+                if(is_array($attributes[$itemKey])) {
+                    foreach($attributes[$itemKey] as $key => $value) {
+                        $link .= sprintf('%s="%s" ', $key, $this->view->escape($value));
+                    }
+                } else {
+                    $link .= sprintf('%s="%s" ', $itemKey, $this->view->escape($attributes[$itemKey]));
+                }
+            }
+        }
+
+        if ($this->view instanceof Zend_View_Abstract) {
+            $link .= ($this->view->doctype()->isXhtml()) ? '/>' : '>';
+        } else {
+            $link .= '/>';
+        }
+
+        if (($link == '<link />') || ($link == '<link >')) {
+            return '';
+        }
+
+        if (isset($attributes['conditionalStylesheet'])
+            && !empty($attributes['conditionalStylesheet'])
+            && is_string($attributes['conditionalStylesheet']))
+        {
+            $link = '<!--[if ' . $attributes['conditionalStylesheet'] . ']> ' . $link . '<![endif]-->';
+        }
+
+        return $link;
     }
 }
