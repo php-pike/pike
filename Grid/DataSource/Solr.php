@@ -68,10 +68,11 @@ class Pike_Grid_DataSource_Solr extends Pike_Grid_DataSource_Abstract implements
      * 
      * @return SolrQuery
      */
-    public function getQuery() {
+    public function getQuery()
+    {
         return $this->_query;
     }
-    
+
     /**
      * Initializes default behavior for sorting, filtering, etc.
      *
@@ -79,9 +80,9 @@ class Pike_Grid_DataSource_Solr extends Pike_Grid_DataSource_Abstract implements
      */
     private function _initEvents()
     {
-        $onOrder = function(array $params, Pike_Grid_DataSource_Interface $dataSource) {                    
+        $onOrder = function(array $params, Pike_Grid_DataSource_Interface $dataSource) {
                     $sidx = $params['sidx'];
-                    switch(strtoupper($params['sord'])) {
+                    switch (strtoupper($params['sord'])) {
                         case 'ASC' :
                             $sord = SolrQuery::ORDER_ASC;
                             break;
@@ -89,7 +90,7 @@ class Pike_Grid_DataSource_Solr extends Pike_Grid_DataSource_Abstract implements
                             $sord = SolrQuery::ORDER_DESC;
                             break;
                     }
-                                        
+
                     $query = $dataSource->getQuery();
                     $query->addSortField($sidx, $sord);
                 };
@@ -98,16 +99,20 @@ class Pike_Grid_DataSource_Solr extends Pike_Grid_DataSource_Abstract implements
 
         $onFilter = function(array $params, Pike_Grid_DataSource_Interface $dataSource) {
                     $filters = json_decode($params['filters']);
-                    
+
                     $query = $dataSource->getQuery();
                     $queryString = '';
-                    
-                    foreach($filters->rules as $field) {
-                        $queryString .= $field->field . ':' . $field->data . ' AND ';
+
+                    foreach ($filters->rules as $field) {
+                        if(!empty($field->data)) {
+                            $queryString .= $field->field . ':' . SolrUtils::escapeQueryChars($field->data) . ' AND ';
+                        }
                     }
-                    
-                    $queryString = substr($queryString, 0, strlen($queryString) - 4);                    
-                    $query->setQuery($queryString);
+
+                    if(strlen($queryString) > 0) {
+                        $queryString = substr($queryString, 0, strlen($queryString) - 4);
+                        $query->setQuery($queryString);
+                    }
                 };
 
         $this->_onFilter = $onFilter;
@@ -122,11 +127,11 @@ class Pike_Grid_DataSource_Solr extends Pike_Grid_DataSource_Abstract implements
     private function _setColumns()
     {
         $this->columns = new Pike_Grid_DataSource_Columns();
-        
-        foreach($this->_query->getFields() as $field) {
-            $this->columns->add($field, null, $field);        
+
+        foreach ($this->_query->getFields() as $field) {
+            $this->columns->add($field, null, $field);
         }
-        
+
         //not finished
     }
 
@@ -183,10 +188,10 @@ class Pike_Grid_DataSource_Solr extends Pike_Grid_DataSource_Abstract implements
     public function getJson($encode = true, array $excludeColumns = array())
     {
         $offset = $this->_limitPerPage * ($this->_params['page'] - 1);
-        
+
         $this->_query->setStart($offset);
         $this->_query->setRows($this->_limitPerPage);
-        
+
         /**
          * Run  events
          */
@@ -194,17 +199,17 @@ class Pike_Grid_DataSource_Solr extends Pike_Grid_DataSource_Abstract implements
             $onSort = $this->_onOrder;
             $onSort($this->_params, $this);
         }
-        
+
         if (array_key_exists('filters', $this->_params) && (array_key_exists('_search', $this->_params)
-            && $this->_params['_search'] == true)) {
+                && $this->_params['_search'] == true)) {
 
             $onFilter = $this->_onFilter;
             $onFilter($this->_params, $this);
-        }        
-        
+        }
+
         $response = $this->_client->query($this->_query);
         $resultResponse = $response->getResponse()->response;
-        
+
         $count = $resultResponse->numFound;
         $result = $resultResponse->docs;
 
@@ -214,20 +219,22 @@ class Pike_Grid_DataSource_Solr extends Pike_Grid_DataSource_Abstract implements
         $this->_data['records'] = $count;
         $this->_data['rows'] = array();
 
-        foreach ($result as $row) {
-            $data = array();
-            
-            /**
-             * converting is neccasary because of the abstract layer which does 
-             * pure array stuff 
-             */
-            $props = $row->getPropertyNames();
-            foreach($props as $prop) {
-                $prop = trim($prop);
-                $data[$prop] = $row[$prop];
+        if (false !== $result) {
+            foreach ($result as $row) {
+                $data = array();
+
+                /**
+                 * converting is neccasary because of the abstract layer which does 
+                 * pure array stuff 
+                 */
+                $props = $row->getPropertyNames();
+                foreach ($props as $prop) {
+                    $prop = trim($prop);
+                    $data[$prop] = $row[$prop];
+                }
+
+                $this->_renderRow($data, $excludeColumns);
             }
-            
-            $this->_renderRow($data, $excludeColumns);
         }
 
         return $encode === true ? json_encode($this->_data) : $this->_data;
