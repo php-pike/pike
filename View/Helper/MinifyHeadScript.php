@@ -51,6 +51,11 @@ class Pike_View_Helper_MinifyHeadScript extends Zend_View_Helper_FormElement
      *   <script type="text/javascript" src="/js/file5.js"></script>
      *   <script type="text/javascript" src="/min/?f=js/file6.js,js/file7.js"></script>
      *
+     * If you specifiy "minify.js.revision = 10" in your application.ini, than &10 will be appended
+     * and Minify will automatically set expiration headers to 1 year in the future. Every time
+     * you make changes to your JavaScript files you'll have to raise the revision number with 1
+     * so that the browser for every user loads the new JavaScript files.
+     * 
      * @return string
      */
     public function minifyHeadScript()
@@ -60,8 +65,8 @@ class Pike_View_Helper_MinifyHeadScript extends Zend_View_Helper_FormElement
             return $this->view->headScript();
         }
 
-        if (isset(Zend_Registry::get('config')->minify->scriptExcludes)) {
-            $minifyScriptExcludes = Zend_Registry::get('config')->minify->scriptExcludes->toArray();
+        if (isset($config->minify->scriptExcludes)) {
+            $minifyScriptExcludes = $config->minify->scriptExcludes->toArray();
         } else {
             $minifyScriptExcludes = array();
         }
@@ -173,11 +178,18 @@ class Pike_View_Helper_MinifyHeadScript extends Zend_View_Helper_FormElement
      */
     protected function _renderTag($path, array $attributes = array())
     {
+        $config = Zend_Registry::get('config');
+        
+        $path = $this->view->escape($path);
+        if (isset($config->minify->js->revision)) {
+            $path .= '&' . $config->minify->js->revision;
+        }
+                
         $type = isset($attributes['type']) ? $attributes['type'] : 'text/javascript';
         unset($attributes['type']);
         unset($attributes['src']);
 
-        return '<script type="' . $type . '" src="' . $this->view->escape($path) . '"'
+        return '<script type="' . $type . '" src="' . $path . '"'
             . $this->_htmlAttribs($attributes)
             . '></script>' . "\n";
     }

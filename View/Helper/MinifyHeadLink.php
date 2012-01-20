@@ -60,6 +60,11 @@ class Pike_View_Helper_MinifyHeadLink extends Zend_View_Helper_HtmlElement
      *   <link rel="stylesheet" media="screen" src="/js/file5.js" />
      *   <link rel="stylesheet" media="screen" src="/min/?f=css/file6.css,css/file7.css" />
      *
+     * If you specifiy "minify.css.revision = 10" in your application.ini, than &10 will be appended
+     * and Minify will automatically set expiration headers to 1 year in the future. Every time
+     * you make changes to your CSS files you'll have to raise the revision number with 1
+     * so that the browser for every user loads the new CSS files.
+     * 
      * @return string
      */
     public function minifyHeadLink()
@@ -69,8 +74,8 @@ class Pike_View_Helper_MinifyHeadLink extends Zend_View_Helper_HtmlElement
             return $this->view->headLink();
         }
 
-        if (isset(Zend_Registry::get('config')->minify->linkExcludes)) {
-            $minifyLinkExcludes = Zend_Registry::get('config')->minify->linkExcludes->toArray();
+        if (isset($config->minify->linkExcludes)) {
+            $minifyLinkExcludes = $config->minify->linkExcludes->toArray();
         } else {
             $minifyLinkExcludes = array();
         }
@@ -181,8 +186,15 @@ class Pike_View_Helper_MinifyHeadLink extends Zend_View_Helper_HtmlElement
     ) {
         $output = null;
 
+        $config = Zend_Registry::get('config');
+        
+        $path = $this->view->escape($path);
+        if (isset($config->minify->css->revision)) {
+            $path .= '&' . $config->minify->css->revision;
+        }
+        
         $link = '<link'
-            . ' href="' . $this->view->escape($path) . '"'
+            . ' href="' . $path . '"'
             . ' media="' . $this->view->escape($media) .'"'
             . ' rel="stylesheet" type="text/css"'
             . $this->_htmlAttribs($attributes) . $this->getClosingBracket()
