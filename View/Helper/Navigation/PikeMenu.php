@@ -176,4 +176,62 @@ class Pike_View_Helper_Navigation_PikeMenu extends Zend_View_Helper_Navigation_M
 
         return $this;
     }
+    
+    /**
+     * Returns an HTML string containing an 'a' element for the given page if
+     * the page's href is not empty, and a 'span' element if it is empty
+     *
+     * Overrides {@link Zend_View_Helper_Navigation_Abstract::htmlify()}.
+     * 
+     * Support added for rel external and nofollow.
+     * @link http://framework.zend.com/issues/browse/ZF-9300
+     *
+     * @param  Zend_Navigation_Page $page  page to generate HTML for
+     * @return string                      HTML string for the given page
+     */
+    public function htmlify(Zend_Navigation_Page $page)
+    {
+        // get label and title for translating
+        $label = $page->getLabel();
+        $title = $page->getTitle();
+
+        // translate label and title?
+        if ($this->getUseTranslator() && $t = $this->getTranslator()) {
+            if (is_string($label) && !empty($label)) {
+                $label = $t->translate($label);
+            }
+            if (is_string($title) && !empty($title)) {
+                $title = $t->translate($title);
+            }
+        }
+
+        // get attribs for element
+        $attribs = array(
+            'id'     => $page->getId(),
+            'title'  => $title,
+            'class'  => $page->getClass()
+        );
+
+        // does page have a href?
+        if ($href = $page->getHref()) {
+            $element = 'a';
+            $attribs['href'] = $href;
+            $attribs['target'] = $page->getTarget();
+            $attribs['accesskey'] = $page->getAccessKey();
+            
+            // Check if there is a 'nofollow' or 'external' relation
+            if ('true' == $page->get('relNofollow')) {
+                $attribs['rel'] = isset($attribs['rel']) ? $attribs['rel'] . ' nofollow' : 'nofollow';
+            }
+            if ('true' == $page->get('relExternal')) {
+                $attribs['rel'] = isset($attribs['rel']) ? $attribs['rel'] . ' external' : 'external';
+            }
+        } else {
+            $element = 'span';
+        }
+
+        return '<' . $element . $this->_htmlAttribs($attribs) . '>'
+             . $this->view->escape($label)
+             . '</' . $element . '>';
+    }
 }
