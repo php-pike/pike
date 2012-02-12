@@ -26,15 +26,14 @@
  * neccasary javascript and JSON for drawing a grid with jqGrid.
  *
  * Dependecies: jqGrid, Zend Framework
- * 
+ *
  * @category   PiKe
  * @copyright  Copyright (C) 2011 by Pieter Vogelaar (pietervogelaar.nl) and Kees Schepers (keesschepers.nl)
  * @license    MIT
  */
-class Pike_Grid_DataSource_Array
-    extends Pike_Grid_DataSource_Abstract
-    implements Pike_Grid_DataSource_Interface
+class Pike_Grid_DataSource_Array extends Pike_Grid_DataSource_Abstract implements Pike_Grid_DataSource_Interface
 {
+
     /**
      * @var array
      */
@@ -123,7 +122,20 @@ class Pike_Grid_DataSource_Array
     public function getJson($encode = true, array $excludeColumns = array())
     {
         $offset = $this->_limitPerPage * ($this->_params['page'] - 1);
-        $count = count($this->_source);
+        $source = $this->_source;
+
+        if (isset($this->_params['filters'])
+            && (!isset($this->_params['_search']) || 'true' == $this->_params['_search'])
+        ) {
+            $filters = json_decode($this->_params['filters'], true);
+            $source = $this->_filter($source, $filters);
+        }
+
+        if (isset($this->_params['sord'])) {
+            $source = $this->_sort($source);
+        }
+
+        $count = count($source);
 
         $this->_data = array();
         $this->_data['page'] = (int) $this->_params['page'];
@@ -131,10 +143,65 @@ class Pike_Grid_DataSource_Array
         $this->_data['records'] = $count;
         $this->_data['rows'] = array();
 
-        foreach ($this->_source as $row) {
+        foreach (array_slice($source, $offset, $this->_limitPerPage) as $row) {
             $this->_renderRow($row, $excludeColumns);
         }
 
         return $encode === true ? json_encode($this->_data) : $this->_data;
+    }
+
+    /**
+     * Filters the data by the specified filter(s)
+     *
+     * @param  array  $source
+     * @param  array  $filters
+     * @param  string $filterType (start or contains)
+     * @return array
+     */
+    protected function _filter(array $source, array $filters, $filterType = 'start')
+    {
+        $rules = $filters['rules'];
+        $groupOp = $filters['groupOp'];
+        $filterType = 'contains' == $filterType ? 'contains' : 'start';
+
+        $columns = array();
+        foreach ($rules as $rule) {
+            $columns[] = array('field' => $rule['field'], 'data' => $rule['data']);
+        }
+
+        $results = array();
+
+        foreach ($columns as $i => $column) {
+            foreach ($source as $key => $value) {
+                $strpos = stripos($value[$column['field']], $column['data']);
+                if (($filterType == 'start' && $strpos === 0 || $filterType == 'contains' && $strpos !== false)
+                    && ($groupOp != 'AND' || $i == 0)) {
+                    if (!isset($results[$key])) {
+                        $results[$key] = $value;
+                    }
+                } elseif (($filterType == 'start' && $strpos !== 0 || $filterType == 'contains' && $strpos === false)
+                    && $groupOp == 'AND' && isset($results[$key])) {
+                    unset($results[$key]);
+                }
+            }
+        }
+
+        return $results;
+    }
+
+    protected function _sort($source)
+    {
+        $sidx = $this->_params['sidx'];
+        $sord = 'desc' == $this->_params['sord'] ? SORT_DESC : SORT_ASC;
+
+        $indexArray = array();
+        if ('' != $sidx) {
+            foreach ($source as $key => $row) {
+                $indexArray[$key] = $row[$sidx];
+            }
+            array_multisort($indexArray, $sord, $source);
+        }
+
+        return $source;
     }
 }

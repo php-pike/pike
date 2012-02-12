@@ -78,8 +78,10 @@ class Pike_Grid_DataSource_Doctrine
     {
         $onOrder = function(array $params, Pike_Grid_DataSource_Interface $dataSource) {
             $columns = $dataSource->columns->getColumns();
-            $sidx = $params['sidx'];
-            $sord = (in_array(strtoupper($params['sord']), array('ASC','DESC')) ? strtoupper($params['sord']) : 'ASC');
+
+            $sidx = $dataSource->getSidx($params['sidx']);
+
+            $sord = (in_array(strtoupper($params['sord']), array('ASC', 'DESC')) ? strtoupper($params['sord']) : 'ASC');
 
             return array(
                 \Doctrine\ORM\Query::HINT_CUSTOM_TREE_WALKERS => array('Pike_Grid_DataSource_Doctrine_OrderByWalker'),
@@ -92,6 +94,14 @@ class Pike_Grid_DataSource_Doctrine
 
         $onFilter = function(array $params, Pike_Grid_DataSource_Interface $dataSource) {
             $filters = json_decode($params['filters']);
+            foreach ($filters->rules as $index => $rule) {
+                $fieldName = $dataSource->getFieldName($rule->field);
+                if ($fieldName) {
+                    $rule->field = $fieldName;
+                } else {
+                    unset($filters->rules[$index]);
+                }
+            }
 
             return array(
                 \Doctrine\ORM\Query::HINT_CUSTOM_TREE_WALKERS => array('Pike_Grid_DataSource_Doctrine_WhereLikeWalker'),
@@ -148,17 +158,29 @@ class Pike_Grid_DataSource_Doctrine
 
             /* @var $expr Doctrine\ORM\Query\AST\PathExpression */
             if ($expr instanceof Doctrine\ORM\Query\AST\PathExpression) {
-                $alias = $expr->identificationVariable;
-                $name = ($selExpr->fieldIdentificationVariable === null) ? $expr->field : $selExpr->fieldIdentificationVariable;
-                $label = ($selExpr->fieldIdentificationVariable === null) ? $name : $selExpr->fieldIdentificationVariable;
-                $index = (strlen($alias) > 0 ? ($alias . '.') : '') . $expr->field;
+                // Check if field alias is available
+                if (null !== $selExpr->fieldIdentificationVariable) {
+                    // Set field alias as column name
+                    $name = $selExpr->fieldIdentificationVariable;
+
+                    // Set field alias as label
+                    $label = $selExpr->fieldIdentificationVariable;
+                } else {
+                    // Set field name as column name
+                    $name = $expr->field;
+
+                    // Set field name as label
+                    $label = $expr->field;
+                }
+
+                $sidx = $name;
             } else {
                 $name = $selExpr->fieldIdentificationVariable;
                 $label = $name;
-                $index = null;
+                $sidx = null;
             }
 
-            $this->columns->add($name, $label, $index);
+            $this->columns->add($name, $label, $sidx);
         }
     }
 
@@ -200,10 +222,7 @@ class Pike_Grid_DataSource_Doctrine
             $orderByItem = $orderByClause->orderByItems[0];
 
             if ($orderByItem->expression instanceof \Doctrine\ORM\Query\AST\PathExpression) {
-                $alias = $orderByItem->expression->identificationVariable;
-                $field = $orderByItem->expression->field;
-
-                $data['index'] = (strlen($alias) > 0 ? $alias . '.' : '') . $field;
+                $data['index'] = $orderByItem->expression->field;
                 $data['direction'] = $orderByItem->type;
 
                 return $data;
@@ -223,7 +242,9 @@ class Pike_Grid_DataSource_Doctrine
         $hints = array();
 
         // Set sorting if defined
-        if (array_key_exists('sidx', $this->_params) && strlen($this->_params['sidx']) > 0) {
+        if (array_key_exists('sidx', $this->_params) && strlen($this->_params['sidx']) > 0
+            && $this->getSidx($this->_params['sidx'])
+        ) {
             $onSort = $this->_onOrder;
             $hints = array_merge_recursive($hints, $onSort($this->_params, $this));
         }
@@ -278,5 +299,49 @@ class Pike_Grid_DataSource_Doctrine
         }
 
         return $encode === true ? json_encode($this->_data) : $this->_data;
+    }
+
+    /**
+     * Returns the actual field name for the specified column name (field alias,
+     * actual field name, or sidx)
+     *
+     * @param  string $sidx
+     * @return string|boolean
+     */
+    public function getSidx($sidx)
+    {
+        if (strpos($sidx, '.') === false) {
+            $sidx = $this->getFieldName($sidx);
+        }
+        return $sidx;
+    }
+
+    /**
+     * Returns the actual field name for the specified column name (field alias or actual field name)
+     *
+     * The field alias is used if available, otherwise the composition
+     * of "identification variable" and "field".
+     *
+     * @param  string $alias
+     * @return string|boolean
+     */
+    public function getFieldName($alias)
+    {
+        $field = false;
+
+        /* @var $selExpr Doctrine\ORM\Query\AST\SelectExpression */
+        foreach ($this->_query->getAST()->selectClause->selectExpressions as $selExpr) {
+            $expr = $selExpr->expression;
+
+            // Check if field alias exists
+            if ($alias == $selExpr->fieldIdentificationVariable) {
+                $field = $expr->identificationVariable . '.' . $expr->field;
+                break;
+            } elseif ($alias == $expr->field && '' == $selExpr->fieldIdentificationVariable) {
+                $field = $expr->identificationVariable . '.' . $expr->field;
+            }
+        }
+
+        return $field;
     }
 }

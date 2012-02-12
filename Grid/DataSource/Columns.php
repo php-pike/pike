@@ -32,7 +32,7 @@ class Pike_Grid_DataSource_Columns extends ArrayObject
 {
     /**
      * If specified, only these columns will be visible in the grid
-     * 
+     *
      * @var array
      */
     public $showColumns = array();
@@ -127,7 +127,7 @@ class Pike_Grid_DataSource_Columns extends ArrayObject
 
             foreach ($columns as &$column) {
                 if (!in_array($column['name'], $this->showColumns)) {
-                    $column['position'] = 0;
+                    $column['position'] = -1;
                 } else {
                     $column['position'] = array_search($column['name'], $this->showColumns);
                 }
@@ -135,7 +135,7 @@ class Pike_Grid_DataSource_Columns extends ArrayObject
 
             $this->exchangeArray($columns);
         }
-        
+
         $this->uasort(function($first, $second) {
             if (isset($first['position']) && isset($second['position'])) {
                 if ($first['position'] > $second['position']) {

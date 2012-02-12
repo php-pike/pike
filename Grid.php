@@ -36,58 +36,63 @@ class Pike_Grid
      * @var string
      */
     protected $_id;
-    
+
+    /**
+     * @var string
+     */
+    protected $_classes;
+
     /**
      * @var string
      */
     protected $_pagerId;
-    
+
     /**
      * @var Pike_Grid_DataSource_Interface
      */
     protected $_dataSource;
-    
+
     /**
      * Amount of rows per 'page' default is 50
      *
      * @var integer
      */
     protected $_recordsPerPage = 50;
-    
+
     /**
      * @var string
      */
     protected $_width = 'auto';
-    
+
     /**
      * @var string
      */
     protected $_height = '100%';
-    
+
     /**
      * @var string
      */
     protected $_url;
-    
+
     /**
      * @var array
      */
     protected $_attributes = array();
-    
+
     /**
      * Grid methods that will be executed after the grid is constructed on the client
      *
      * @var array
      */
     protected $_methods = array();
-    
+
     /**
      * If filled, only those columns will be visible in the grid
      *
      * @var array
      */
     protected $_showColumns = array();
-    
+
     /**
      * @var string
      */
@@ -178,8 +183,22 @@ class Pike_Grid
     }
 
     /**
+     * Sets the classes in the grid class attribute
+     *
+     * Seperate multiple classes with a whitespace
+     *
+     * @param string $classes
+     * @return Pike_Grid
+     */
+    public function setClasses($classes)
+    {
+        $this->_classes = $classes;
+        return $this;
+    }
+
+    /**
      * Returns an attribute
-     * 
+     *
      * @param  string $attribute
      * @return mixed
      */
@@ -405,7 +424,8 @@ EOF;
      */
     public function getHtml()
     {
-        return '<table id="' . $this->_id . '"></table><div id="' . $this->_pagerId . '"></div>';
+        return '<table id="' . $this->_id . '" class="' . $this->_classes . '"></table>'
+            . '<div id="' . $this->_pagerId . '"></div>';
     }
 
     /**

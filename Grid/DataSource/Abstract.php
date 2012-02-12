@@ -117,7 +117,7 @@ class Pike_Grid_DataSource_Abstract
         if (isset($this->columns[$column])) {
             $this->_identifierColumn = $this->columns[$column];
         } else {
-            throw new Pike_Exception('Cannot set identifier to a unknown column "' . $column . '"');
+            throw new Pike_Exception('Cannot set identifier to an unknown column "' . $column . '"');
         }
 
         return $this;
@@ -157,7 +157,7 @@ class Pike_Grid_DataSource_Abstract
     /**
      * Resets the entire list of columns to be excluded from escaping. This will set
      * the datasource to normal behavior.
-     * 
+     *
      * @return Pike_Grid_DataSource_Abstract
      */
     public function resetExcludeColumnsFromEscaping()
@@ -177,6 +177,16 @@ class Pike_Grid_DataSource_Abstract
     {
         $this->_params = $params;
         return $this;
+    }
+
+    /**
+     * Returns the parameters which probably come from jQuery
+     *
+     * @return array
+     */
+    public function getParameters()
+    {
+        return $this->_params;
     }
 
     /**
