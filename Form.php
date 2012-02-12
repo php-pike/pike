@@ -123,16 +123,23 @@ class Pike_Form extends Zend_Form
     /**
      * Validates the form
      *
-     * @param  array  $data
+     * @param  array            $data
+     * @param  callable|boolean $callback
      * @return boolean
      */
-    public function isValid($data, $namespace = null)
+    public function isValid($data, $callback = null)
     {
         $isValid = parent::isValid($data);
         if (!$isValid) {
-            $this->_addErrorMessagesToFlashMessenger($this);
-            $this->_getMessagesFromSubForms($this->getSubForms(), $this);
-            $this->_addErrorClassToInvalidElements($this);
+            if (false !== $callback) {
+                if (null !== $callback && is_callable($callback)) {
+                    return call_user_func($callback, $isValid);
+                } else {
+                    $this->_addErrorMessagesToFlashMessenger($this);
+                    $this->_getMessagesFromSubForms($this->getSubForms(), $this);
+                    $this->_addErrorClassToInvalidElements($this);
+                }
+            }
 
             return false;
         } else {
@@ -335,9 +342,10 @@ class Pike_Form extends Zend_Form
      * IMPORTANT: If you want to use this method pass the option csrfToken with value FALSE to the
      * constructor of this form.
      *
-     * @param string $namespace
+     * @param string  $namespace
+     * @param boolean $regenerate
      */
-    public function setExpirationTimeOnlyCsrfToken($namespace = null)
+    public function setExpirationTimeOnlyCsrfToken($namespace = null, $regenerate = false)
     {
         $this->removeElement('csrfToken');
 
@@ -355,6 +363,10 @@ class Pike_Form extends Zend_Form
 
         $namespace = new Zend_Session_Namespace($namespaceName);
         $namespace->setExpirationSeconds($this->_csrfTimeout);
+
+        if (true === $regenerate) {
+            $namespace->unsetAll();
+        }
 
         $csrfToken = $namespace->csrfToken;
         if (null === $csrfToken) {
