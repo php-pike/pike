@@ -79,10 +79,15 @@ class Pike_Form_Decorator_Composite
     /**
      * Builds the form element label
      *
+     * @param  string $format
      * @return string
      */
-    public function buildLabel()
+    public function buildLabel($format = null)
     {
+        if (null === $format) {
+            $format = '%n:';
+        }
+
         $element = $this->_element;
         $label = $element->getLabel();
         if (null === $label || !$this->_renderLabel) {
@@ -101,11 +106,14 @@ class Pike_Form_Decorator_Composite
         }
 
         if ($element->isRequired()) {
-            $labelTag = sprintf('<label id="label-%s" class="required" for="form-element-%s">%s:'
+            $labelTag = sprintf('<label id="label-%s" class="required" for="form-element-%s">'
+                . str_replace('%n', '%s', $format)
                 . '<span class="asterisk">*</span></label>',
                 $belongsToPrefix . $element->getName(), $belongsToPrefix . $element->getName(), $label);
         } else {
-            $labelTag = sprintf('<label id="label-%s" for="form-element-%s">%s:</label>',
+            $labelTag = sprintf('<label id="label-%s" for="form-element-%s">'
+                . str_replace('%n', '%s', $format)
+                . '</label>',
                 $belongsToPrefix . $element->getName(), $belongsToPrefix . $element->getName(), $label);
         }
 
@@ -252,7 +260,7 @@ class Pike_Form_Decorator_Composite
         $seperator   = $this->getSeparator();
         $placement   = $this->getPlacement();
         $label       = $this->buildLabel();
-        
+
         if ($element instanceof Zend_Form_Element_Captcha) {
             $input = $content;
             $content = '';
@@ -300,15 +308,16 @@ class Pike_Form_Decorator_Composite
      * Renders the label for the specified element
      *
      * @param  Zend_Form_Element $element
+     * @param  string            $format
      * @return string
      */
-    public function renderLabel(Zend_Form_Element $element)
+    public function renderLabel(Zend_Form_Element $element, $format = null)
     {
         if (!$this->_setElement($element)) {
             return false;
         }
 
-        return $this->buildLabel();
+        return $this->buildLabel($format);
     }
 
     /**
