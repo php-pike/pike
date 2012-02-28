@@ -47,6 +47,13 @@ class Pike_Grid_DataSource_Solarium
     protected $_client;
 
     /**
+     * Multi value field delimiter
+     *
+     * @var string
+     */
+    public $multiValueFieldDelimiter = ', ';
+
+    /**
      * Constructor
      *
      * @param Solarium_Client
@@ -255,13 +262,24 @@ class Pike_Grid_DataSource_Solarium
     protected function _renderResult(Solarium_Result_Select $result, array $excludeColumns = array())
     {
         if ($result) {
+            /**
+             * Solr only returns fields for each document that are not empty unlike a database.
+             * To still get the database behaviour we take the specified columns as base and fill
+             * it with values that the document contains.
+             */
+            $columnNames = array_keys($this->columns->getColumns());
+            $columns = array();
+            foreach ($columnNames as $columnName) {
+                $columns[$columnName] = null;
+            }
+
             foreach ($result as $document) {
-                $data = array();
+                $data = $columns;
 
                 foreach ($document as $field => $value) {
-                    // Convert multi value fields to a comma separated
+                    // Convert multi value fields to a string with the specified delimiter
                     if (is_array($value)) {
-                        $value = implode(', ', $value);
+                        $value = implode($this->multiValueFieldDelimiter, $value);
                     }
 
                     $data[$field] = $value;
