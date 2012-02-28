@@ -99,6 +99,20 @@ class Pike_Grid
     protected $_rowClickEvent;
 
     /**
+     * @var boolean
+     */
+    protected $_historyEnabled = false;
+
+    /**
+     * The JavaScript class that creates the grid on the client side
+     *
+     * @var string
+     */
+    protected $_javaScriptClass = 'jqGrid';
+
+    /**
+     * Constructor
+     *
      * @param Pike_Grid_DataSource_Interface $dataSource
      * @param array                          $options
      */
@@ -118,7 +132,6 @@ class Pike_Grid
     }
 
     /**
-     *
      * Pike_Grid needs to know the data source in order to generate the initial column names etc.
      *
      * @param  Pike_Grid_DataSource_Interface $dataSource
@@ -185,7 +198,7 @@ class Pike_Grid
     /**
      * Sets the classes in the grid class attribute
      *
-     * Seperate multiple classes with a whitespace
+     * Seperate multiple classes with a whitespace.
      *
      * @param string $classes
      * @return Pike_Grid
@@ -212,7 +225,7 @@ class Pike_Grid
     }
 
     /**
-     * Sets a grid attribute
+     * Sets an attribute
      *
      * @param  string $attribute
      * @param  string $value
@@ -222,6 +235,30 @@ class Pike_Grid
     {
         $this->_attributes[$attribute] = $value;
         return $this;
+    }
+
+    /**
+     * Prepends an attribute
+     *
+     * @param  string $attribute
+     * @param  string $value
+     * @return Pike_Grid
+     */
+    public function prependAttribute($attribute, $value)
+    {
+        $this->_mergeAttribute($attribute, $value, 'prepend');
+    }
+
+    /**
+     * Appends an attribute
+     *
+     * @param  string $attribute
+     * @param  string $value
+     * @return Pike_Grid
+     */
+    public function appendAttribute($attribute, $value)
+    {
+        $this->_mergeAttribute($attribute, $value, 'append');
     }
 
     /**
@@ -270,6 +307,27 @@ class Pike_Grid
     public function setCaption($caption)
     {
         return $this->setAttribute('caption', $caption);
+    }
+
+    /**
+     * Sets the JavaScript class that creates the grid on the client side
+     *
+     * @param string $name
+     */
+    public function setJavaScriptClass($name)
+    {
+        $this->_javaScriptClass = $name;
+        return $this;
+    }
+
+    /**
+     * Returns the JavaScript class that creates the grid on the client side
+     *
+     * @return string
+     */
+    public function getJavaScriptClass()
+    {
+        return $this->_javaScriptClass;
     }
 
     /**
@@ -435,7 +493,14 @@ EOF;
      */
     public function getJavascript($pretty = false)
     {
-        $settings = array(
+       if ($this->_historyEnabled) {
+           // Set history class if history is enabled and no other than the default class is defined
+           if ('jqGrid' == $this->getJavaScriptClass()) {
+               $this->setJavaScriptClass('jqGridHistory');
+           }
+       }
+
+       $settings = array(
             'url'         => $this->_url,
             'datatype'    => 'json',
             'mtype'       => 'post',
@@ -464,6 +529,44 @@ EOF;
             $settings['sortorder'] = strtolower($defaultSorting['direction']);
         }
 
+        $output = $this->_render($settings, $pretty);
+        return $output;
+    }
+
+    /**
+     * Enables history
+     *
+     * NOTE: This requires three jquery plugins (also included in the assets folder)
+     *
+     * - jQuery BBQ: Back Button & Query Library - v1.2.1+ http://github.com/cowboy/jquery-bbq
+     * - assets/js/jquery.jq-grid.pike.js
+     */
+    public function enableHistory()
+    {
+        $this->_historyEnabled = true;
+        return $this;
+    }
+
+    /**
+     * Disables history
+     */
+    public function disableHistory()
+    {
+        $this->_historyEnabled = false;
+        return $this;
+    }
+
+    /**
+     * Renders the grid structure
+     *
+     * @param  array   $settings
+     * @param  boolean $pretty
+     * @return string
+     */
+    protected function _render(array $settings, $pretty = false)
+    {
+        $output = '';
+
         $settings = array_merge($settings, $this->_attributes);
 
         if (isset($settings['width']) && '' != $settings['width']) {
@@ -471,13 +574,12 @@ EOF;
         }
 
         $json = Zend_Json::encode($settings, false, array('enableJsonExprFinder' => true));
-
         if ($pretty) {
             $json = Zend_Json::prettyPrint($json);
         }
 
-        $output = 'var lastsel;' . PHP_EOL;
-        $output .= '$("#' . $this->_id . '").jqGrid(' . $json . ');' . PHP_EOL;
+        $output .= 'var lastsel;' . PHP_EOL;
+        $output .= '$("#' . $this->_id . '").' . $this->getJavaScriptClass() . '(' . $json . ');' . PHP_EOL;
 
         // Set possible specified row click event
         if (null !== $this->_rowClickEvent) {
@@ -488,6 +590,84 @@ EOF;
         $output .= PHP_EOL . $this->_fixCursorForNonSortableColumns() . PHP_EOL;
 
         return $output;
+    }
+
+    /**
+     * Merges the specified attribute
+     *
+     * @param  string $attribute
+     * @param  mixed  $value
+     * @param  string $method "append" (default) or "prepend"
+     * @return Pike_Grid
+     */
+    protected function _mergeAttribute($attribute, $value, $method = 'append')
+    {
+        if (!isset($this->_attributes[$attribute])) {
+            $this->setAttribute($attribute, $value);
+        } else {
+            $currentValue = $this->_attributes[$attribute];
+
+            if (($currentValue instanceof Zend_Json_Expr && strpos($currentValue, 'function') !== false)
+                || ($value instanceof Zend_Json_Expr && strpos($value, 'function') !== false)
+            ) {
+                $currentParts = $this->_getFunctionParts($currentValue);
+                $parts = $this->_getFunctionParts($value);
+
+                if (null === $currentParts['header']) {
+                    $currentParts['header'] = $parts['header'];
+                    $currentParts['footer'] = $parts['footer'];
+                }
+
+                switch ($method) {
+                    case 'prepend':
+                        $value = $currentParts['header'] . "\n" . $parts['content'] . "\n"
+                            . $currentParts['content'] . $currentParts['footer'];
+                        break;
+                    case 'append':
+                        $value = $currentParts['header'] . "\n" . $currentParts['content'] . "\n"
+                            . $parts['content'] . $currentParts['footer'];
+                        break;
+                }
+
+                $value = new Zend_Json_Expr($value);
+            } else {
+                // Value is scalar like string or integer
+                if ('prepend' == $method) {
+                    $value = $value . $currentValue;
+                } elseif ('append' == $method) {
+                    $value = $currentValue . $value;
+                }
+            }
+
+            $this->setAttribute($attribute, $value);
+        }
+
+        return $this;
+    }
+
+    /**
+     * Returns the specified function in parts
+     *
+     * @param  string|Zend_Json_Expr $function
+     * @return string
+     */
+    protected function _getFunctionParts($function)
+    {
+        $function = (string) $function;
+        $function = str_replace("\n", ' ', $function);
+
+        $matches = array();
+        preg_match('/(?:function)(.*)(?:{)(.*)/', $function, $matches);
+
+        if (!isset($matches[2])) {
+            return array('header' => null, 'content' => rtrim($function, '; ') . ';', 'footer' => null);
+        } else {
+            return array(
+                'header' => 'function' . $matches[1] . '{',
+                'content' => trim(rtrim($matches[2], '}; ')) . ';',
+                'footer' => '}'
+            );
+        }
     }
 
     /**
