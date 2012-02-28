@@ -344,4 +344,12 @@ class Pike_Grid_DataSource_Doctrine
 
         return $field;
     }
+
+    /**
+     * @return Doctrine\ORM\Query
+     */
+    public function getQuery()
+    {
+        return $this->_query;
+    }
 }
