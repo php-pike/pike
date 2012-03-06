@@ -489,7 +489,8 @@ EOF;
     /**
      * Returns a jqGrid declaration with all required settings
      *
-     * @param boolean $pretty Wether to print the javascript readable
+     * @param  boolean $pretty Wether to print the javascript readable
+     * @return string
      */
     public function getJavascript($pretty = false)
     {
