@@ -34,6 +34,9 @@
  * resources.frontController.plugins.Toolbar = "Pike_Controller_Plugin_Toolbar"
  * resources.view.helperPath.Pike_View_Helper = APPLICATION_PATH "/../library/Pike/View/Helper"
  *
+ * Add to the the development environment application.ini part:
+ * pike.toolbar.enabled = 1
+ * 
  * Add this line at the bottom of your layout.phtml:
  * <?= $this->toolbar() ?>
  *
@@ -130,9 +133,10 @@ class Pike_Controller_Plugin_Toolbar extends Zend_Controller_Plugin_Abstract
      */
     protected function _handleRequest(Zend_Controller_Request_Abstract $request)
     {
-        if ('pike' == $request->getControllerName()) {
-            $action = $request->getActionName();
-
+        if (stripos($request->getRequestUri(), $request->getBaseUrl() . '/pike') === 0) {
+            $strPos = strlen($request->getBaseUrl() . '/pike') + 1;
+            list($action) = explode('/', substr($request->getRequestUri(), $strPos), 1);
+            
             $inflector = new Zend_Filter_Inflector(':string');
             $inflector->addRules(array(':string' => array('StringToLower', 'Word_DashToCamelCase')));
             $method = lcfirst($inflector->filter(array('string' => $action)) . 'Action');
