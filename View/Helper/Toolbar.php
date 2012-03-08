@@ -29,9 +29,7 @@
  * Pike toolbar view helper
  *
  * A toolbar will be displayed with the config setting "pike.toolbar.enabled = 1";
- *
- * NOTE: Make sure you also read the class comments of Pike_Controller_Plugin_Toolbar
- * to get it working!
+ * Read the class comments of Pike_Controller_Plugin_Toolbar to get it working!
  *
  * @category   PiKe
  * @copyright  Copyright (C) 2011 by Pieter Vogelaar (pietervogelaar.nl) and Kees Schepers (keesschepers.nl)
@@ -294,7 +292,7 @@ EOF;
      * If you also want to display database queries in AJAX request they must be logged.
      * Add this line to your application.ini:
      *
-     * pike.databaseQueryLog = APPLICATION_PATH "/../data/logs/toolbar_db_queries.log"
+     * pike.toolbar.databaseQueryLog = APPLICATION_PATH "/../data/logs/toolbar_db_queries.log"
      *
      * If you want to update the toolbar after each AJAX request automatically add also this:
      * pike.toolbar.reloadAfterEachAjaxComplete = 1

@@ -22,6 +22,7 @@
     border-top: 1px solid #eee;
     border-left: 1px solid #eee;
     border-right: 1px solid #eee;
+    line-height: 100%;
 
     /* CSS3 */
     -moz-border-radius-topleft: 8px;
@@ -40,12 +41,14 @@
     margin: 0 auto; /* centered toolbar */
     left: 0;
     display: none;
+    text-align: left;
 }
 #pike-toolbar-button {
     width: 77px;
     height: 15px;
     margin-right: 3%;
     display: none;
+    text-align: center;
 }
 #pike-toolbar-button .button-show-toolbar a {
     padding: 5px;
@@ -82,6 +85,10 @@
 #pike-toolbar .button a {
     color: #333;
     display: inline-block;
+    text-decoration: none;
+}
+#pike-toolbar .button a:hover {
+    text-decoration: none;
 }
 #pike-toolbar .button img {
     border-width: 0;
@@ -170,6 +177,9 @@
 /**
  * PHP dialog
  */
+#pike-toolbar .dialog-php {
+    line-height: 150%;
+}
 #pike-toolbar .dialog-php td,
 #pike-toolbar .dialog-php th,
 #pike-toolbar .dialog-php h1,
@@ -207,6 +217,8 @@
     border: 1px solid #000000;
     vertical-align: baseline;
     font-size: 12px;
+    padding: 2px;
+    color: #000;
 }
 #pike-toolbar .dialog-php {
     font-size: 12px;
@@ -214,6 +226,7 @@
 #pike-toolbar .dialog-php h1 {
     font-size: 22px;
     font-weight: bold;
+    margin: 10px 0;
 }
 #pike-toolbar .dialog-php h2 {
     font-size: 22px;
