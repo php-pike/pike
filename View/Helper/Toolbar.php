@@ -181,7 +181,7 @@ EOF;
         $phpInfo = str_replace('</body></html>', '', $parts[1]);
 
         try {
-            ini_get_all('xdebug');
+            @ini_get_all('xdebug');
             $xdebug = '<span class="status-enabled">xdebug</span>';
         } catch (Exception $e) {
             $xdebug = '<span class="status-disabled">xdebug</span>';
@@ -212,14 +212,14 @@ EOF;
         $apcEnabled = (bool) ini_get('apc.enabled');
 
         try {
-            ini_get_all('xcache');
+            @ini_get_all('xcache');
             $xCacheEnabled = true;
         } catch (Exception $e) {
             $xCacheEnabled = false;
         }
 
         try {
-            ini_get_all('eaccelerator');
+            @ini_get_all('eaccelerator');
             $eAcceleratorEnabled = true;
         } catch (Exception $e) {
             $eAcceleratorEnabled = false;
