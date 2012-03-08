@@ -267,7 +267,7 @@ class Pike_Grid_DataSource_Solarium
              * To still get the database behaviour we take the specified columns as base and fill
              * it with values that the document contains.
              */
-            $columnNames = array_keys($this->columns->getColumns());
+            $columnNames = array_keys($this->columns->getAll());
             $columns = array();
             foreach ($columnNames as $columnName) {
                 $columns[$columnName] = null;

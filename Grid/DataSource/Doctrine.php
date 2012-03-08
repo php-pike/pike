@@ -77,7 +77,7 @@ class Pike_Grid_DataSource_Doctrine
     private function _initEvents()
     {
         $onOrder = function(array $params, Pike_Grid_DataSource_Interface $dataSource) {
-            $columns = $dataSource->columns->getColumns();
+            $columns = $dataSource->columns->getAll();
 
             $sidx = $dataSource->getSidx($params['sidx']);
 

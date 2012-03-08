@@ -65,8 +65,9 @@ class Pike_Grid_DataSource_Columns extends ArrayObject
             $column = array();
             $column['name'] = $name;
             $column['label'] = (is_null($label) ? $name : $label);
-            if (null !== $sidx)
+            if (null !== $sidx) {
                 $column['index'] = $sidx;
+            }
 
             $column['position'] = (is_null($position) ? $this->count() : $position);
 
@@ -168,11 +169,21 @@ class Pike_Grid_DataSource_Columns extends ArrayObject
      * Returns the columns
      *
      * @return array
+     * @deprecated Use ->getAll() because of better naming
      */
     public function getColumns()
     {
-        $this->_sort();
+        return $this->getAll();
+    }
 
+    /**
+     * Returns the columns
+     *
+     * @return array
+     */
+    public function getAll()
+    {
+        $this->_sort();
         return $this->getArrayCopy();
     }
 }
