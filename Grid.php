@@ -361,7 +361,7 @@ class Pike_Grid
 
         if (isset($this->_dataSource->columns[$name])) {
             $attributes = array_merge(
-                array('data' => $data, 'label' => $label, 'sidx' => $sidx), $attributes
+                array('data' => $data, 'label' => $label, 'index' => $sidx), $attributes
             );
         } else {
             // Add column to the data source
