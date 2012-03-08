@@ -189,6 +189,7 @@
 }
 #pike-toolbar .dialog-php table {
     border-collapse: collapse;
+    width: 100%;
 }
 #pike-toolbar .dialog-php .center {
     text-align: center;
