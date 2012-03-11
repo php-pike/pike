@@ -210,17 +210,18 @@ class Pike_Grid_DataSource_Abstract
      */
     protected function _renderRow($row, $excludeColumns = array())
     {
+        $rowColumns = array();
         foreach ($this->columns as $index => $column) {
             if (array_key_exists('data', $column)) {
                 if (is_callable($column['data'], false, $method)) {
-                    $row[$index] = $this->_escape(call_user_func($column['data'], $row), $column['name']);
+                    $rowColumns[$index] = $this->_escape(call_user_func($column['data'], $row), $column['name']);
                 } else {
                     // Replace all column tokens that are possibly available in the column data
                     array_walk($row, function($value, $key) use (&$column) {
                         $column['data'] = str_replace('{' . strtolower($key) . '}', $value, $column['data']);
                     });
 
-                    $row[$index] = $this->_escape($column['data'], $column['name']);
+                    $rowColumns[$index] = $this->_escape($column['data'], $column['name']);
                 }
             } elseif (array_key_exists($index, $row)) {
                 continue;
@@ -229,22 +230,8 @@ class Pike_Grid_DataSource_Abstract
             }
         }
 
-        // Sort the row data specified by the column positions
-        $columns = $this->columns;
-
-        uksort($row, function($a, $b) use ($columns) {
-            if($columns[$a]['position'] > $columns[$b]['position']) {
-                return 1;
-            } elseif($columns[$a]['position'] < $columns[$b]['position']) {
-                return -1;
-            } else {
-                return 0;
-            }
-        });
-
         $record = array();
 
-        $rowColumns = $row;
         foreach ($excludeColumns as $excludeColumn) {
             $rowColumns[$excludeColumn] = null;
         }

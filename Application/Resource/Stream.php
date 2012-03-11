@@ -48,6 +48,10 @@ class Pike_Application_Resource_Stream extends Zend_Application_Resource_Resourc
 {
     public function init()
     {
+        if ('1' == ini_get('short_open_tag') || 'on' == strtolower(ini_get('short_open_tag'))) {
+            throw new Pike_Exception('The short_open_tag setting must be "Off" in your php.ini');
+        }
+
         $options = $this->getOptions();
         if (isset($options['streamWrapper'])) {
             if (!in_array('zend.view', stream_get_wrappers())) {

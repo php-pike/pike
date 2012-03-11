@@ -43,7 +43,7 @@ class Pike_View_Helper_MinifyHeadLink extends Zend_View_Helper_HtmlElement
      * @var array
      */
     protected $_itemKeys = array('charset', 'href', 'hreflang', 'id', 'media', 'rel', 'rev', 'type', 'title', 'extras');
-    
+
     /**
      * Combines all the style sheets available in the head link container for use with Minify
      *
@@ -64,7 +64,7 @@ class Pike_View_Helper_MinifyHeadLink extends Zend_View_Helper_HtmlElement
      * and Minify will automatically set expiration headers to 1 year in the future. Every time
      * you make changes to your CSS files you'll have to raise the revision number with 1
      * so that the browser for every user loads the new CSS files.
-     * 
+     *
      * @return string
      */
     public function minifyHeadLink()
@@ -85,15 +85,15 @@ class Pike_View_Helper_MinifyHeadLink extends Zend_View_Helper_HtmlElement
         $previousConditionalStylesheet = null;
         $collection = array();
         $nonStylesheetLinks = array();
-        
+
         $this->view->headLink()->getContainer()->ksort();
-        
+
         foreach ($this->view->headLink()->getContainer() as $offset => $item) {
             if ('stylesheet' != $item->rel) {
                 $nonStylesheetLinks[] = $this->_itemToString($item);
                 continue;
             }
-            
+
             $media = $item->media;
             $conditionalStylesheet = $item->conditionalStylesheet;
 
@@ -124,7 +124,7 @@ class Pike_View_Helper_MinifyHeadLink extends Zend_View_Helper_HtmlElement
         }
 
         $output = implode("\n", $nonStylesheetLinks) . "\n" . $output;
-        
+
         return $output;
     }
 
@@ -187,12 +187,13 @@ class Pike_View_Helper_MinifyHeadLink extends Zend_View_Helper_HtmlElement
         $output = null;
 
         $config = Zend_Registry::get('config');
-        
+
         $path = $this->view->escape($path);
         if (isset($config->minify->css->revision)) {
-            $path .= '&' . $config->minify->css->revision;
+            $revisionDelimiter = strpos($path, '?') === false ? '?' : '&';
+            $path .= $revisionDelimiter . $config->minify->css->revision;
         }
-        
+
         $link = '<link'
             . ' href="' . $path . '"'
             . ' media="' . $this->view->escape($media) .'"'
@@ -208,7 +209,7 @@ class Pike_View_Helper_MinifyHeadLink extends Zend_View_Helper_HtmlElement
 
         return $output;
     }
-    
+
     /**
      * Create HTML link element from data item
      *

@@ -80,9 +80,11 @@ class Pike_Reflection_Resource
     /**
      * Returns the resources as a multi dimensional array
      *
+     * @param  boolean $translate Set to TRUE if the resources must be translated
+     * @param  boolean $sort
      * @return array
      */
-    public function toArray()
+    public function toArray($translate = false, $sort = true)
     {
         $resources = array();
         $this->_frontController = Zend_Controller_Front::getInstance();
@@ -127,6 +129,15 @@ class Pike_Reflection_Resource
         }
 
         $resources = $this->_excludeErrorHandlerResource($resources);
+
+        if (true === $translate) {
+            $resources = self::translateResources($resources);
+        }
+
+        if (true === $sort) {
+            $resources = self::sortResources($resources);
+        }
+
         return $resources;
     }
 
@@ -135,13 +146,15 @@ class Pike_Reflection_Resource
      *
      * Format: controller_action => human
      *
-     * @param  string $moduleName
+     * @param  string  $moduleName
+     * @param  boolean $translate Set to TRUE if the resources must be translated
+     * @param  boolean $sort
      * @return array
      */
-    public function toFlatArray($moduleName = 'default')
+    public function toFlatArray($moduleName = 'default', $translate = false, $sort = true)
     {
         $flatResources = array();
-        $resources = $this->toArray();
+        $resources = $this->toArray($translate);
 
         foreach ($resources[$moduleName] as $controllerName => $controller) {
             foreach ($controller as $actionName => $action) {
@@ -153,6 +166,18 @@ class Pike_Reflection_Resource
                 }
                 $flatResources[$moduleName . '_' . $controllerName . '_' . $actionName] = $value;
             }
+        }
+
+        // Translate
+        if (true === $translate) {
+            foreach ($flatResources as $key => $value) {
+                $flatResources[$key] = Zend_Registry::get('Zend_Translate')->_($value);
+            }
+        }
+
+        // Sort
+        if (true === $sort) {
+            asort($flatResources);
         }
 
         return $flatResources;
@@ -259,5 +284,65 @@ class Pike_Reflection_Resource
         }
 
         return $resourceAttributes;
+    }
+
+    /**
+     * Translates the specified resources
+     *
+     * @param  array $resources Resources as multi dimensional array
+     * @return array
+     */
+    public static function translateResources($resources)
+    {
+        if (Zend_Registry::isRegistered('Zend_Translate')) {
+            foreach ($resources as $module => $controllers) {
+                foreach ($controllers as $controller => $actions) {
+                    foreach ($actions as $action => $attributes) {
+                        foreach ($attributes as $key => $value) {
+                            if (in_array($key, array('human', 'humanDescription'))) {
+                                $resources[$module][$controller][$action][$key] =
+                                    Zend_Registry::get('Zend_Translate')->_($value);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return $resources;
+    }
+
+    /**
+     * Sorts the specified resources
+     *
+     * @param  array $resources Resources as multi dimensional array
+     * @return array
+     */
+    public static function sortResources($resources)
+    {
+        foreach ($resources as $module => &$controllers) {
+            $controllerIndex = array();
+
+            foreach ($controllers as $controller => &$actions) {
+                $controllerIndex[$controller] = $controllers[$controller]['_attributes']['human'];
+
+                $actionIndex = array();
+                foreach ($actions as $action => $attributes) {
+                    if ('_attributes' == $action) {
+                        $actionIndex[$action] = null;
+                    } elseif (isset($attributes['human'])) {
+                        $actionIndex[$action] = $attributes['human'];
+                    } else {
+                        $actionIndex[$action] = $action;
+                    }
+                }
+
+                array_multisort($actionIndex, SORT_ASC, $actions);
+            }
+
+            array_multisort($controllerIndex, SORT_ASC, $controllers);
+        }
+
+        return $resources;
     }
 }

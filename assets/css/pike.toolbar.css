@@ -1,0 +1,288 @@
+#pike-toolbar div,
+#pike-toolbar ul,
+#pike-toolbar ol,
+#pike-toolbar li,
+#pike-toolbar th,
+#pike-toolbar h1 {
+    margin: 0;
+    padding: 0;
+}
+#pike-toolbar ol,
+#pike-toolbar ul {
+    list-style: none;
+}
+#pike-toolbar,
+#pike-toolbar-button {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    z-index: 6000000; /* keep the bar on top  */
+    height: 36px;
+    background: url(../images/toolbar-background.png);
+    border-top: 1px solid #eee;
+    border-left: 1px solid #eee;
+    border-right: 1px solid #eee;
+    line-height: 100%;
+
+    /* CSS3 */
+    -moz-border-radius-topleft: 8px;
+    -khtml-border-radius-topleft: 8px;
+    -webkit-border-top-left-radius: 8px;
+    -moz-border-radius-topright: 8px;
+    -khtml-border-radius-topright: 8px;
+    -webkit-border-top-right-radius: 8px;
+    -moz-box-shadow: 0px 1px 10px #666, inset 1px 1px 0px #a4a4a4; /* inset creates a inner-shadow */
+    -khtml-box-shadow: 0px 1px 10px #666;
+    -webkit-box-shadow: 0px 1px 10px #666;
+}
+#pike-toolbar {
+    width: 85%;
+    min-width: 700px; /* limit the width for an excessive window resize */
+    margin: 0 auto; /* centered toolbar */
+    left: 0;
+    display: none;
+    text-align: left;
+}
+#pike-toolbar-button {
+    width: 77px;
+    height: 15px;
+    margin-right: 3%;
+    display: none;
+    text-align: center;
+}
+#pike-toolbar-button .button-show-toolbar a {
+    padding: 5px;
+    font-size: 10px;
+    color: #777;
+    text-decoration: none;
+}
+#pike-toolbar-button .button-show-toolbar a:focus {
+    outline: none;
+    -moz-outline-style: none;
+}
+#pike-toolbar .side-left {
+    float: left;
+}
+#pike-toolbar .side-right {
+    float: right;
+}
+#pike-toolbar-clear {
+    clear: both;
+    height: 30px;
+}
+#pike-toolbar-clear-collapsed {
+    height: 10px;
+}
+#pike-toolbar .button-container .button {
+    white-space: nowrap;
+    color: #2f2f2f;
+    display: inline-block;
+    min-height: 24px;
+    border-right: 1px solid #a4a4a4;
+    padding: 0 7px 0 4px;
+    line-height: 35px;
+}
+#pike-toolbar .button a {
+    color: #333;
+    display: inline-block;
+    text-decoration: none;
+}
+#pike-toolbar .button a:hover {
+    text-decoration: none;
+}
+#pike-toolbar .button img {
+    border-width: 0;
+    margin: 0 5px 0 10px;
+    vertical-align: middle;
+}
+#pike-toolbar .button-hide-toolbar {
+    float: right;
+    border-left: 1px solid #a4a4a4;
+}
+
+#pike-toolbar .button-hide-toolbar a {
+    display: block;
+    width: 36px;
+    height: 26px;
+    padding: 25px 0 0 10px;
+    background: url(../images/toolbar-hide.png) no-repeat 5px 7px;
+}
+#pike-toolbar .dialog {
+    position: absolute;
+    top: -352px;
+    left: 10%;
+    width: 80%;
+    height: 330px;
+    background: #e4e4e4;
+    color: #444;
+    overflow-y: scroll;
+    border-top: 1px solid #a4a4a4;
+    border-left: 1px solid #a4a4a4;
+    border-right: 1px solid #a4a4a4;
+    /* CSS3 */
+    -moz-box-shadow: 2px -3px 5px #c5c5c5, -3px 0px 5px #cdcdcd;
+    -khtml-shadow: 2px -3px 5px #c5c5c5, -3px 0px 5px #cdcdcd;
+    -webkit-box-shadow: 2px -3px 5px #c5c5c5, -3px 0px 5px #cdcdcd;
+    /* CSS3 end */
+    display: none;
+    padding: 10px 10px;
+}
+#pike-toolbar .dialog h2 {
+    padding: 0 0 5px;
+    border-bottom: 1px solid #989898;
+    margin: 0 0 5px
+}
+#pike-toolbar .dialog h2,
+#pike-toolbar .dialog h2 a {
+    font-size: 18px;
+    font-weight: normal;
+    color: #676767;
+}
+#pike-toolbar .dialog h2 a:hover {
+    color: #a0a0a0;
+}
+#pike-toolbar .divider {
+    color: #7f7f7f;
+    margin: 0 1px;
+}
+#pike-toolbar .status-enabled {
+    color: #68b604;
+}
+#pike-toolbar .query-log-ajax-container {
+    display: none;
+}
+#pike-toolbar .query-log-ajax-container .reload {
+    float: right;
+}
+#pike-toolbar .query-log {
+    border-collapse: collapse;
+    margin: 0 0 10px 0;
+}
+#pike-toolbar .query-log td {
+    border: 1px solid #A4A4A4;
+    padding: 2px;
+    vertical-align: top;
+}
+#pike-toolbar .query-log td:first-child {
+    text-align: right;
+}
+#pike-toolbar .query-log .query-slow td {
+    background: #fed305;
+}
+#pike-toolbar .query-log .query-very-slow td {
+    background: #b60404;
+    color: #f7f7f7;
+}
+
+/**
+ * PHP dialog
+ */
+#pike-toolbar .dialog-php {
+    line-height: 150%;
+}
+#pike-toolbar .dialog-php td,
+#pike-toolbar .dialog-php th,
+#pike-toolbar .dialog-php h1,
+#pike-toolbar .dialog-php h2 {
+    font-family: sans-serif;
+}
+#pike-toolbar .dialog-php pre {
+    margin: 0px;
+    font-family: monospace;
+}
+#pike-toolbar .dialog-php a:link {
+    color: #000099;
+    text-decoration: none;
+}
+#pike-toolbar .dialog-php a:hover {
+    text-decoration: underline;
+}
+#pike-toolbar .dialog-php table {
+    border-collapse: collapse;
+    width: 100%;
+}
+#pike-toolbar .dialog-php .center {
+    text-align: center;
+}
+#pike-toolbar .dialog-php .center table {
+    margin-left: auto;
+    margin-right: auto;
+    text-align: left;
+}
+#pike-toolbar .dialog-php .center th {
+    text-align: center !important;
+}
+#pike-toolbar .dialog-php td,
+#pike-toolbar .dialog-php th {
+    border: 1px solid #000000;
+    vertical-align: baseline;
+    font-size: 12px;
+    padding: 2px;
+    color: #000;
+}
+#pike-toolbar .dialog-php {
+    font-size: 12px;
+}
+#pike-toolbar .dialog-php h1 {
+    font-size: 22px;
+    font-weight: bold;
+    margin: 10px 0;
+}
+#pike-toolbar .dialog-php h2 {
+    font-size: 22px;
+    border: none;
+    color: #000000;
+    font-weight: bold;
+}
+#pike-toolbar .dialog-php h2 a {
+    text-decoration: none;
+    color: #000000;
+    font-weight: bold;
+}
+#pike-toolbar .dialog-php h2 a:hover {
+    text-decoration: none;
+    color: #000000;
+}
+#pike-toolbar .dialog-php .p {
+    text-align: left;
+}
+#pike-toolbar .dialog-php .e {
+    background-color: #ccccff;
+    font-weight: bold;
+    color: #000000;
+}
+#pike-toolbar .dialog-php .h {
+    font-weight: bold;
+    color: #000000;
+    background-color: #9999CC;
+}
+#pike-toolbar .dialog-php .h th {
+    background-color: #9999cc;
+}
+#pike-toolbar .dialog-php .v {
+    background-color: #cccccc;
+    color: #000000;
+}
+#pike-toolbar .dialog-php .vr {
+    background-color: #cccccc;
+    text-align: right;
+    color: #000000;
+}
+#pike-toolbar .dialog-php img {
+    float: right;
+    border: 0px;
+}
+#pike-toolbar .dialog-php hr {
+    width: 600px;
+    background-color: #cccccc;
+    border: 0px;
+    height: 1px; color: #000000;
+}
+
+/**
+ * Database queries
+ */
+#pike-toolbar .button-databaseQueries .divider,
+#pike-toolbar .button-databaseQueries .count-ajax {
+    display: none;
+}

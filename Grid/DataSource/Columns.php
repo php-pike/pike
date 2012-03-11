@@ -65,8 +65,9 @@ class Pike_Grid_DataSource_Columns extends ArrayObject
             $column = array();
             $column['name'] = $name;
             $column['label'] = (is_null($label) ? $name : $label);
-            if (null !== $sidx)
+            if (null !== $sidx) {
                 $column['index'] = $sidx;
+            }
 
             $column['position'] = (is_null($position) ? $this->count() : $position);
 
@@ -75,12 +76,12 @@ class Pike_Grid_DataSource_Columns extends ArrayObject
              */
             if (!is_callable($data)) {
                 $column['data'] = function($row) use ($column, $data) {
-                    if (null !== $data) {
-                        return $data;
-                    } else {
-                        return isset($row[$column['name']]) ? $row[$column['name']] : null;
-                    }
-                };
+                        if (null !== $data) {
+                            return $data;
+                        } else {
+                            return isset($row[$column['name']]) ? $row[$column['name']] : null;
+                        }
+                    };
             } else {
                 $column['data'] = $data;
             }
@@ -122,35 +123,57 @@ class Pike_Grid_DataSource_Columns extends ArrayObject
      */
     public function getIterator()
     {
-        if (count($this->showColumns) > 0) {
-            $columns = $this->getArrayCopy();
-
-            foreach ($columns as &$column) {
-                if (!in_array($column['name'], $this->showColumns)) {
-                    $column['position'] = -1;
-                } else {
-                    $column['position'] = array_search($column['name'], $this->showColumns);
-                }
-            }
-
-            $this->exchangeArray($columns);
-        }
-
-        $this->uasort(function($first, $second) {
-            if (isset($first['position']) && isset($second['position'])) {
-                if ($first['position'] > $second['position']) {
-                    return 1;
-                } elseif($first['position'] < $second['position']) {
-                    return -1;
-                } else {
-                    return 0;
-                }
-            } else {
-                return 0;
-            }
-        });
+        $this->_sort();
 
         return parent::getIterator();
+    }
+
+    /**
+     * Sorts the columns
+     */
+    protected function _sort()
+    {
+        $arrayCopy = $this->getArrayCopy();
+
+        if (count($this->showColumns) > 0) {
+            $columns = array();
+            foreach ($arrayCopy as $name => $column) {
+                if (!in_array($name, $this->showColumns)) {
+                    $columns[$name] = $column;
+                }
+            }
+
+            foreach ($this->showColumns as $name) {
+                if ($this->offsetExists($name)) {
+                    $columns[$name] = $this->offsetGet($name);
+                }
+            }
+        } else {
+            $columns = $arrayCopy;
+
+            $columnNames = array();
+            $columnPositions = array();
+
+            foreach ($columns as $name => $column) {
+                $columnNames[$name] = $name;
+                $columnPositions[$name] = $column['position'];
+            }
+
+            array_multisort($columnPositions, SORT_ASC, $columnNames, SORT_ASC, $columns);
+        }
+
+        $this->exchangeArray($columns);
+    }
+
+    /**
+     * Returns the columns
+     *
+     * @return array
+     * @deprecated Use ->getAll() because of better naming
+     */
+    public function getColumns()
+    {
+        return $this->getAll();
     }
 
     /**
@@ -158,8 +181,9 @@ class Pike_Grid_DataSource_Columns extends ArrayObject
      *
      * @return array
      */
-    public function getColumns()
+    public function getAll()
     {
+        $this->_sort();
         return $this->getArrayCopy();
     }
 }

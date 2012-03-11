@@ -55,7 +55,7 @@ class Pike_View_Helper_MinifyHeadScript extends Zend_View_Helper_FormElement
      * and Minify will automatically set expiration headers to 1 year in the future. Every time
      * you make changes to your JavaScript files you'll have to raise the revision number with 1
      * so that the browser for every user loads the new JavaScript files.
-     * 
+     *
      * @return string
      */
     public function minifyHeadScript()
@@ -77,7 +77,7 @@ class Pike_View_Helper_MinifyHeadScript extends Zend_View_Helper_FormElement
         $collection = array();
 
         $this->view->headScript()->getContainer()->ksort();
-            
+
         foreach ($this->view->headScript()->getContainer() as $offset => $item) {
             $type = isset($item->attributes['src']) ? 'external' : 'inline';
 
@@ -98,7 +98,7 @@ class Pike_View_Helper_MinifyHeadScript extends Zend_View_Helper_FormElement
                 } else {
                     $collection[] = $path;
                 }
-            } else {                
+            } else {
                 $collection[] = $item->source;
             }
 
@@ -179,12 +179,13 @@ class Pike_View_Helper_MinifyHeadScript extends Zend_View_Helper_FormElement
     protected function _renderTag($path, array $attributes = array())
     {
         $config = Zend_Registry::get('config');
-        
+
         $path = $this->view->escape($path);
         if (isset($config->minify->js->revision)) {
-            $path .= '&' . $config->minify->js->revision;
+            $revisionDelimiter = strpos($path, '?') === false ? '?' : '&';
+            $path .= $revisionDelimiter . $config->minify->js->revision;
         }
-                
+
         $type = isset($attributes['type']) ? $attributes['type'] : 'text/javascript';
         unset($attributes['type']);
         unset($attributes['src']);
