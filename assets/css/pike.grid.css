@@ -1,0 +1,4 @@
+/* Remove text selection when a cell is clicked with the Ctrl or Shift key */
+.pike-grid td {
+    -moz-user-select: none;
+}

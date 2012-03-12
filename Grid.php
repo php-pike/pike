@@ -460,6 +460,25 @@ class Pike_Grid
      */
     public function setRowClickEvent($data)
     {
+        if (strpos($data, 'http') === 0 || strpos($data, '=') === false) {
+            if (strpos($data, '+') !== false) {
+                $literalCharacter = "";
+            } else {
+                $literalCharacter = "'";
+            }
+            $data = $literalCharacter . $data . $literalCharacter;
+
+            $data = <<<EOF
+if (e.shiftKey) {
+                window.open({$data}, '_blank');
+            } else if (e.ctrlKey) {
+                window.open({$data});
+            } else {
+                location.href = {$data};
+            }
+EOF;
+        }
+
         $this->_rowClickEvent = <<<EOF
 $('#{$this->_id}').jqGrid('setGridParam', {
     'onCellSelect' : function(rowId, iCol, cellContent, e) {
@@ -482,7 +501,7 @@ EOF;
      */
     public function getHtml()
     {
-        return '<table id="' . $this->_id . '" class="' . $this->_classes . '"></table>'
+        return '<table id="' . $this->_id . '" class="pike-grid ' . $this->_classes . '"></table>'
             . '<div id="' . $this->_pagerId . '"></div>';
     }
 
