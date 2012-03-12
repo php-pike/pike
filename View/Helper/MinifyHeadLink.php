@@ -42,7 +42,8 @@ class Pike_View_Helper_MinifyHeadLink extends Zend_View_Helper_HtmlElement
      *
      * @var array
      */
-    protected $_itemKeys = array('charset', 'href', 'hreflang', 'id', 'media', 'rel', 'rev', 'type', 'title', 'extras');
+    protected $_itemKeys = array('charset', 'href', 'hreflang', 'id', 'media', 'rel', 'rev',
+        'type', 'title', 'extras');
 
     /**
      * Combines all the style sheets available in the head link container for use with Minify
@@ -52,7 +53,7 @@ class Pike_View_Helper_MinifyHeadLink extends Zend_View_Helper_HtmlElement
      * media types and conditional statements will also be split up with the order preserved.
      *
      * Added to application.ini:
-     *   minify.linkExcludes[] = 'css/file5.css'
+     *   pike.minify.css.excludes[] = 'css/file5.css'
      *
      * Output will be:
      *   <link rel="stylesheet" media="all" src="/min/?f=css/file1.css" />
@@ -60,7 +61,7 @@ class Pike_View_Helper_MinifyHeadLink extends Zend_View_Helper_HtmlElement
      *   <link rel="stylesheet" media="screen" src="/js/file5.js" />
      *   <link rel="stylesheet" media="screen" src="/min/?f=css/file6.css,css/file7.css" />
      *
-     * If you specifiy "minify.css.revision = 10" in your application.ini, than &10 will be appended
+     * If you specifiy "pike.minify.css.revision = 10" in your application.ini, than &10 will be appended
      * and Minify will automatically set expiration headers to 1 year in the future. Every time
      * you make changes to your CSS files you'll have to raise the revision number with 1
      * so that the browser for every user loads the new CSS files.
@@ -69,15 +70,16 @@ class Pike_View_Helper_MinifyHeadLink extends Zend_View_Helper_HtmlElement
      */
     public function minifyHeadLink()
     {
-        $config = Zend_Registry::get('config');
+        $config = $this->_getConfig();
+
         if (isset($config->minify->enabled) && !$config->minify->enabled) {
             return $this->view->headLink();
         }
 
-        if (isset($config->minify->linkExcludes)) {
-            $minifyLinkExcludes = $config->minify->linkExcludes->toArray();
+        if (isset($config->minify->css->excludes)) {
+            $minifyCssExcludes = $config->minify->css->excludes->toArray();
         } else {
-            $minifyLinkExcludes = array();
+            $minifyCssExcludes = array();
         }
 
         $output = null;
@@ -103,7 +105,7 @@ class Pike_View_Helper_MinifyHeadLink extends Zend_View_Helper_HtmlElement
                 $collection = array();
             }
 
-            if (in_array($this->_getRelativePath($item->href), $minifyLinkExcludes)) {
+            if (in_array($this->_getRelativePath($item->href), $minifyCssExcludes)) {
                 if (null !== $previousMedia) {
                     $output .= $this->_combine($collection, $previousMedia, $previousConditionalStylesheet);
                     $collection = array();
@@ -186,7 +188,7 @@ class Pike_View_Helper_MinifyHeadLink extends Zend_View_Helper_HtmlElement
     ) {
         $output = null;
 
-        $config = Zend_Registry::get('config');
+        $config = $this->_getConfig();
 
         $path = $this->view->escape($path);
         if (isset($config->minify->css->revision)) {
@@ -251,5 +253,15 @@ class Pike_View_Helper_MinifyHeadLink extends Zend_View_Helper_HtmlElement
         }
 
         return $link;
+    }
+
+    /**
+     * Returns the PiKe config
+     *
+     * @return Zend_Config|null
+     */
+    protected function _getConfig()
+    {
+        return isset(Zend_Registry::get('config')->pike) ? Zend_Registry::get('config')->pike : null;
     }
 }

@@ -44,14 +44,14 @@ class Pike_View_Helper_MinifyHeadScript extends Zend_View_Helper_FormElement
      * will still be correct because the minified collections are then split up in parts.
      *
      * Added to application.ini:
-     *   minify.scriptExcludes[] = 'js/file5.js'
+     *   pike.minify.js.excludes[] = 'js/file5.js'
      *
      * Output will be:
      *   <script type="text/javascript" src="/min/?f=js/file1.js,js/file2.js,js/file3.js,js/file4.js"></script>
      *   <script type="text/javascript" src="/js/file5.js"></script>
      *   <script type="text/javascript" src="/min/?f=js/file6.js,js/file7.js"></script>
      *
-     * If you specifiy "minify.js.revision = 10" in your application.ini, than &10 will be appended
+     * If you specifiy "pike.minify.js.revision = 10" in your application.ini, than &10 will be appended
      * and Minify will automatically set expiration headers to 1 year in the future. Every time
      * you make changes to your JavaScript files you'll have to raise the revision number with 1
      * so that the browser for every user loads the new JavaScript files.
@@ -60,19 +60,19 @@ class Pike_View_Helper_MinifyHeadScript extends Zend_View_Helper_FormElement
      */
     public function minifyHeadScript()
     {
-        $config = Zend_Registry::get('config');
+        $config = $this->_getConfig();
+
         if (isset($config->minify->enabled) && !$config->minify->enabled) {
             return $this->view->headScript();
         }
 
-        if (isset($config->minify->scriptExcludes)) {
-            $minifyScriptExcludes = $config->minify->scriptExcludes->toArray();
+        if (isset($config->minify->js->excludes)) {
+            $minifyJsExcludes = $config->minify->js->excludes->toArray();
         } else {
-            $minifyScriptExcludes = array();
+            $minifyJsExcludes = array();
         }
 
         $output = null;
-        $types = array('external', 'inline');
         $previousType = null;
         $collection = array();
 
@@ -88,7 +88,7 @@ class Pike_View_Helper_MinifyHeadScript extends Zend_View_Helper_FormElement
 
             if ('external' == $type) {
                 $path = $item->attributes['src'];
-                if (in_array($this->_getRelativePath($path), $minifyScriptExcludes)) {
+                if (in_array($this->_getRelativePath($path), $minifyJsExcludes)) {
                     if (null !== $previousType) {
                         $output .= $this->_combine($collection, $previousType);
                         $collection = array();
@@ -178,7 +178,7 @@ class Pike_View_Helper_MinifyHeadScript extends Zend_View_Helper_FormElement
      */
     protected function _renderTag($path, array $attributes = array())
     {
-        $config = Zend_Registry::get('config');
+        $config = $this->_getConfig();
 
         $path = $this->view->escape($path);
         if (isset($config->minify->js->revision)) {
@@ -193,5 +193,15 @@ class Pike_View_Helper_MinifyHeadScript extends Zend_View_Helper_FormElement
         return '<script type="' . $type . '" src="' . $path . '"'
             . $this->_htmlAttribs($attributes)
             . '></script>' . "\n";
+    }
+
+    /**
+     * Returns the PiKe config
+     *
+     * @return Zend_Config|null
+     */
+    protected function _getConfig()
+    {
+        return isset(Zend_Registry::get('config')->pike) ? Zend_Registry::get('config')->pike : null;
     }
 }
