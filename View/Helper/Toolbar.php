@@ -31,6 +31,9 @@
  * A toolbar will be displayed with the config setting "pike.toolbar.enabled = 1";
  * Read the class comments of Pike_Controller_Plugin_Toolbar to get it working!
  *
+ * NOTE: Make sure you also read the class comments of Pike_Controller_Plugin_Toolbar
+ * to get it working!
+ *
  * @category   PiKe
  * @copyright  Copyright (C) 2011 by Pieter Vogelaar (pietervogelaar.nl) and Kees Schepers (keesschepers.nl)
  * @license    MIT
@@ -63,8 +66,7 @@ class Pike_View_Helper_Toolbar extends Zend_View_Helper_Abstract
         if (isset(Zend_Registry::get('config')->pike->toolbar->enabled)
             && Zend_Registry::get('config')->pike->toolbar->enabled
         ) {
-            $leftSide = '';
-            $rightSide = '';
+            $buttonsContent = '';
             $dialogs = '';
 
             if ($showDefaultButtons) {
@@ -81,10 +83,11 @@ class Pike_View_Helper_Toolbar extends Zend_View_Helper_Abstract
 
                     // Add content
                     if (isset($button['side']) && 'right' == $button['side']) {
-                        $rightSide .= '<span class="' . $class . '">' . $button['content'] .'</span>';
+                        $class .= ' button-side-right';
                     } else {
-                        $leftSide .= '<span class="' . $class . '">' . $button['content'] .'</span>';
+                        $class .= ' button-side-left';
                     }
+                    $buttonsContent .= '<span class="' . $class . '">' . $button['content'] .'</span>';
 
                     // Add dialog
                     if (isset($button['dialog'])) {
@@ -96,25 +99,18 @@ class Pike_View_Helper_Toolbar extends Zend_View_Helper_Abstract
                         $dialogs .= '<div class="' . $class . '">' . $button['dialog'] . '</div>';
                     }
                 } else {
-                    $leftSide .= $button;
+                    $buttonsContent .= $button;
                 }
             }
 
             $content = <<<EOF
-                <div class="side-left">
-                    <div class="button-container">
-                        {$leftSide}
-                    </div>
-                </div>
 
-                <div class="side-right">
                     <div class="button-container">
                         <span class="button-hide-toolbar">
                             <a href="#"></a>
                         </span>
-                        {$rightSide}
+                        {$buttonsContent}
                     </div>
-                </div>
 
                 {$dialogs}
 EOF;
@@ -137,10 +133,10 @@ EOF;
             'php'                    => $this->getPhpButton(),
             'applicationEnvironment' => $this->getApplicationEnvButton(),
             'currentRequest'         => $this->getCurrentRequestButton(),
-            'executionTime'          => $this->getExecutionTimeButton(),
-            'memoryUsage'            => $this->getMemoryUsageButton(),
-            'databaseQueries'        => $this->getDatabaseQueriesButton(),
             'identity'               => $this->getIdentityButton(),
+            'databaseQueries'        => $this->getDatabaseQueriesButton(),
+            'memoryUsage'            => $this->getMemoryUsageButton(),
+            'executionTime'          => $this->getExecutionTimeButton(),
         );
     }
 
@@ -467,6 +463,7 @@ EOF;
      */
     public static function getAjaxQueryLogContainer($attributes = null)
     {
+        $container = array();
         $container['header'] = '<div class="query-log-ajax-container"' . $attributes . '>'
             . '<h2>Database queries (AJAX)'
             . '<a class="reload" href="#">reload</a></h2>'

@@ -22,7 +22,6 @@
     border-top: 1px solid #eee;
     border-left: 1px solid #eee;
     border-right: 1px solid #eee;
-    line-height: 100%;
 
     /* CSS3 */
     -moz-border-radius-topleft: 8px;
@@ -36,19 +35,17 @@
     -webkit-box-shadow: 0px 1px 10px #666;
 }
 #pike-toolbar {
-    width: 85%;
-    min-width: 700px; /* limit the width for an excessive window resize */
-    margin: 0 auto; /* centered toolbar */
+    min-width: 700px;
+    max-width: 1200px;
+    margin: 0 auto;
     left: 0;
     display: none;
-    text-align: left;
 }
 #pike-toolbar-button {
     width: 77px;
     height: 15px;
     margin-right: 3%;
     display: none;
-    text-align: center;
 }
 #pike-toolbar-button .button-show-toolbar a {
     padding: 5px;
@@ -59,12 +56,6 @@
 #pike-toolbar-button .button-show-toolbar a:focus {
     outline: none;
     -moz-outline-style: none;
-}
-#pike-toolbar .side-left {
-    float: left;
-}
-#pike-toolbar .side-right {
-    float: right;
 }
 #pike-toolbar-clear {
     clear: both;
@@ -81,14 +72,14 @@
     border-right: 1px solid #a4a4a4;
     padding: 0 7px 0 4px;
     line-height: 35px;
+    float: left;
+}
+#pike-toolbar .button-container .button-side-right {
+    float: right;
 }
 #pike-toolbar .button a {
     color: #333;
     display: inline-block;
-    text-decoration: none;
-}
-#pike-toolbar .button a:hover {
-    text-decoration: none;
 }
 #pike-toolbar .button img {
     border-width: 0;
@@ -97,7 +88,6 @@
 }
 #pike-toolbar .button-hide-toolbar {
     float: right;
-    border-left: 1px solid #a4a4a4;
 }
 
 #pike-toolbar .button-hide-toolbar a {
@@ -177,9 +167,6 @@
 /**
  * PHP dialog
  */
-#pike-toolbar .dialog-php {
-    line-height: 150%;
-}
 #pike-toolbar .dialog-php td,
 #pike-toolbar .dialog-php th,
 #pike-toolbar .dialog-php h1,
@@ -217,8 +204,6 @@
     border: 1px solid #000000;
     vertical-align: baseline;
     font-size: 12px;
-    padding: 2px;
-    color: #000;
 }
 #pike-toolbar .dialog-php {
     font-size: 12px;
@@ -226,7 +211,6 @@
 #pike-toolbar .dialog-php h1 {
     font-size: 22px;
     font-weight: bold;
-    margin: 10px 0;
 }
 #pike-toolbar .dialog-php h2 {
     font-size: 22px;
