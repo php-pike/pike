@@ -323,8 +323,12 @@ class Pike_Reflection_Resource
         foreach ($resources as $module => &$controllers) {
             $controllerIndex = array();
 
-            foreach ($controllers as $controller => &$actions) {
-                $controllerIndex[$controller] = $controllers[$controller]['_attributes']['human'];
+            foreach ($controllers as $controller => &$actions) {  
+                if(isset($controllers[$controller]['_attributes'])) {
+                    $controllerIndex[$controller] = $controllers[$controller]['_attributes']['human'];
+                } else {
+                    $controllerIndex[$controller] = $controller;
+                }
 
                 $actionIndex = array();
                 foreach ($actions as $action => $attributes) {
