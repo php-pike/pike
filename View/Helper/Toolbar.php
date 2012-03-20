@@ -231,8 +231,19 @@ EOF;
     {
         $dialog = null;
         if (Zend_Registry::isRegistered('config')) {
-            $dialog = '<h2>Configuration for ' . APPLICATION_ENV . ' environment</h2>
-                    ' . Pike_Debug::dump(Zend_Registry::get('config')->toArray(), 10, null, false);
+            $config = Zend_Registry::get('config')->toArray();
+            try {
+                if (function_exists('yaml_emit')) {
+                    $dialog = yaml_emit($config);
+                } elseif (class_exists('Symfony\Component\Yaml\Yaml')) {
+                    $dialog = Symfony\Component\Yaml\Yaml::dump($config, 10);
+                }
+                $dialog = str_replace('  ', '    ', $dialog);
+            } catch (Exception $e) {
+                $dialog = Pike_Debug::dump($config, 10, null, false);
+            }
+            $dialog = '<h2>Configuration for ' . APPLICATION_ENV . ' environment</h2>'
+                . ('' != $dialog && strpos($dialog, '<pre>') === 0 ? $dialog : '<pre>' . $dialog . '</pre>');
         }
 
         $content = '<a href="#"><img src="' . $this->pikeUrl() . '/images/config.png" title="Environment" />'
