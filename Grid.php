@@ -111,6 +111,18 @@ class Pike_Grid
     protected $_javaScriptClass = 'jqGrid';
 
     /**
+     * If columns must be shown as link
+     */
+    protected $_showColumnsAsLink = false;
+
+    /**
+     * The URL that is used if showColumnsAsLink is TRUE
+     *
+     * @var string
+     */
+    protected $_columnLink = false;
+
+    /**
      * Constructor
      *
      * @param Pike_Grid_DataSource_Interface $dataSource
@@ -495,6 +507,25 @@ EOF;
     }
 
     /**
+     * Wraps the content of columns in anchor tags
+     *
+     * This enables the user to click with the right mouse button on column text and open the link
+     * in a new tab or window. If setRowClickEvent() is used, the user could already click on a grid
+     * row and open the link in a new tab (ctrl + left mouse button) or window (shift + left mouse
+     * button), with the corresponding key.
+     *
+     * The link may contain dynamic parts of the cellvalue, options and rowObject.
+     *
+     * @param string $link
+     */
+    public function showColumnsAsLinks($link)
+    {
+        $this->_showColumnsAsLink = true;
+        $this->_columnLink = $link;
+        return $this;
+    }
+
+    /**
      * Returns the grid HTML container
      *
      * @return string
@@ -540,6 +571,11 @@ EOF;
                 $column['hidden'] = true;
             }
 
+            // Set link formatter if enabled and no column specific formatter is available
+            if ($this->_showColumnsAsLink && !isset($column['formatter'])) {
+                $column['formatter'] = $this->_getLinkFormatter();
+            }
+
             $settings['colModel'][] = $column;
             $settings['colNames'][] = $column['label'];
         }
@@ -551,6 +587,31 @@ EOF;
 
         $output = $this->_render($settings, $pretty);
         return $output;
+    }
+
+    /**
+     * Returns the link formatter
+     */
+    protected function _getLinkFormatter()
+    {
+        $columnLink = $this->_columnLink;
+        $columnLink = str_replace('"', "'", $columnLink);
+
+        if (substr($columnLink, 0, 1) !== "'") {
+            $columnLink = "' + " . $columnLink;
+        } else {
+            $columnLink = ltrim($columnLink, "'");
+        }
+
+        if (substr($columnLink, strlen($columnLink) - 1, 1) !== "'") {
+            $columnLink .= " + '";
+        } else {
+            $columnLink = rtrim($columnLink, "'");
+        }
+
+        return new Zend_Json_Expr("function(cellvalue, options, rowObject) {
+            return '<a href=\"{$columnLink}\">' + cellvalue + '</a>';
+        }");
     }
 
     /**
