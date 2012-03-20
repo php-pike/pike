@@ -40,19 +40,19 @@
  * $arrayOfroles = Zend_Auth::getInstance()->getIdentity()->getRoles();
  *
  * $layoutView->navigation()
- *      ->PikeMenu($navigation)
+ *      ->pikeMenu($navigation)
  *      ->setACL(Zend_Registry::get('acl')) //should be a object of type Zend_ACL
  *       ->setRoles($arrayOfRoles);
  * </code>
  *
- * And make sure u use PikeMenu either in your view (layout script proberly)
+ * And make sure u use pikeMenu either in your view (layout script proberly)
  *
- * <?= $this->navigation()->PikeMenu(); ?>
+ * <?= $this->navigation()->pikeMenu(); ?>
  *
  * Next make sure the Pike library is loaded with autoloaderNamespaces[] = "Pike"  in your
  * application.ini. And beyond to make sure the view navigation helper is found add something like
  * the following to it:
- * 
+ *
  * resources.view.helperPath.Pike_View_Helper_Navigation_ =
  *                      APPLICATION_PATH "/../library/Pike/View/Helper/Navigation"
  *
@@ -64,18 +64,18 @@ class Pike_View_Helper_Navigation_PikeMenu extends Zend_View_Helper_Navigation_M
 {
     /**
      * Roles
-     * 
+     *
      * @var array
      */
     protected $_roles = array();
 
     /**
      * Pike menu
-     * 
+     *
      * @param  Zend_Navigation_Container $container
      * @return Pike_View_Helper_Navigation_PikeMenu
      */
-    public function PikeMenu(Zend_Navigation_Container $container = null)
+    public function pikeMenu(Zend_Navigation_Container $container = null)
     {
         if (null !== $container) {
             $this->setContainer($container);
@@ -86,7 +86,7 @@ class Pike_View_Helper_Navigation_PikeMenu extends Zend_View_Helper_Navigation_M
 
     /**
      * Checks if a role has access to the specified page
-     * 
+     *
      * @param  Zend_Navigation_Page $page
      * @return boolean
      */
@@ -96,7 +96,7 @@ class Pike_View_Helper_Navigation_PikeMenu extends Zend_View_Helper_Navigation_M
         if (strpos($page->getHref(), '://') !== false) {
             return true;
         }
-        
+
         if (!$acl = $this->getAcl()) {
             // no acl registered means don't use acl
             return true;
@@ -130,7 +130,7 @@ class Pike_View_Helper_Navigation_PikeMenu extends Zend_View_Helper_Navigation_M
 
     /**
      * Returns the roles
-     * 
+     *
      * @return array
      */
     public function getRoles()
@@ -140,9 +140,9 @@ class Pike_View_Helper_Navigation_PikeMenu extends Zend_View_Helper_Navigation_M
 
     /**
      * Adds the specified role
-     * 
+     *
      * @param  Zend_Acl_Role_Interface $role
-     * @return Pike_View_Helper_Navigation_PikeMenu 
+     * @return Pike_View_Helper_Navigation_PikeMenu
      */
     public function addRole($role)
     {
@@ -163,26 +163,25 @@ class Pike_View_Helper_Navigation_PikeMenu extends Zend_View_Helper_Navigation_M
 
     /**
      * Sets the specified roles
-     * 
+     *
      * @param  array $roles
      * @return Pike_View_Helper_Navigation_PikeMenu
      */
     public function setRoles(array $roles)
     {
-
         foreach ($roles as $role) {
             $this->addRole($role);
         }
 
         return $this;
     }
-    
+
     /**
      * Returns an HTML string containing an 'a' element for the given page if
      * the page's href is not empty, and a 'span' element if it is empty
      *
      * Overrides {@link Zend_View_Helper_Navigation_Abstract::htmlify()}.
-     * 
+     *
      * Support added for rel external and nofollow.
      * @link http://framework.zend.com/issues/browse/ZF-9300
      *
@@ -218,7 +217,7 @@ class Pike_View_Helper_Navigation_PikeMenu extends Zend_View_Helper_Navigation_M
             $attribs['href'] = $href;
             $attribs['target'] = $page->getTarget();
             $attribs['accesskey'] = $page->getAccessKey();
-            
+
             // Check if there is a 'nofollow' or 'external' relation
             if ('true' == $page->get('relNofollow')) {
                 $attribs['rel'] = isset($attribs['rel']) ? $attribs['rel'] . ' nofollow' : 'nofollow';
