@@ -156,6 +156,10 @@ class Pike_Reflection_Resource
         $flatResources = array();
         $resources = $this->toArray($translate);
 
+        if (!isset($resources[$moduleName])) {
+            throw new Pike_Exception('Module "' . $moduleName . '" not found');
+        }
+        
         foreach ($resources[$moduleName] as $controllerName => $controller) {
             foreach ($controller as $actionName => $action) {
                 if ($actionName == '_attributes') continue;
