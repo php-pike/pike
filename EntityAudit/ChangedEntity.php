@@ -1,5 +1,5 @@
 <?php
-/*
+/**
  * (c) 2011 SimpleThings GmbH
  *
  * @package SimpleThings\EntityAudit
@@ -23,13 +23,39 @@
 
 namespace Pike\EntityAudit;
 
+/**
+ * ChangedEntity
+ */
 class ChangedEntity
 {
+    /**
+     * @var string
+     */
     private $className;
+
+    /**
+     * @var array
+     */
     private $id;
+
+    /**
+     * @var string
+     */
     private $revType;
+
+    /**
+     * @var object
+     */
     private $entity;
-    
+
+    /**
+     * Constructor
+     *
+     * @param string $className
+     * @param array  $id
+     * @param string $revType
+     * @param object $entity
+     */
     public function __construct($className, array $id, $revType, $entity)
     {
         $this->className = $className;
@@ -37,7 +63,7 @@ class ChangedEntity
         $this->revType = $revType;
         $this->entity = $entity;
     }
-    
+
     /**
      * @return string
      */
@@ -47,7 +73,6 @@ class ChangedEntity
     }
 
     /**
-     *
      * @return array
      */
     public function getId()

@@ -1,22 +1,21 @@
 <?php
-
-/*
-	Paul's Simple Diff Algorithm v 0.1
-	(C) Paul Butler 2007 <http://www.paulbutler.org/>
-	May be used and distributed under the zlib/libpng license.
-
-	This code is intended for learning purposes; it was written with short
-	code taking priority over performance. It could be used in a practical
-	application, but there are a few ways it could be optimized.
-
-	Given two arrays, the function diff will return an array of the changes.
-	I won't describe the format of the array, but it will be obvious
-	if you use print_r() on the result of a diff on some test data.
-
-	htmlDiff is a wrapper for the diff command, it takes two strings and
-	returns the differences in HTML. The tags used are <ins> and <del>,
-	which can easily be styled with CSS.
-*/
+/**
+ * Paul's Simple Diff Algorithm v 0.1
+ * (C) Paul Butler 2007 <http://www.paulbutler.org/>
+ * May be used and distributed under the zlib/libpng license.
+ *
+ * This code is intended for learning purposes; it was written with short
+ * code taking priority over performance. It could be used in a practical
+ * application, but there are a few ways it could be optimized.
+ *
+ * Given two arrays, the function diff will return an array of the changes.
+ * I won't describe the format of the array, but it will be obvious
+ * if you use print_r() on the result of a diff on some test data.
+ *
+ * htmlDiff is a wrapper for the diff command, it takes two strings and
+ * returns the differences in HTML. The tags used are <ins> and <del>,
+ * which can easily be styled with CSS.
+ */
 
 namespace Pike\EntityAudit\Utils;
 
@@ -27,6 +26,13 @@ namespace Pike\EntityAudit\Utils;
  */
 class SimpleDiff
 {
+    /**
+     * Returns the difference between the two specified arrays as array
+     *
+     * @param  array $old
+     * @param  array $new
+     * @return array
+     */
     public function diff(array $old, array $new)
     {
         $maxlen = 0;
@@ -49,7 +55,14 @@ class SimpleDiff
             $this->diff(array_slice($old, $omax + $maxlen), array_slice($new, $nmax + $maxlen)));
     }
 
-    public function htmlDiff($old, $new)
+    /**
+     * Returns the difference between the two specified arrays as HTML
+     *
+     * @param  array $old
+     * @param  array $new
+     * @return string
+     */
+    public function htmlDiff(array $old, array $new)
     {
         $ret = '';
         $diff = $this->diff(explode(' ', $old), explode(' ', $new));
@@ -61,5 +74,4 @@ class SimpleDiff
         }
         return $ret;
     }
-
 }

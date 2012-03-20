@@ -1,5 +1,5 @@
 <?php
-/*
+/**
  * (c) 2011 SimpleThings GmbH
  *
  * @package SimpleThings\EntityAudit
@@ -28,10 +28,28 @@ namespace Pike\EntityAudit;
  */
 class Revision
 {
+    /**
+     * @var string
+     */
     private $rev;
+
+    /**
+     * @var \DateTime
+     */
     private $timestamp;
+
+    /**
+     * @var string
+     */
     private $username;
 
+    /**
+     * Constructor
+     *
+     * @param string    $rev
+     * @param \DateTime $timestamp
+     * @param string    $username
+     */
     function __construct($rev, $timestamp, $username)
     {
         $this->rev = $rev;
@@ -39,16 +57,25 @@ class Revision
         $this->username = $username;
     }
 
+    /**
+     * @return string
+     */
     public function getRev()
     {
         return $this->rev;
     }
 
+    /**
+     * @return \DateTime
+     */
     public function getTimestamp()
     {
         return $this->timestamp;
     }
 
+    /**
+     * @return string
+     */
     public function getUsername()
     {
         return $this->username;

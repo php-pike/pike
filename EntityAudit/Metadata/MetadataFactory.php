@@ -1,5 +1,5 @@
 <?php
-/*
+/**
  * (c) 2011 SimpleThings GmbH
  *
  * @package SimpleThings\EntityAudit
@@ -36,7 +36,7 @@ class MetadataFactory
     {
         return isset($this->auditedEntities[$entity]);
     }
-    
+
     public function getAllClassNames()
     {
         return array_flip($this->auditedEntities);

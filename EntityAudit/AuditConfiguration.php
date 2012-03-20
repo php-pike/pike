@@ -1,5 +1,5 @@
 <?php
-/*
+/**
  * (c) 2011 SimpleThings GmbH
  *
  * @package SimpleThings\EntityAudit
@@ -23,6 +23,9 @@
 
 namespace Pike\EntityAudit;
 
+/**
+ * AuditConfiguration
+ */
 class AuditConfiguration
 {
     private $prefix = '';

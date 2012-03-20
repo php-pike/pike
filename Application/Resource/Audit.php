@@ -1,4 +1,29 @@
 <?php
+/**
+ * Copyright (C) 2011 by Pieter Vogelaar (pietervogelaar.nl) and Kees Schepers (keesschepers.nl)
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ *
+ * @category   PiKe
+ * @copyright  Copyright (C) 2011 by Pieter Vogelaar (pietervogelaar.nl) and Kees Schepers (keesschepers.nl)
+ * @license    MIT
+ */
 
 namespace Pike\EntityAudit\Application\Resource;
 
@@ -6,9 +31,33 @@ use Pike\EntityAudit\AuditException,
     Pike\EntityAudit\AuditConfiguration,
     Pike\EntityAudit\AuditManager;
 
+/**
+ * PiKe entity audit application resource
+ *
+ * Add the following lines to your application.ini to enable the auditing of Doctrine entities
+ *
+ * pluginPaths.Pike_Application_Resource = "Pike/Application/Resource"
+ * pluginPaths.Pike\EntityAudit\Application\Resource\ = "Pike/Application/Resource"
+ *
+ * resources.Audit.TableSuffix = "Audit"
+ * resources.Audit.RevisionTableName = "Revision"
+ * resources.Audit.RevisionTypeFieldName = "revision_type"
+ * resources.Audit.RevisionFieldName = "revision"
+ * resources.Audit.RevisionDataType = "new"
+ * resources.Audit.auditedEntityClasses[] = "Application\Entity\ExampleOne"
+ * resources.Audit.auditedEntityClasses[] = "Application\Entity\ExampleTwo"
+ *
+ * @category   PiKe
+ * @copyright  Copyright (C) 2011 by Pieter Vogelaar (pietervogelaar.nl) and Kees Schepers (keesschepers.nl)
+ * @license    MIT
+ */
 class Audit extends \Zend_Application_Resource_ResourceAbstract
 {
-
+    /**
+     * Initialize
+     *
+     * @return AuditConfiguration
+     */
     public function init()
     {
         $bootstrap = $this->getBootstrap()->getApplication()->getBootstrap();

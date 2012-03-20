@@ -1,5 +1,5 @@
 <?php
-/*
+/**
  * (c) 2011 SimpleThings GmbH
  *
  * @package SimpleThings\EntityAudit
@@ -96,7 +96,8 @@ class LogRevisionsListener implements EventSubscriber
      * @author Kees Schepers <kees@stichtingsbo.nl>
      * @return void
      */
-    public function postLoad(LifecycleEventArgs $eventArgs) {
+    public function postLoad(LifecycleEventArgs $eventArgs)
+    {
         $entity = $eventArgs->getEntity();
         $em = $eventArgs->getEntityManager();
         $uow = $em->getUnitOfWork();
@@ -134,7 +135,6 @@ class LogRevisionsListener implements EventSubscriber
     }
 
     /**
-     *
      * Add the old data to the corresponding audit table
      *
      * @param LifecycleEventArgs $eventArgs
@@ -165,7 +165,6 @@ class LogRevisionsListener implements EventSubscriber
     }
 
     /**
-     *
      * Handles d
      *
      * @param OnFlushEventArgs $eventArgs
