@@ -59,10 +59,12 @@
          * Initialization
          */
         init : function() {
-            this.initToolbarToggle();
-            this.initButtons();
-            this.initDialogs();
-            this.initAjaxDatabaseQueries();
+            if ($('#pike-toolbar').length) {
+                this.initToolbarToggle();
+                this.initButtons();
+                this.initDialogs();
+                this.initAjaxDatabaseQueries();
+            }
         },
 
         initToolbarToggle : function() {
@@ -180,7 +182,7 @@
                         if ('' != json.data) {
                             $('.query-log-ajax-container', '#pike-toolbar').replaceWith(json.data);
                             self.bindClickEventToAjaxDatabaseQueriesReloadButton();
-                            
+
                             $('.button-databaseQueries .count-ajax', '#pike-toolbar')
                                 .text(json.count)
                                 .show();
