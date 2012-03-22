@@ -74,7 +74,10 @@ class Pike_Validate_DateRange extends Zend_Validate_Abstract
      */
     protected $_inputValue;
 
-    protected $valueDateFormat = 'YYYY-mm-dd';
+    /**
+     * @var string
+     */
+    protected $format = 'Y-M-d';
 
     /**
      * Sets validator options
@@ -100,7 +103,7 @@ class Pike_Validate_DateRange extends Zend_Validate_Abstract
                     $this->equals = (bool)$val;
                     break;
                 case 'format' :
-                    $this->valueDateFormat = $val;
+                    $this->format = $val;
                     break;
                 default:
                     throw new \Pike_Exception('Unknown option');
@@ -123,7 +126,6 @@ class Pike_Validate_DateRange extends Zend_Validate_Abstract
 
         $date->setTime(array('hour' => 0, 'second' => 0));
         $this->$type = $date;
-
     }
 
     /**
@@ -154,7 +156,7 @@ class Pike_Validate_DateRange extends Zend_Validate_Abstract
                     return true;
                 }
 
-                $this->_inputValue = $this->lessThan->toString('Y-M-d');
+                $this->_inputValue = $this->lessThan->toString($this->format);
                 $this->_error(true === $this->equals ? self::NOT_EARLIER_EQUAL : self::NOT_EARLIER);
                 return false;
             }
@@ -165,13 +167,13 @@ class Pike_Validate_DateRange extends Zend_Validate_Abstract
                     return true;
                 }
 
-                $this->_inputValue = $this->greaterThan->toString('Y-M-d h:M');
+                $this->_inputValue = $this->greaterThan->toString($this->format);
                 $this->_error(self::NOT_LATER);
                 return false;
             }
         } elseif($this->greaterThan instanceof Zend_Date && $this->lessThan instanceof Zend_Date) {
             if (!$valueDate->isEarlier($this->lessThan) || !$valueDate->isLater($this->greaterThan)) {
-                $this->_inputValue = $this->lessThan->toString('Y-M-d') . ' and ' . $this->_inputValue = $this->greaterThan->toString('Y-M-d');
+                $this->_inputValue = $this->lessThan->toString($this->format) . ' and ' . $this->_inputValue = $this->greaterThan->toString($this->format);
                 $this->_error(self::NOT_BETWEEN);
                 return false;
             }
@@ -180,4 +182,3 @@ class Pike_Validate_DateRange extends Zend_Validate_Abstract
         return true;
     }
 }
-
