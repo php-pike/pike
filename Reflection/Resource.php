@@ -159,7 +159,7 @@ class Pike_Reflection_Resource
         if (!isset($resources[$moduleName])) {
             throw new Pike_Exception('Module "' . $moduleName . '" not found');
         }
-        
+
         foreach ($resources[$moduleName] as $controllerName => $controller) {
             foreach ($controller as $actionName => $action) {
                 if ($actionName == '_attributes') continue;
@@ -327,8 +327,8 @@ class Pike_Reflection_Resource
         foreach ($resources as $module => &$controllers) {
             $controllerIndex = array();
 
-            foreach ($controllers as $controller => &$actions) {  
-                if(isset($controllers[$controller]['_attributes'])) {
+            foreach ($controllers as $controller => &$actions) {
+                if (isset($controllers[$controller]['_attributes']['human'])) {
                     $controllerIndex[$controller] = $controllers[$controller]['_attributes']['human'];
                 } else {
                     $controllerIndex[$controller] = $controller;
