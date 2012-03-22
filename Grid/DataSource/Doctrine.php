@@ -333,11 +333,16 @@ class Pike_Grid_DataSource_Doctrine
         foreach ($this->_query->getAST()->selectClause->selectExpressions as $selExpr) {
             $expr = $selExpr->expression;
 
+            // Skip aggregate fields
+            if (!isset($expr->field)) {
+                continue;
+            }
+
             // Check if field alias exists
             if ($alias == $selExpr->fieldIdentificationVariable) {
                 $field = $expr->identificationVariable . '.' . $expr->field;
                 break;
-            } elseif ($alias == $expr->field && '' == $selExpr->fieldIdentificationVariable) {
+            } elseif (isset($expr->field) && $alias == $expr->field && '' == $selExpr->fieldIdentificationVariable) {
                 $field = $expr->identificationVariable . '.' . $expr->field;
             }
         }
