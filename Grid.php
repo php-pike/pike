@@ -491,17 +491,15 @@ if (e.shiftKey) {
 EOF;
         }
 
-        $this->_rowClickEvent = <<<EOF
-$('#{$this->_id}').jqGrid('setGridParam', {
-    'onCellSelect' : function(rowId, iCol, cellContent, e) {
+        $this->appendAttribute('onCellSelect', new Zend_Json_Expr("
+            function(rowId, iCol, cellContent, e) {
         // Only execute click event if the actual cell was clicked and not an element in that cell
         // like a checkbox for example.
         if ('gridcell' == $(e.target).attr('role')) {
-            {$data}
+                    " . $data . "
         }
     }
-}).trigger('reloadGrid');
-EOF;
+        "));
 
         return $this;
     }
