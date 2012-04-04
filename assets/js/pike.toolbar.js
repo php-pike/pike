@@ -82,7 +82,7 @@
             $('.button-hide-toolbar a', '#pike-toolbar').click(function() {
                 $('#pike-toolbar').slideToggle('fast');
                 $('#pike-toolbar-button').fadeIn('slow');
-                self.setCookie('pikeToolbarEnabled', 0, 30);
+                self.setCookie('pikeToolbarEnabled', 0);
                 return false;
             });
 
@@ -90,7 +90,7 @@
             $('.button-show-toolbar a', '#pike-toolbar-button').click(function() {
                 $('#pike-toolbar').slideToggle('fast');
                 $('#pike-toolbar-button').fadeOut();
-                self.setCookie('pikeToolbarEnabled', 1, 30);
+                self.setCookie('pikeToolbarEnabled', 1);
                 return false;
             });
         },
@@ -195,24 +195,12 @@
             );
         },
 
-        setCookie : function(name, value, exdays) {
-            var exdate = new Date();
-            exdate.setDate(exdate.getDate() + exdays);
-            value = escape(value) + ((exdays==null) ? '' : '; expires=' + exdate.toUTCString());
-            document.cookie = name + '=' + value;
+        setCookie : function(name, value) {
+            $.cookie(name, value, { expires: 30, path: '/' });
         },
 
         getCookie : function(name) {
-            var i, x, y, ARRcookies = document.cookie.split(';');
-
-            for (i = 0; i < ARRcookies.length; i++) {
-                x = ARRcookies[i].substr(0, ARRcookies[i].indexOf("="));
-                y = ARRcookies[i].substr(ARRcookies[i].indexOf("=") + 1);
-                x = x.replace(/^\s+|\s+$/g,'');
-                if (x == name) {
-                    return unescape(y);
-                }
-            }
+            return $.cookie(name);
         }
     };
 })(jQuery);

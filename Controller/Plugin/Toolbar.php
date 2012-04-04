@@ -36,7 +36,7 @@
  *
  * Add to the the development environment application.ini part:
  * pike.toolbar.enabled = 1
- * 
+ *
  * Add this line at the bottom of your layout.phtml:
  * <?= $this->toolbar() ?>
  *
@@ -85,8 +85,7 @@ class Pike_Controller_Plugin_Toolbar extends Zend_Controller_Plugin_Abstract
 
         self::$uniqueKey = sha1(uniqid(null, true) . rand(1000, 1000000));
 
-        $view->headLink()->appendStylesheet($baseUrl . '/pike/css/pike.toolbar.css');
-        $view->headScript()->appendFile($baseUrl . '/pike/js/pike.toolbar.js');
+        $this->_loadAssets($view, $baseUrl);
 
         $scriptLines = array(
             "$.pike.toolbar.baseUrl = '" . $baseUrl . "'",
@@ -127,6 +126,19 @@ class Pike_Controller_Plugin_Toolbar extends Zend_Controller_Plugin_Abstract
     }
 
     /**
+     * Loads assets
+     *
+     * @param Zend_View $view
+     * @param string    $baseUrl
+     */
+    protected function _loadAssets($view, $baseUrl)
+    {
+        $view->headLink()->appendStylesheet($baseUrl . '/pike/css/pike.toolbar.css');
+        $view->headScript()->appendFile($baseUrl . '/pike/externals/jquery.cookie.js');
+        $view->headScript()->appendFile($baseUrl . '/pike/js/pike.toolbar.js');
+    }
+
+    /**
      * Checks the request for PiKe actions and handles them
      *
      * @param Zend_Controller_Request_Abstract $request
@@ -136,7 +148,7 @@ class Pike_Controller_Plugin_Toolbar extends Zend_Controller_Plugin_Abstract
         if (stripos($request->getRequestUri(), $request->getBaseUrl() . '/pike') === 0) {
             $strPos = strlen($request->getBaseUrl() . '/pike') + 1;
             list($action) = explode('/', substr($request->getRequestUri(), $strPos), 1);
-            
+
             $inflector = new Zend_Filter_Inflector(':string');
             $inflector->addRules(array(':string' => array('StringToLower', 'Word_DashToCamelCase')));
             $method = lcfirst($inflector->filter(array('string' => $action)) . 'Action');
