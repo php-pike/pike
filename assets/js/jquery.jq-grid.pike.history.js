@@ -246,8 +246,7 @@
                 }
 
                 if (reload) {
-                    grid.setGridParam(params)
-                    .trigger("reloadGrid");
+                    grid.setGridParam(params).trigger('reloadGrid');
                 }
             });
         },
@@ -377,13 +376,15 @@
         $.jgrid.pike.history.bindHashchangeEventToWindow();
         $.jgrid.pike.history.setDefaults(this);
 
+        $.jgrid.pike.history.hashchangeHandler();
+
         if ('' != datatype) {
             this.setGridParam({
                 datatype: datatype
             });
         }
 
-        $.jgrid.pike.history.hashchangeHandler();
+        this.trigger('reloadGrid');
         return this;
     };
 })(jQuery);
