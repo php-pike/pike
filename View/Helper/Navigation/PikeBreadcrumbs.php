@@ -59,7 +59,7 @@ class Pike_View_Helper_Navigation_PikeBreadcrumbs extends Zend_View_Helper_Navig
      *
      * @var array
      */
-    protected $_appendPages = array();
+    protected $_appendedPages = array();
 
     /**
      * View helper entry point:
@@ -109,10 +109,10 @@ class Pike_View_Helper_Navigation_PikeBreadcrumbs extends Zend_View_Helper_Navig
         $appendedPages = array();
 
         // Append pages if specified
-        if (count($this->_appendPages) > 0) {
-            foreach ($this->_appendPages as $appendPage) {
-                $activePage->addPage($appendPage);
-                $activePage = $appendPage;
+        if (count($this->_appendedPages) > 0) {
+            foreach ($this->_appendedPages as $appendedPage) {
+                $activePage->addPage($appendedPage);
+                $activePage = $appendedPage;
                 $activePage->setActive(true);
                 $appendedPages[] = $activePage;
             }
@@ -152,6 +152,16 @@ class Pike_View_Helper_Navigation_PikeBreadcrumbs extends Zend_View_Helper_Navig
      */
     public function appendPage(Zend_Navigation_Page $page)
     {
-        $this->_appendPages[] = $page;
+        $this->_appendedPages[] = $page;
+    }
+
+    /**
+     * Returns the appended pages
+     *
+     * @return array
+     */
+    public function getAppendedPages()
+    {
+        return $this->_appendedPages;
     }
 }
