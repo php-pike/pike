@@ -118,7 +118,7 @@ class Pike_Reflection_Resource
                     $resourceAttributes = array();
 
                     // Ignore methods that don't have an "Action" suffix
-                    if ($method->class == $className && substr($method->name, -6) == 'Action') {
+                    if (substr($method->name, -6) == 'Action') {
                         $resourceAttributes = $this->_getResourceAttributes($method);
                         $actionName = $this->_getInflectedName(substr($method->name, 0, -6));
                         $resources[$moduleName][$controllerName][$actionName]
