@@ -37,5 +37,5 @@ class Pike_Version
     /**
      * Current PiKe Version
      */
-    const VERSION = '1.2-DEV';
+    const VERSION = '1.2';
 }
