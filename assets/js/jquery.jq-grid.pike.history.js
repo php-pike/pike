@@ -25,7 +25,9 @@
  * @license    MIT
  */
 (function ($) {
-    $.jgrid.pike = {};
+    if (typeof $.jgrid.pike == 'undefined') {
+        $.jgrid.pike = {};
+    }
 
     $.jgrid.pike.history = {
         /**
