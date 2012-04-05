@@ -560,8 +560,12 @@ EOF;
             'viewrecords' => true,
         );
 
-        foreach ($this->_dataSource->columns as $column) {
+        foreach ($this->_dataSource->columns as $name => $column) {
             unset($column['data']);
+
+            if (!isset($column['name'])) {
+                throw new Pike_Exception('Column "' . $name . '" is undefined');
+            }
 
             // If show columns is set, show only the defined columns
             if (count($this->_dataSource->columns->showColumns) > 0
@@ -608,7 +612,7 @@ EOF;
         }
 
         return new Zend_Json_Expr("function(cellvalue, options, rowObject) {
-            return '<a href=\"{$columnLink}\">' + cellvalue + '</a>';
+            return $.jgrid.pike.linkFormatter(cellvalue, options, rowObject, '" . $columnLink . "');
         }");
     }
 
