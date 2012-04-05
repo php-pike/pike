@@ -206,15 +206,19 @@ class Pike_Grid_DataSource_Abstract
      *
      * @param array $row
      * @param array $excludeColumns
+     * @param mixed $closureResult
      * @return void
      */
-    protected function _renderRow($row, $excludeColumns = array())
+    protected function _renderRow($row, $excludeColumns = array(), $closureResult = null)
     {
         $rowColumns = array();
         foreach ($this->columns as $index => $column) {
             if (array_key_exists('data', $column)) {
                 if (is_callable($column['data'], false, $method)) {
-                    $rowColumns[$index] = $this->_escape(call_user_func($column['data'], $row), $column['name']);
+                    $rowColumns[$index] = $this->_escape(
+                        call_user_func($column['data'], $row, $closureResult),
+                        $column['name']
+                    );
                 } else {
                     // Replace all column tokens that are possibly available in the column data
                     array_walk($row, function($value, $key) use (&$column) {

@@ -263,16 +263,17 @@ class Pike_Grid_DataSource_Doctrine
      * Returns a JSON string useable for JQuery Grid. This grids interprets this
      * data and is able to draw a grid.
      *
-     * @param boolean $encode         If data must be JSON encoded. If false, you must encode the returned
-     *                                data yourself through a JSON encode function.
-     * @param array   $excludeColumns If you have columns in your query with the only purpose of
-     *                                suplementing data for the construction of other columns and
-     *                                you also probably set the column as hidden and you don't need
-     *                                their value on the client side for manipulation, then you can
-     *                                exclude the columns here to gain some performance.
-     * @return string JSON data
+     * @param boolean  $encode         If data must be JSON encoded. If false, you must encode the returned
+     *                                 data yourself through a JSON encode function.
+     * @param array    $excludeColumns If you have columns in your query with the only purpose of
+     *                                 suplementing data for the construction of other columns and
+     *                                 you also probably set the column as hidden and you don't need
+     *                                 their value on the client side for manipulation, then you can
+     *                                 exclude the columns here to gain some performance.
+     * @param  Closure $closure
+     * @return string  JSON data
      */
-    public function getJson($encode = true, array $excludeColumns = array())
+    public function getJson($encode = true, array $excludeColumns = array(), Closure $closure = null)
     {
         $offset = $this->_limitPerPage * ($this->_params['page'] - 1);
         $hints = $this->_getQueryHints();
@@ -286,7 +287,7 @@ class Pike_Grid_DataSource_Doctrine
             $hints
         );
 
-        $result = $paginateQuery->getResult();
+        $queryResult = $paginateQuery->getResult();
 
         $this->_data = array();
         $this->_data['page'] = (int)$this->_params['page'];
@@ -294,8 +295,14 @@ class Pike_Grid_DataSource_Doctrine
         $this->_data['records'] = $count;
         $this->_data['rows'] = array();
 
-        foreach ($result as $row) {
-            $this->_renderRow($row, $excludeColumns);
+        if (null !== $closure) {
+            $closureResult = $closure($queryResult);
+        } else {
+            $closureResult = null;
+        }
+
+        foreach ($queryResult as $row) {
+            $this->_renderRow($row, $excludeColumns, $closureResult);
         }
 
         return $encode === true ? json_encode($this->_data) : $this->_data;
