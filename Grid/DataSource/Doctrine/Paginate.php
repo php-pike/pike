@@ -65,16 +65,7 @@ class Pike_Grid_DataSource_Doctrine_Paginate
         /* @var $countQuery Query */
         $countQuery = self::cloneQuery($query);
 
-        if (null !== $countQuery->getAST()->havingClause) {
-            $sql = 'SELECT COUNT(*) FROM (' . $countQuery->getSQL() . ') results';
-
-            $stmt = $countQuery->getEntityManager()->getConnection()
-                ->executeQuery($sql, array_reverse(array_values($countQuery->getParameters())));
-
-            $count = $stmt->fetchColumn();
-
-            return $count;
-        } else {
+        if (null === $countQuery->getAST()->havingClause) {
             $hints = array_merge_recursive($hints, array(
                 Query::HINT_CUSTOM_TREE_WALKERS => array('Pike_Grid_DataSource_Doctrine_CountWalker')
             ));
@@ -87,7 +78,20 @@ class Pike_Grid_DataSource_Doctrine_Paginate
         $countQuery->setFirstResult(null)->setMaxResults(null);
         $countQuery->setParameters($query->getParameters());
 
-        return current($countQuery->getSingleResult());
+        if (null !== $countQuery->getAST()->groupByClause
+            || null !== $countQuery->getAST()->havingClause
+        ) {
+            $sql = 'SELECT COUNT(*) FROM (' . $countQuery->getSQL() . ') results';
+
+            $stmt = $countQuery->getEntityManager()->getConnection()
+                ->executeQuery($sql, array_reverse(array_values($countQuery->getParameters())));
+
+            $count = $stmt->fetchColumn();
+        } else {
+            $count = current($countQuery->getSingleResult());
+        }
+
+        return $count;
     }
 
     /**

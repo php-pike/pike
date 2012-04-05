@@ -51,11 +51,6 @@ class Pike_Grid_DataSource_Doctrine_CountWalker extends TreeWalkerAdapter
         $this->_AST->selectClause->selectExpressions = array();
         $this->_addCountComponent();
 
-        if (null === $this->_AST->havingClause) {
-            // GROUP BY will break things, we are trying to get a count of all
-            $this->_AST->groupByClause = null;
-        }
-
         // ORDER BY is not needed, only increases query execution through unnecessary sorting.
         $this->_AST->orderByClause = null;
 
