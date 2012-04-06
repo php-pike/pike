@@ -61,6 +61,7 @@ class Pike_View_Helper_MinifyHeadScript extends Zend_View_Helper_FormElement
     public function minifyHeadScript()
     {
         $config = $this->_getConfig();
+        $this->view->headScript()->getContainer()->ksort();
 
         if (isset($config->minify->enabled) && !$config->minify->enabled) {
             return $this->view->headScript();
@@ -75,8 +76,6 @@ class Pike_View_Helper_MinifyHeadScript extends Zend_View_Helper_FormElement
         $output = null;
         $previousType = null;
         $collection = array();
-
-        $this->view->headScript()->getContainer()->ksort();
 
         foreach ($this->view->headScript()->getContainer() as $offset => $item) {
             $type = isset($item->attributes['src']) ? 'external' : 'inline';

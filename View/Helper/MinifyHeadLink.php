@@ -71,6 +71,7 @@ class Pike_View_Helper_MinifyHeadLink extends Zend_View_Helper_HtmlElement
     public function minifyHeadLink()
     {
         $config = $this->_getConfig();
+        $this->view->headLink()->getContainer()->ksort();
 
         if (isset($config->minify->enabled) && !$config->minify->enabled) {
             return $this->view->headLink();
@@ -87,8 +88,6 @@ class Pike_View_Helper_MinifyHeadLink extends Zend_View_Helper_HtmlElement
         $previousConditionalStylesheet = null;
         $collection = array();
         $nonStylesheetLinks = array();
-
-        $this->view->headLink()->getContainer()->ksort();
 
         foreach ($this->view->headLink()->getContainer() as $offset => $item) {
             if ('stylesheet' != $item->rel) {
