@@ -63,13 +63,30 @@
  * 
  * resources.router.routes.newsShowAbstract.type = Zend_Controller_Router_Route
  * resources.router.routes.newsShowAbstract.abstract = On
- * resources.router.routes.newsShowAbstract.route = "news/:article"
+ * resources.router.routes.newsShowAbstract.route = "@news/:article"
  * resources.router.routes.newsShowAbstract.defaults.module = "default"
  * resources.router.routes.newsShowAbstract.defaults.controller = "news"
  * resources.router.routes.newsShowAbstract.defaults.action = "show"
  * 
  * resources.router.routes.newsShow.type = Zend_Controller_Router_Route_Chain
  * resources.router.routes.newsShow.chain = "language,newsShowAbstract"
+ * 
+ * To enable translatable routes add for example to your application.ini:
+ * 
+ * pike.route.translate.adapter = "array"
+ * pike.route.translate.content = APPLICATION_PATH "/../languages/%locale%/routes.php"
+ * pike.route.translate.locale = "auto"
+ * pike.route.translate.logUntranslated = 1
+ * pike.route.translate.disableNotices = 1
+ * 
+ * Example of routes.php for locale "nl":
+ * 
+ * return array(
+ *     'news' => 'nieuws', // Note the @ character added to news in the newsShowAbstract route,
+ *                         // that makes it translatable
+ *     'some-other-word' => 'een-ander-woord',
+ * );
+ *
  * 
  * @category   PiKe
  * @copyright  Copyright (C) 2011 by Pieter Vogelaar (pietervogelaar.nl) and Kees Schepers (keesschepers.nl)
@@ -84,13 +101,13 @@ class Pike_Controller_Plugin_Language extends Zend_Controller_Plugin_Abstract
      */
     public function routeStartup(Zend_Controller_Request_Abstract $request)
     {
+        $translate = Zend_Registry::get('Zend_Translate');
+        
         /**
          * Check if no language information is available in the request URI because
          * the base URL is entered.
          */
         if (substr($request->getRequestUri(), 0, -1) == $request->getBaseUrl()) {
-            $translate = Zend_Registry::get('Zend_Translate');
-            
             // Get current locale language (autodetected if "auto" is used as config value)
             $language = Zend_Registry::get("Zend_Locale")->getLanguage();
 
@@ -107,8 +124,22 @@ class Pike_Controller_Plugin_Language extends Zend_Controller_Plugin_Abstract
 
             $request->setRequestUri($request->getRequestUri() . $language . '/');
             $request->setParam("language", $language);
-            
-            // Support the translation of routes
+        }
+        
+        // Set route translator
+        if (isset(Zend_Registry::get('config')->pike->route->translate)) {
+            $routeTranslateSettings = Zend_Registry::get('config')->pike->route->translate->toArray();
+            $routeTranslateSettings['content'] = str_replace('%locale%', $translate->getLocale(), $routeTranslateSettings['content']);
+            $routeTranslateSettings['locale'] = $translate->getLocale();
+  
+            if (file_exists($routeTranslateSettings['content'])) {
+                $routeTranslate = new Zend_Translate($routeTranslateSettings);
+                Zend_Controller_Router_Route::setDefaultTranslator($routeTranslate);
+                Zend_Controller_Router_Route::setDefaultLocale($translate->getLocale());
+            } else {
+                Zend_Controller_Router_Route::setDefaultTranslator($translate);
+            }
+        } else {
             Zend_Controller_Router_Route::setDefaultTranslator($translate);
         }
     }
