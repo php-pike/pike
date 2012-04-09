@@ -145,6 +145,11 @@
             var self = this;
 
             if (this.ajaxDatabaseQueriesEnabled) {
+                // This merges with other setup AJAX data
+                $.ajaxSetup({
+                    data: { pikeToolbarUniqueKey: $.pike.toolbar.uniqueKey }            
+                });
+                
                 $('.query-log-ajax-container', '#pike-toolbar').show();
                 this.bindClickEventToAjaxDatabaseQueriesReloadButton();
 
