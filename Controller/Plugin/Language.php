@@ -125,7 +125,7 @@ class Pike_Controller_Plugin_Language extends Zend_Controller_Plugin_Abstract
                 $language = Zend_Registry::get("Zend_Locale")->getLanguage();
                 
                 // Set the default language if the preferred language is not available
-                if (!$translate->isAvailable($language) || !$this->_isAllowedLanguage($language)) {
+                if (!$translate->isAvailable($language) || !self::isAllowedLanguage($language)) {
                     // Set the default locale
                     Zend_Registry::set("Zend_Locale", new Zend_Locale('default'));
 
@@ -217,7 +217,7 @@ class Pike_Controller_Plugin_Language extends Zend_Controller_Plugin_Abstract
      * 
      * @param string $language 
      */
-    protected function _isAllowedLanguage($language)
+    public static function isAllowedLanguage($language)
     {
         $pattern = Zend_Registry::get('config')->resources->router->routes->language->reqs->language;
         $allowedLanguages = explode('|', substr($pattern, 2, - 2));
