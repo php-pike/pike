@@ -102,24 +102,39 @@ class Pike_Controller_Plugin_Language extends Zend_Controller_Plugin_Abstract
     public function routeStartup(Zend_Controller_Request_Abstract $request)
     {
         $translate = Zend_Registry::get('Zend_Translate');
-        
+
         /**
          * Check if no language information is available in the request URI because
          * the base URL is entered.
          */
         if (substr($request->getRequestUri(), 0, -1) == $request->getBaseUrl()) {
-            // Get current locale language (autodetected if "auto" is used as config value)
-            $language = Zend_Registry::get("Zend_Locale")->getLanguage();
+            // Get choosen language of the current identity
+            $language = $this->_getIdentityLanguage();
 
-            // Set the default language if the preferred language is not available
-            if (!$translate->isAvailable($language)) {
-                Zend_Registry::set("Zend_Locale", new Zend_Locale('default'));
-
-                // Get default language
-                $language = Zend_Registry::get("Zend_Locale")->getLanguage();
+            if ('' != $language) {
+                // Set the locale
+                Zend_Registry::set("Zend_Locale", new Zend_Locale($language));
 
                 // Set new locale in the translator
-                $translate->setLocale(Zend_Registry::get('Zend_Locale'));
+                $translate->setLocale(Zend_Registry::get("Zend_Locale"));
+                
+                // Get the language
+                $language = Zend_Registry::get("Zend_Locale")->getLanguage();
+            } else {
+                // Get current locale language (autodetected if "auto" is used as config value)
+                $language = Zend_Registry::get("Zend_Locale")->getLanguage();
+                
+                // Set the default language if the preferred language is not available
+                if (!$translate->isAvailable($language) || !$this->_isAllowedLanguage($language)) {
+                    // Set the default locale
+                    Zend_Registry::set("Zend_Locale", new Zend_Locale('default'));
+
+                    // Set new locale in the translator
+                    $translate->setLocale(Zend_Registry::get('Zend_Locale'));
+                    
+                    // Get the language
+                    $language = Zend_Registry::get("Zend_Locale")->getLanguage();
+                }
             }
 
             $request->setRequestUri($request->getRequestUri() . $language . '/');
@@ -128,19 +143,24 @@ class Pike_Controller_Plugin_Language extends Zend_Controller_Plugin_Abstract
         
         // Set route translator
         if (isset(Zend_Registry::get('config')->pike->route->translate)) {
+            $language = $this->_getLanguageFromRequestUri();
+            
+            if ('' != $language) {
+                $locale = $language;
+            } else {
+                $locale = $translate->getLocale();
+            }
+            
             $routeTranslateSettings = Zend_Registry::get('config')->pike->route->translate->toArray();
-            $routeTranslateSettings['content'] = str_replace('%locale%', $translate->getLocale(), $routeTranslateSettings['content']);
-            $routeTranslateSettings['locale'] = $translate->getLocale();
+            $routeTranslateSettings['content'] = str_replace('%locale%',
+                $locale, $routeTranslateSettings['content']);
+            $routeTranslateSettings['locale'] = $locale;
   
             if (file_exists($routeTranslateSettings['content'])) {
                 $routeTranslate = new Zend_Translate($routeTranslateSettings);
                 Zend_Controller_Router_Route::setDefaultTranslator($routeTranslate);
-                Zend_Controller_Router_Route::setDefaultLocale($translate->getLocale());
-            } else {
-                Zend_Controller_Router_Route::setDefaultTranslator($translate);
+                Zend_Controller_Router_Route::setDefaultLocale($locale);
             }
-        } else {
-            Zend_Controller_Router_Route::setDefaultTranslator($translate);
         }
     }
 
@@ -155,13 +175,18 @@ class Pike_Controller_Plugin_Language extends Zend_Controller_Plugin_Abstract
     {
         // Get language from request param
         $language = $request->getParam("language");
+        
+        if ('' == $language) {
+            // Get language choosen by identity
+            $language = $this->_getIdentityLanguage();
+        }
 
         // Get default locale
         $locale = Zend_Registry::get('Zend_Locale');
         $defaultLocale = current(array_keys($locale::getDefault()));
         
         // Set default language if not available
-        if (null === $language) {
+        if ('' == $language) {
             $language = $defaultLocale;
         }
         
@@ -182,5 +207,63 @@ class Pike_Controller_Plugin_Language extends Zend_Controller_Plugin_Abstract
         // Set the correct language in navigation links etc.
         $router = Zend_Controller_Front::getInstance()->getRouter();
         $router->setGlobalParam('language', $language);
+        
+        // Set language for the current identity
+        $this->_setIdentityLanguage($language);
+    }
+    
+    /**
+     * Returns if the specified language is allowed
+     * 
+     * @param string $language 
+     */
+    protected function _isAllowedLanguage($language)
+    {
+        $pattern = Zend_Registry::get('config')->resources->router->routes->language->reqs->language;
+        $allowedLanguages = explode('|', substr($pattern, 2, - 2));
+        foreach ($allowedLanguages as $allowedLanguage) {
+            if (strtolower($language) == strtolower($allowedLanguage)) {
+                return true;
+            }
+        }
+        
+        return false;
+    }
+    
+    /**
+     * Returns the language from the request URI 
+     */
+    protected function _getLanguageFromRequestUri()
+    {
+        $language = null;
+        
+        $parts = explode('/', $this->getRequest()->getRequestUri());
+        if (isset($parts[1]) && '' != $parts[1]) {
+            $language = $parts[1];
+        }
+        
+        return $language;
+    }
+    
+    /**
+     * Returns the language choosen by the identity
+     */
+    protected function _getIdentityLanguage()
+    {
+        $identity = Zend_Auth::getInstance()->getIdentity();
+        return is_object($identity) ? $identity->language : null;
+    }
+    
+    /**
+     * Sets the language for the current identity
+     * 
+     * @param string $language
+     */
+    protected function _setIdentityLanguage($language)
+    {
+        $identity = Zend_Auth::getInstance()->getIdentity();
+        if (is_object($identity)) {
+            $identity->language = $language;
+        }
     }
 }
