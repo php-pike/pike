@@ -219,8 +219,7 @@ class Pike_Controller_Plugin_Language extends Zend_Controller_Plugin_Abstract
      */
     public static function isAllowedLanguage($language)
     {
-        $pattern = Zend_Registry::get('config')->resources->router->routes->language->reqs->language;
-        $allowedLanguages = explode('|', substr($pattern, 2, - 2));
+        $allowedLanguages = self::getAllowedLanguages();
         foreach ($allowedLanguages as $allowedLanguage) {
             if (strtolower($language) == strtolower($allowedLanguage)) {
                 return true;
@@ -228,6 +227,21 @@ class Pike_Controller_Plugin_Language extends Zend_Controller_Plugin_Abstract
         }
         
         return false;
+    }
+    
+    /**
+     * Returns the allowed languages
+     */
+    public static function getAllowedLanguages()
+    {
+        $allowedLanguages = array();
+        
+        if (isset(Zend_Registry::get('config')->resources->router->routes->language->reqs->language)) {
+            $pattern = Zend_Registry::get('config')->resources->router->routes->language->reqs->language;
+            $allowedLanguages = explode('|', substr($pattern, 2, - 2));
+        }
+        
+        return $allowedLanguages;
     }
     
     /**
