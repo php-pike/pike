@@ -141,27 +141,7 @@ class Pike_Controller_Plugin_Language extends Zend_Controller_Plugin_Abstract
             $request->setParam("language", $language);
         }
         
-        // Set route translator
-        if (isset(Zend_Registry::get('config')->pike->route->translate)) {
-            $language = $this->_getLanguageFromRequestUri();
-            
-            if ('' != $language) {
-                $locale = $language;
-            } else {
-                $locale = $translate->getLocale();
-            }
-            
-            $routeTranslateSettings = Zend_Registry::get('config')->pike->route->translate->toArray();
-            $routeTranslateSettings['content'] = str_replace('%locale%',
-                $locale, $routeTranslateSettings['content']);
-            $routeTranslateSettings['locale'] = $locale;
-  
-            if (file_exists($routeTranslateSettings['content'])) {
-                $routeTranslate = new Zend_Translate($routeTranslateSettings);
-                Zend_Controller_Router_Route::setDefaultTranslator($routeTranslate);
-                Zend_Controller_Router_Route::setDefaultLocale($locale);
-            }
-        }
+        $this->_setRouteTranslator($translate);
     }
 
     /**
@@ -213,6 +193,60 @@ class Pike_Controller_Plugin_Language extends Zend_Controller_Plugin_Abstract
     }
     
     /**
+     * Set the route translator 
+     * 
+     * @param Zend_Translate $translate
+     */
+    protected function _setRouteTranslator($translate)
+    {
+        if (isset(Zend_Registry::get('config')->pike->route->translate)) {
+            $language = $this->_getLanguageFromRequestUri();
+            
+            if ('' != $language) {
+                $locale = $language;
+            } else {
+                $locale = $translate->getLocale();
+            }
+            
+            $routeTranslateSettings = Zend_Registry::get('config')->pike->route->translate->toArray();
+            $routeTranslateSettings['content'] = str_replace('%locale%',
+                $locale, $routeTranslateSettings['content']);
+            $routeTranslateSettings['locale'] = $locale;
+  
+            if (file_exists($routeTranslateSettings['content'])) {
+                
+                if (isset($routeTranslateSettings['logger']) && '' != $routeTranslateSettings['logger']) {
+                    $loggerName = $routeTranslateSettings['logger'];
+                    
+                    if (isset(Zend_Registry::get('config')->resources->log->$loggerName)) {
+                        $loggerOptions = Zend_Registry::get('config')->resources
+                            ->log->$loggerName->toArray();
+                    } else {
+                        $loggerOptions = array();
+                    }
+
+                    if (isset($loggerOptions['writerParams']['stream'])
+                        && isset($loggerOptions['writerParams']['permission'])
+                    ) {
+                        // Set the correct permissions on the log file
+                        @chmod($loggerOptions['writerParams']['stream'],
+                            octdec('0'. $loggerOptions['writerParams']['permission']));
+                    }
+
+                    $logger = new Zend_Log();
+                    $logger->addWriter($loggerOptions);
+                    $logger->setEventItem('namespace', 'route');
+                    $routeTranslateSettings['log'] = $logger;
+                }
+                
+                $routeTranslate = new Zend_Translate($routeTranslateSettings);
+                Zend_Controller_Router_Route::setDefaultTranslator($routeTranslate);
+                Zend_Controller_Router_Route::setDefaultLocale($locale);
+            }
+        }
+    }
+    
+    /**
      * Returns if the specified language is allowed
      * 
      * @param string $language 
@@ -252,7 +286,7 @@ class Pike_Controller_Plugin_Language extends Zend_Controller_Plugin_Abstract
         $language = null;
         
         $parts = explode('/', $this->getRequest()->getRequestUri());
-        if (isset($parts[1]) && '' != $parts[1]) {
+        if (isset($parts[1]) && '' != $parts[1] && 2 == strlen($parts[1])) {
             $language = $parts[1];
         }
         
