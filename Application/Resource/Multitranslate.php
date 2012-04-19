@@ -82,7 +82,7 @@ class Pike_Application_Resource_MultiTranslate extends Zend_Application_Resource
     public function init()
     {
         $options = $this->getOptions();
-        $translateLogger = $this->_getLogger('default');
+        $translateLogger = $this->getLogger('default');
 
         // Set default translate source
         if (null !== $translateLogger) {
@@ -98,7 +98,7 @@ class Pike_Application_Resource_MultiTranslate extends Zend_Application_Resource
             $translateSettings['content'] = str_replace('%locale%', $translate->getLocale(), $translateSettings['content']);
 
             if (file_exists($translateSettings['content'])) {
-                $translateLogger = $this->_getLogger($translateSourceName);
+                $translateLogger = $this->getLogger($translateSourceName);
                 if (null !== $translateLogger) {
                     $translateSettings['log'] = $translateLogger;
                 }
@@ -118,7 +118,7 @@ class Pike_Application_Resource_MultiTranslate extends Zend_Application_Resource
      * @param  string $namespace
      * @return Zend_Log
      */
-    public function _getLogger($namespace = null)
+    public function getLogger($namespace = null)
     {
         if (!array_key_exists($namespace, $this->_loggers)) {
             $this->_loggers[$namespace] = null;
