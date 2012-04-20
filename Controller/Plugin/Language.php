@@ -74,19 +74,19 @@
  * To enable translatable routes add for example to your application.ini:
  * 
  * pike.route.translate.adapter = "array"
- * pike.route.translate.content = APPLICATION_PATH "/../languages/%locale%/routes.php"
+ * pike.route.translate.content = APPLICATION_PATH "/../languages/routes"
  * pike.route.translate.locale = "auto"
+ * pike.route.translate.scan = "filename"
  * pike.route.translate.logUntranslated = 1
  * pike.route.translate.disableNotices = 1
  * 
- * Example of routes.php for locale "nl":
+ * Example of APPLICATION_PATH "/../languages/routes/nl.php for locale "nl":
  * 
  * return array(
  *     'news' => 'nieuws', // Note the @ character added to news in the newsShowAbstract route,
  *                         // that makes it translatable
  *     'some-other-word' => 'een-ander-woord',
  * );
- *
  * 
  * @category   PiKe
  * @copyright  Copyright (C) 2011 by Pieter Vogelaar (pietervogelaar.nl) and Kees Schepers (keesschepers.nl)
