@@ -136,23 +136,28 @@ class Pike_View_Helper_Navigation_PikeBreadcrumbs extends Zend_View_Helper_Navig
     /**
      * Appends an array of Zend_Navigation_Page objects
      *
-     * @param array $pages
+     * @param  array $pages
+     * @return self
      */
     public function appendPages(array $pages)
     {
         foreach ($pages as $page) {
             $this->appendPage($page);
         }
+        
+        return $this;
     }
 
     /**
      * Appends a page
      *
-     * @param Zend_Navigation_Page $page
+     * @param  Zend_Navigation_Page $page
+     * @return self
      */
     public function appendPage(Zend_Navigation_Page $page)
     {
         $this->_appendedPages[] = $page;
+        return $this;
     }
 
     /**
