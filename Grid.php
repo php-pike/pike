@@ -147,7 +147,7 @@ class Pike_Grid
      * Pike_Grid needs to know the data source in order to generate the initial column names etc.
      *
      * @param  Pike_Grid_DataSource_Interface $dataSource
-     * @return Pike_Grid
+     * @return self
      */
     public function setDataSource(Pike_Grid_DataSource_Interface $dataSource)
     {
@@ -188,7 +188,7 @@ class Pike_Grid
      * Sets the (unique) grid ID
      *
      * @param  string $id
-     * @return Pike_Grid
+     * @return self
      */
     public function setId($id)
     {
@@ -212,8 +212,8 @@ class Pike_Grid
      *
      * Seperate multiple classes with a whitespace.
      *
-     * @param string $classes
-     * @return Pike_Grid
+     * @param  string $classes
+     * @return self
      */
     public function setClasses($classes)
     {
@@ -241,7 +241,7 @@ class Pike_Grid
      *
      * @param  string $attribute
      * @param  string $value
-     * @return Pike_Grid
+     * @return self
      */
     public function setAttribute($attribute, $value)
     {
@@ -254,11 +254,12 @@ class Pike_Grid
      *
      * @param  string $attribute
      * @param  string $value
-     * @return Pike_Grid
+     * @return self
      */
     public function prependAttribute($attribute, $value)
     {
         $this->_mergeAttribute($attribute, $value, 'prepend');
+        return $this;
     }
 
     /**
@@ -266,18 +267,31 @@ class Pike_Grid
      *
      * @param  string $attribute
      * @param  string $value
-     * @return Pike_Grid
+     * @return self
      */
     public function appendAttribute($attribute, $value)
     {
         $this->_mergeAttribute($attribute, $value, 'append');
+        return $this;
+    }
+
+    /**
+     * Removes the specified attribute
+     *
+     * @param string $attribute
+     * @param self
+     */
+    public function removeAttribute($attribute)
+    {
+        unset($this->_attributes[$attribute]);
+        return $this;
     }
 
     /**
      * Sets the pager ID
      *
      * @param  string $id
-     * @return Pike_Grid
+     * @return self
      */
     public function setPagerId($id)
     {
@@ -289,7 +303,7 @@ class Pike_Grid
      * Sets the amount of rows to display per page
      *
      * @param  integer $amount For unlimited rows fill in "-1"
-     * @return Pike_Grid
+     * @return self
      */
     public function setRowsPerPage($amount)
     {
@@ -352,7 +366,7 @@ class Pike_Grid
      * @param  array   $attributes If an integer is specified, it will be seen as a position for
      *                             backward compatibility reasons. To specifically set a column
      *                             position, define it as an attribute.
-     * @return Pike_Grid
+     * @return self
      */
     public function addColumn($name, $data, $label = null, $sidx = null, $attributes = array())
     {
@@ -400,7 +414,7 @@ class Pike_Grid
      * @param  string $columnName The name of the column
      * @param  string $attribute
      * @param  string $value
-     * @return Pike_Grid
+     * @return self
      */
     public function setColumnAttribute($columnName, $attribute, $value)
     {
@@ -451,7 +465,7 @@ class Pike_Grid
      *
      * @param  string $name
      * @param  array  $options
-     * @return Pike_Grid
+     * @return self
      */
     public function setMethod($name, $options = array())
     {
@@ -462,7 +476,8 @@ class Pike_Grid
     /**
      * Sets the row click event
      *
-     * @param string $data
+     * @param string  $data
+     * @param boolean $link Set to FALSE if custom code instead of a link must be executed
      *
      * The first argument "rowId" of the javaScript callback will be the value of the identifier
      * column for the particular row if specified.
@@ -470,25 +485,27 @@ class Pike_Grid
      * You can specify an identifier column on a data source like: $dataSource->setIdentifierColumn('id');
      * If no identifier column is set, the value of "rowId" will just be the grid row number.
      */
-    public function setRowClickEvent($data)
+    public function setRowClickEvent($data, $link = true)
     {
-        if (strpos($data, 'http') === 0 || strpos($data, '=') === false) {
-            if (strpos($data, '+') !== false) {
-                $literalCharacter = "";
-            } else {
-                $literalCharacter = "'";
-            }
-            $data = $literalCharacter . $data . $literalCharacter;
+        if (false !== $link) {
+            if (strpos($data, 'http') === 0 || strpos($data, '=') === false) {
+                if (strpos($data, '+') !== false) {
+                    $literalCharacter = "";
+                } else {
+                    $literalCharacter = "'";
+                }
+                $data = $literalCharacter . $data . $literalCharacter;
 
-            $data = <<<EOF
-if (e.shiftKey) {
-                window.open({$data}, '_blank');
-            } else if (e.ctrlKey) {
-                window.open({$data});
-            } else {
-                location.href = {$data};
-            }
+                $data = <<<EOF
+    if (e.shiftKey) {
+                    window.open({$data}, '_blank');
+                } else if (e.ctrlKey) {
+                    window.open({$data});
+                } else {
+                    location.href = {$data};
+                }
 EOF;
+            }
         }
 
         $this->appendAttribute('onCellSelect', new Zend_Json_Expr("
@@ -681,7 +698,7 @@ EOF;
      * @param  string $attribute
      * @param  mixed  $value
      * @param  string $method "append" (default) or "prepend"
-     * @return Pike_Grid
+     * @return self
      */
     protected function _mergeAttribute($attribute, $value, $method = 'append')
     {
