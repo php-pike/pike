@@ -83,6 +83,8 @@
 
         /**
          * Sets the default params of a grid
+         *
+         * @param grid
          */
         setDefaults : function(grid) {
             var defaults = [];
@@ -96,32 +98,7 @@
          * Grid complete callback function
          */
         gridComplete : function() {
-            this.setFilterInputFields();
             this.buildHash();
-        },
-
-        /**
-         * Sets the filter input fields with the values
-         */
-        setFilterInputFields : function() {
-            this.getGrids().each(function() {
-                var grid = $(this);
-                var filters = $.parseJSON(grid.getGridParam('postData').filters);
-                if (null !== filters) {
-                    grid.closest('.ui-jqgrid').find('.ui-search-toolbar input[id^="gs_"]')
-                    .each(function() {
-                        var field = $(this).attr('name');
-                        var value = '';
-                        for (var i in filters.rules) {
-                            if (field == filters.rules[i].field) {
-                                value = filters.rules[i].data;
-                                continue;
-                            }
-                        }
-                        $(this).val(value);
-                    });
-                }
-            });
         },
 
         /**
@@ -186,19 +163,15 @@
         addFiltersToHash : function(hash, grid) {
             var id = grid.getGridParam('id');
             var prefix = (this.prefix ? id + '-' : '');
-            var filters = $.parseJSON(grid.getGridParam('postData').filters);
-            var param;
+            var param = prefix + 'filters';
 
-            if (filters && filters.rules && filters.rules.length > 0) {
-                filters = grid.getGridParam('postData').filters;
-                param = prefix + 'filters';
+            if (true === grid.getGridParam('search')) {
+                var filters = grid.getGridParam('postData').filters;
                 if (filters != hash[param]) {
                     hash[param] = filters;
                     this.pushState = true;
                 }
-                hash[param] = grid.getGridParam('postData').filters;
             } else {
-                param = prefix + 'filters';
                 if (hash[param]) {
                     delete hash[param];
                     this.pushState = true;
@@ -229,27 +202,46 @@
                 var reload = false;
 
                 reload = self.handleParams(params, hash, grid) || reload;
-
                 if (self.filters) {
-                    var filters = $.parseJSON(grid.getGridParam('postData').filters);
-                    var hashFilters = $.parseJSON(
-                        hash[(this.prefix ? grid.getGridParam('id') + '-' : '') + 'filters']);
-                    if (null === filters && null !== hashFilters) {
-                        filters = hashFilters;
-                    }
-
-                    reload = self.handleFilters(filters, hash, grid) || reload;
-
-                    if (filters) {
-                        params['postData'] = {
-                            filters : JSON.stringify(filters)
-                        };
-                    }
+                    reload = self.handleFilters(params, hash, grid) || reload;
                 }
 
                 if (reload) {
                     grid.setGridParam(params).trigger('reloadGrid');
                 }
+            });
+        },
+
+
+        /**
+         * Returns the visible filter toolbar input fields for a grid
+         *
+         * @param grid
+         */
+        getFilterToolbarInputFields : function(grid) {
+            return grid.closest('.ui-jqgrid')
+            .find('.ui-search-toolbar input[id^="gs_"]:visible');
+        },
+
+        /**
+         * Sets the visible filter toolbar input fields with the correct values
+         *
+         * @param filters
+         * @param grid
+         */
+        setFilterToolbarInputFields : function(filters, grid) {
+            this.getFilterToolbarInputFields(grid).each(function() {
+                var field = $(this).attr('name');
+                var value = '';
+                if (null !== filters && filters.rules.length > 0) {
+                    for (var i in filters.rules) {
+                        if (field == filters.rules[i].field) {
+                            value = filters.rules[i].data;
+                            continue;
+                        }
+                    }
+                }
+                $(this).val(value);
             });
         },
 
@@ -281,14 +273,16 @@
         /**
          * Handles the filters from the hash
          *
-         * @param  filters
+         * @param  params
          * @param  hash
          * @param  grid
          * @return boolean  Reload needed?
          */
-        handleFilters : function(filters, hash, grid) {
-            var hashFilters = $.parseJSON(
-                hash[(this.prefix ? grid.getGridParam('id') + '-' : '') + 'filters']);
+        handleFilters : function(params, hash, grid) {
+            var id = grid.getGridParam('id');
+            var prefix = (this.prefix ? id + '-' : '');
+            var filters = $.parseJSON(grid.getGridParam('postData').filters);
+            var hashFilters = $.parseJSON(hash[prefix + 'filters']);
             var reload = false;
 
             if (null !== filters) {
@@ -296,7 +290,20 @@
                 if (null !== hashFilters) {
                     reload = this.addFilters(filters, hashFilters) || reload;
                 }
+            } else if (null !== hashFilters) {
+                filters = hashFilters;
+                reload = true;
             }
+
+            if (filters) {
+                params['search'] = true;
+                params['postData'] = {
+                    filters : JSON.stringify(filters)
+                };
+            }
+
+            this.setFilterToolbarInputFields(filters, grid);
+
             return reload;
         },
 
@@ -378,15 +385,17 @@
         $.jgrid.pike.history.bindHashchangeEventToWindow();
         $.jgrid.pike.history.setDefaults(this);
 
-        $.jgrid.pike.history.hashchangeHandler();
+        var self = this;
+        $(this).ready(function() {
+            $.jgrid.pike.history.hashchangeHandler();
+            if ('' != datatype) {
+                self.setGridParam({
+                    datatype: datatype
+                });
+            }
 
-        if ('' != datatype) {
-            this.setGridParam({
-                datatype: datatype
-            });
-        }
-
-        this.trigger('reloadGrid');
+            self.trigger('reloadGrid');
+        });
         return this;
     };
 })(jQuery);
