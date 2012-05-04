@@ -109,11 +109,15 @@
             var hash = $.bbq.getState();
             this.getGrids().each(function() {
                 var grid = $(this);
-                if ('local' != grid.getGridParam('datatype')) {
-                    self.addParamsToHash(hash, grid);
+                var id = grid.getGridParam('id');
 
-                    if (self.filters) {
-                        self.addFiltersToHash(hash, grid);
+                if (undefined !== self.defaults[id]) {
+                    if ('local' != grid.getGridParam('datatype')) {
+                        self.addParamsToHash(hash, grid);
+
+                        if (self.filters) {
+                            self.addFiltersToHash(hash, grid);
+                        }
                     }
                 }
             });
@@ -198,16 +202,19 @@
 
             this.getGrids().each(function() {
                 var grid = $(this);
+                var id = grid.getGridParam('id');
                 var params = new Array();
                 var reload = false;
 
-                reload = self.handleParams(params, hash, grid) || reload;
-                if (self.filters) {
-                    reload = self.handleFilters(params, hash, grid) || reload;
-                }
+                if (undefined !== self.defaults[id]) {
+                    reload = self.handleParams(params, hash, grid) || reload;
+                    if (self.filters) {
+                        reload = self.handleFilters(params, hash, grid) || reload;
+                    }
 
-                if (reload) {
-                    grid.setGridParam(params).trigger('reloadGrid');
+                    if (reload) {
+                        grid.setGridParam(params).trigger('reloadGrid');
+                    }
                 }
             });
         },
