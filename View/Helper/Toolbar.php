@@ -449,7 +449,7 @@ EOF;
             if ($param instanceof DateTime) {
                 $param = $param->format('Y-m-d H:i:s');
             } else if (is_array($param)) {
-                $param = var_export($param, true);
+                $param = '[' . implode(', ', $param) . ']';
             }
             $params .= sprintf('%s, ', $param);
         }
@@ -462,8 +462,47 @@ EOF;
             $class = 'query-slow';
         }
 
-        return sprintf('<tr class="%s"><td>%s</td><td>%s</td><td>%s</td><td style="width: 100px">%s</td></tr>',
-            $class, $i, $query['sql'], $params, round($query['executionMS'], 4) .' sec');
+        $content = '<tr class="%s">'
+            . '<td>%s</td>'
+            . '<td class="query"><span class="raw">%s</span><span class="bound">%s</span></td>'
+            . '<td style="width: 100px">%s</td>'
+            . '</tr>';
+
+        return sprintf($content, $class, $i, $query['sql'], self::bindDatabaseQuery($query),
+            $params, round($query['executionMS'], 4) . ' sec');
+    }
+
+    /**
+     * Renders the specified database query bound
+     *
+     * @param  array  $query
+     * @return string
+     */
+    public static function bindDatabaseQuery($query)
+    {
+        $escape = function($param, $escape) {
+            if (is_array($param)) {
+                foreach ($param as $key => $value) {
+                    $param[$key] = $escape($value, $escape);
+                }
+                $param = implode(', ', $param);
+            } else {
+                if ($param instanceof DateTime) {
+                    $param = $param->format('Y-m-d H:i:s');
+                }
+                if (!is_numeric($param)) {
+                    $param = "'" . $param . "'";
+                }
+            }
+            return $param;
+        };
+
+        $values = array();
+        foreach ($query['params'] as $index => $param) {
+            $values[] = $escape($param, $escape);
+        }
+
+        return vsprintf(str_replace('?', '%s', $query['sql']), $values);
     }
 
     /**

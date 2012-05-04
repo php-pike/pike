@@ -130,14 +130,51 @@
         },
 
         initDialogs : function() {
-            // Hide dialog(s) when something outside the dialog is clicked
-            $(document).click(function() {
-                $('.dialog', '#pike-toolbar').fadeOut('fast');
+            var mouseIsInside = false;
+            $('.dialog', '#pike-toolbar').hover(function() {
+                mouseIsInside = true;
+            }, function() {
+                mouseIsInside = false;
             });
 
-            $('.dialog', '#pike-toolbar').click(function(event) {
-                // Avoid closing of a dialog when clicking on its elements
-                event.stopPropagation();
+            $(document).click(function() {
+                if (!mouseIsInside) {
+                    $('.dialog', '#pike-toolbar').fadeOut('fast');
+                }
+            });
+
+            this.initDatabaseQueriesDialog();
+        },
+
+        initDatabaseQueriesDialog : function() {
+            this.addDatabaseQueryToggleButtons();
+        },
+
+        addDatabaseQueryToggleButtons : function() {
+            var self = this, bound;
+            $('td.query').each(function() {
+                if ($(this).find('a.toggle').length < 1) {
+                    $(this).prepend('<a href="#" class="toggle ' + (bound ? 'bound' : 'raw') + '">'
+                        + '<img src="' + self.baseUrl + '/pike/images/page_white_code.png" /></a>');
+                }
+            });
+            this.bindClickEventToQueryToggleImages();
+        },
+
+        bindClickEventToQueryToggleImages : function() {
+            var self = this;
+            $('td.query a.toggle').each(function() {
+                if (undefined === $(this).data('events') || typeof $(this).data('events').click != 'object') {
+                    var column = $(this).closest('td');
+                    $(this).click(function() {
+                        var bound = ($(column).find('span.bound:visible').length);
+                        $(this).html('<img src="' + self.baseUrl + '/pike/images/page_white_code'
+                            + (bound ? '' : '_red') + '.png" />');
+                        $(column).find('span.' + (bound ? 'raw' : 'bound')).show();
+                        $(column).find('span.' + (bound ? 'bound' : 'raw')).hide();
+                        return false;
+                    });
+                }
             });
         },
 
@@ -147,9 +184,9 @@
             if (this.ajaxDatabaseQueriesEnabled) {
                 // This merges with other setup AJAX data
                 $.ajaxSetup({
-                    data: { pikeToolbarUniqueKey: $.pike.toolbar.uniqueKey }            
+                    data: { pikeToolbarUniqueKey: $.pike.toolbar.uniqueKey }
                 });
-                
+
                 $('.query-log-ajax-container', '#pike-toolbar').show();
                 this.bindClickEventToAjaxDatabaseQueriesReloadButton();
 
@@ -161,7 +198,7 @@
                         // Only take action if AJAX request was not initiated by PiKe
                         if (ajaxOptions.url.indexOf(self.baseUrl + '/pike') !== 0
                             && self.firstTimeAjaxDatabaseQueriesRetrieved
-                        ) {
+                            ) {
                             $('.reload', '#pike-toolbar').click();
                         }
                     });
@@ -180,23 +217,24 @@
         getAjaxDatabaseQueries : function() {
             var self = this;
             $.post(this.baseUrl +'/pike/ajax-database-queries', {
-                    pikeToolbarUniqueKey: this.uniqueKey
-                }, function(data) {
-                    var json = $.parseJSON(data);
-                    if (typeof json.data != 'undefined') {
-                        if ('' != json.data) {
-                            $('.query-log-ajax-container', '#pike-toolbar').replaceWith(json.data);
-                            self.bindClickEventToAjaxDatabaseQueriesReloadButton();
+                pikeToolbarUniqueKey: this.uniqueKey
+            }, function(data) {
+                var json = $.parseJSON(data);
+                if (typeof json.data != 'undefined') {
+                    if ('' != json.data) {
+                        $('.query-log-ajax-container', '#pike-toolbar').replaceWith(json.data);
+                        self.bindClickEventToAjaxDatabaseQueriesReloadButton();
+                        self.addDatabaseQueryToggleButtons();
 
-                            $('.button-databaseQueries .count-ajax', '#pike-toolbar')
-                                .text(json.count)
-                                .show();
-                            $('.button-databaseQueries .divider', '#pike-toolbar').show();
-                        }
+                        $('.button-databaseQueries .count-ajax', '#pike-toolbar')
+                        .text(json.count)
+                        .show();
+                        $('.button-databaseQueries .divider', '#pike-toolbar').show();
                     }
-
-                    self.firstTimeAjaxDatabaseQueriesRetrieved = true;
                 }
+
+                self.firstTimeAjaxDatabaseQueriesRetrieved = true;
+            }
             );
         },
 
