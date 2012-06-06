@@ -466,6 +466,7 @@ EOF;
             . '<td>%s</td>'
             . '<td class="query"><span class="raw">%s</span><span class="bound">%s</span></td>'
             . '<td style="width: 100px">%s</td>'
+            . '<td style="width: 80px">%s</td>'
             . '</tr>';
 
         return sprintf($content, $class, $i, $query['sql'], self::bindDatabaseQuery($query),
@@ -502,7 +503,11 @@ EOF;
             $values[] = $escape($param, $escape);
         }
 
-        return vsprintf(str_replace('?', '%s', $query['sql']), $values);
+        $query['sql'] = str_replace('%', '%%', $query['sql']);
+        $query['sql'] = vsprintf(str_replace('?', '%s', $query['sql']), $values);
+        $query['sql'] = str_replace('%%', '%', $query['sql']);
+
+        return $query['sql'];
     }
 
     /**
