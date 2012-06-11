@@ -1,5 +1,7 @@
 ### Welcome to the *PiKe 1.4* Release!
 
+[![Build Status](https://secure.travis-ci.org/php-pike/Pike.png?branch=master)](http://travis-ci.org/php-pike/Pike)
+
 ## RELEASE INFORMATION
 
 PiKe 1.4 is mainly the same as the last 1.2 release except that the 
