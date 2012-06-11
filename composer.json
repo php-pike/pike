@@ -1,0 +1,34 @@
+{
+    "name": "php-pike/pike",
+    "version": "1.4.0-alpha",
+    "description": "",
+    "keywords": ["datagrid", "zendframework", "jquery", "doctrine2", "grid", "EntityAudit", "Forms", "Toolbar", "Reflection"],
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+    {
+        "name": "Kees Schepers",
+        "email": "kees@keesschepers.nl",
+        "homepage": "http://keesschepers.nl/"
+    },
+    {
+        "name": "Pieter Vogelaar",
+        "email": "pieter@pietervogelaar.nl",
+        "homepage": "http://pietervogelaar.nl/"
+    }
+    ],
+    
+    "require": {
+        "php": ">=5.3",
+        "doctrine/orm": "2.*",
+        "breerly/zf1" : "1.11.11"
+    },
+    
+    "autoload":     {
+        "psr-0": {
+            "doctrine/doctrine2" : "lib/",
+            "breerly/zf1" : "library/"
+        }
+    },
+    "target-dir": "php-pike/pike"
+}
