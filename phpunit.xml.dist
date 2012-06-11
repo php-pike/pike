@@ -1,0 +1,25 @@
+<phpunit bootstrap="./tests/bootstrap.php" colors="true">
+    <testsuites>
+        <testsuite name="Library Test Suite">
+            <directory>./tests/lib/Pike</directory>
+        </testsuite>
+    </testsuites>
+
+    <filter>
+        <whitelist>
+            <directory suffix=".php">./lib/Pike</directory>
+            <exclude>
+<!--                <directory suffix=".php">test</directory>-->
+            </exclude>
+        </whitelist>
+        <blacklist>
+<!--            <directory>test</directory>-->
+        </blacklist>
+    </filter>
+
+    <logging>
+        <log type="coverage-html" target="./tests/log/report" charset="UTF-8" yui="true" highlight="true" lowUpperBound="50" highLowerBound="80" />
+        <log type="junit" target="./tests/log/testresults.xml" logIncompleteSkipped="false"/>
+        <log type="testdox" target="./test/log/testdox.html" />
+    </logging>
+</phpunit>
