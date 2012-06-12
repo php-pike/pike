@@ -29,5 +29,5 @@ and the rest will follow.
 
 We'll hope you enjoy our library!
 
-With dutch greetins,
+With dutch greetings,
 Pieter Vogelaar & Kees Schepers
