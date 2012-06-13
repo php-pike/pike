@@ -125,14 +125,14 @@ class Pike_Validate_DateYears extends Zend_Validate_Abstract
                     return false;
                 }
                 break;
-            case '<';
-                if ($years >= $this->_years) {
+            case '<';                
+                if ($years <= $this->_years) {
                     $this->_error(self::NOT_LESS);
                     return false;
                 }
                 break;
             case '<=':
-                if ($years > $this->_years) {
+                if ($years < $this->_years) {
                     $this->_error(self::NOT_LESS_OR_EQUALS);
                     return false;
                 }

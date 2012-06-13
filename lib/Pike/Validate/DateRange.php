@@ -192,7 +192,7 @@ class Pike_Validate_DateRange extends Zend_Validate_Abstract
                 return false;
             }
         } elseif($this->greaterThan instanceof Zend_Date && $this->lessThan instanceof Zend_Date) {
-            if (!$valueDate->isEarlier($this->lessThan) || !$valueDate->isLater($this->greaterThan)) {
+            if ($valueDate->isEarlier($this->lessThan) || $valueDate->isLater($this->greaterThan)) {
                 $this->_inputValue = $this->lessThan->toString($this->format) . ' and ' . $this->_inputValue = $this->greaterThan->toString($this->format);
                 $this->_error(self::NOT_BETWEEN);
                 return false;

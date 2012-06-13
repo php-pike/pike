@@ -31,10 +31,8 @@
  *
  * Usage:
  * $element->addValidator(new Pike_Validate_DateCompare('startdate')); // exact match
- * $element->addValidator(new Pike_Validate_DateCompare('startdate', 'enddate')); // between dates
  * $element->addValidator(new Pike_Validate_DateCompare('startdate', '<')); // not later
  * $element->addValidator(new Pike_Validate_DateCompare('startdate', '>')); // not earlier
- * $element->addValidator(new Pike_Validate_DateCompare('startdate', true, 'm-d-Y')); // not later
  *     and specified element has value in date format m-d-Y
  *
  * @category   PiKe
@@ -97,12 +95,12 @@ class Pike_Validate_DateCompare extends Zend_Validate_Abstract
      * @param  boolean $compare
      * @param  string  $inputDateFormat
      */
-    public function __construct($token = null, $compare = true, $inputDateFormat = null)
+    public function __construct($token = null, $compare = null, $inputDateFormat = null)
     {
         if (null !== $token) {
+            $this->setInputDateFormat($inputDateFormat);
             $this->setToken($token);
             $this->setCompare($compare);
-            $this->setInputDateFormat($inputDateFormat);
         }
     }
 
@@ -114,8 +112,18 @@ class Pike_Validate_DateCompare extends Zend_Validate_Abstract
      */
     public function setToken($token)
     {
-        $this->_tokenValue = (string) $token->getValue();
+        if($token instanceof Zend_Form_Element) {
+            $this->_tokenValue = (string) $token->getValue();
+        } elseif($token instanceof Zend_Date) {
+            $this->_tokenValue = $token->toString($this->getInputDateFormat());
+        } elseif($token instanceof DateTime) {
+            $this->_tokenValue = $token->format($this->getInputDateFormat());
+        } else {
+            $this->_tokenValue = $token;
+        }
+        
         $this->_token = $token;
+        
         return $this;
     }
 
@@ -208,11 +216,10 @@ class Pike_Validate_DateCompare extends Zend_Validate_Abstract
         if ($token === null) {
             $this->_error(self::MISSING_TOKEN);
             return false;
-        } else {
-            $this->setTokenValue($token->getValue());
         }
 
         $valueSystemDate = DateTime::createFromFormat($this->getInputDateFormat(), $value);
+
         if ($valueSystemDate instanceof DateTime) {
             $valueSystemDate->setTime(0, 0, 0);
         } else {
@@ -220,7 +227,7 @@ class Pike_Validate_DateCompare extends Zend_Validate_Abstract
             return false;
         }
 
-        $tokenSystemDate = DateTime::createFromFormat($this->getInputDateFormat(), $token->getValue());
+        $tokenSystemDate = DateTime::createFromFormat($this->getInputDateFormat(), $this->_tokenValue);
         if ($tokenSystemDate instanceof DateTime) {
             $tokenSystemDate->setTime(0, 0, 0);
         } else {
@@ -256,16 +263,9 @@ class Pike_Validate_DateCompare extends Zend_Validate_Abstract
                     return false;
                 }
                 break;
-            case null :
+            case '=' :
                 if (!$date1->equals($date2)) {
                     $this->_error(self::NOT_SAME);
-                    return false;
-                }
-                break;
-            default :
-                $date3 = new Zend_Date($this->getCompare());
-                if ($date1->compare($date2) < 0 || $date1->compare($date3) > 0) {
-                    $this->_error(self::NOT_BETWEEN);
                     return false;
                 }
                 break;
