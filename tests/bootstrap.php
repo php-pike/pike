@@ -21,3 +21,5 @@ set_include_path(implode(PATH_SEPARATOR, array(
 include_once 'autoload.php'; //composer
 $loader = Zend_Loader_Autoloader::getInstance();
 $loader->registerNamespace('Pike');
+
+Zend_Session::start();
