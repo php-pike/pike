@@ -84,7 +84,7 @@ class Pike_Grid_DataSource_Doctrine_Paginate
             $sql = 'SELECT COUNT(*) FROM (' . $countQuery->getSQL() . ') results';
 
             $stmt = $countQuery->getEntityManager()->getConnection()
-                ->executeQuery($sql, array_reverse(array_values($countQuery->getParameters())));
+                ->executeQuery($sql, array_values($countQuery->getParameters()));
 
             $count = $stmt->fetchColumn();
         } else {
