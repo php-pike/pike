@@ -36,16 +36,11 @@ class Pike_Grid_DataSource_Doctrine_Paginate
      */
     protected static function cloneQuery(Query $query)
     {
-        $reflector = new ReflectionClass($query);
-        $attribute = $reflector->getProperty('_paramTypes');
-        $attribute->setAccessible(true);
-        $paramTypes = $attribute->getValue($query);
-
         /* @var $countQuery Query */
         $countQuery = clone $query;
         $params = $query->getParameters();
 
-        $countQuery->setParameters($params, $paramTypes);
+        $countQuery->setParameters($params);
 
         return $countQuery;
     }
