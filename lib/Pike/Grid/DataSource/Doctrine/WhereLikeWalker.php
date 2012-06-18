@@ -26,6 +26,7 @@ use Doctrine\ORM\Query\TreeWalkerAdapter,
     Doctrine\ORM\Query\AST\PathExpression,
     Doctrine\ORM\Query\AST\LikeExpression,
     Doctrine\ORM\Query\AST\ComparisonExpression,
+    Doctrine\ORM\Query\AST\Literal,
     Doctrine\ORM\Query\AST\InputParameter,
     Doctrine\ORM\Query\AST\ConditionalPrimary,
     Doctrine\ORM\Query\AST\ConditionalTerm,
@@ -134,62 +135,104 @@ class Pike_Grid_DataSource_Doctrine_WhereLikeWalker extends TreeWalkerAdapter
             switch ($field->op) {
                 case 'eq':
                 case 'equal':
-                    $conditionalExpression = new ComparisonExpression($pathExpression, '=', $field->data);
+                    $conditionalExpression = new ComparisonExpression(
+                            $pathExpression, 
+                            new Literal(Literal::STRING, '=', $field->data)
+                    );
                     break;
                 case 'ne':
                 case 'not equal':
-                    $conditionalExpression = new ComparisonExpression($pathExpression, '!=', $field->data);
+                    $conditionalExpression = new ComparisonExpression(
+                            $pathExpression, 
+                            new Literal(Literal::STRING, '!=', $field->data)
+                    );
                     break;
                 case 'lt':
                 case 'less':
-                    $conditionalExpression = new ComparisonExpression($pathExpression, '<', $field->data);
+                    $conditionalExpression = new ComparisonExpression(
+                            $pathExpression, 
+                            new Literal(Literal::STRING, '<', $field->data)
+                    );
                     break;
                 case 'le':
                 case 'less or equal':
-                    $conditionalExpression = new ComparisonExpression($pathExpression, '<=', $field->data);
+                    $conditionalExpression = new ComparisonExpression(
+                            $pathExpression, 
+                            new Literal(Literal::STRING, '<=', $field->data)
+                    );
                     break;
                 case 'gt':
                 case 'greater':
-                    $conditionalExpression = new ComparisonExpression($pathExpression, '>', $field->data);
+                    $conditionalExpression = new ComparisonExpression(
+                            $pathExpression, 
+                            new Literal(Literal::STRING, '>', $field->data)
+                    );
                     break;
                 case 'ge':
                 case 'greater or equal':
-                    $conditionalExpression = new ComparisonExpression($pathExpression, '>=', $field->data);
+                    $conditionalExpression = new ComparisonExpression(
+                            $pathExpression, 
+                            new Literal(Literal::STRING, '>=', $field->data)
+                    );
                     break;
                 case 'bw':
                 case 'begins with':
-                    $conditionalExpression = new LikeExpression($pathExpression, $field->data . '%');
+                    $conditionalExpression = new LikeExpression(
+                            $pathExpression, 
+                            new Literal(Literal::STRING, $field->data . '%')
+                    );
                     break;
                 case 'bn':
                 case 'does not begin with':
-                    $conditionalExpression = new LikeExpression($pathExpression, $field->data . '%');
+                    $conditionalExpression = new LikeExpression(
+                            $pathExpression, 
+                            new Literal(Literal::STRING, $field->data . '%')
+                    );
                     $conditionalExpression->not = true;
                     break;
                 case 'in':
                 case 'is in':
-                    $conditionalExpression = new LikeExpression($pathExpression, '%' . $field->data . '%');
+                    $conditionalExpression = new LikeExpression(
+                            $pathExpression, 
+                            new Literal(Literal::STRING, '%' . $field->data . '%')
+                    );
                     break;
                 case 'ni':
                 case 'is not in':
-                    $conditionalExpression = new LikeExpression($pathExpression, '%' . $field->data . '%');
+                    $conditionalExpression = new LikeExpression(
+                            $pathExpression, 
+                            new Literal(Literal::STRING, '%' . $field->data . '%')
+                    );
                     $conditionalExpression->not = true;
                     break;
                 case 'ew':
                 case 'ends with':
-                    $conditionalExpression = new LikeExpression($pathExpression, '%' . $field->data);
+                    $conditionalExpression = new LikeExpression(
+                            $pathExpression, 
+                            new Literal(Literal::STRING, '%' . $field->data)
+                    );
                     break;
                 case 'en':
                 case 'does not end with':
-                    $conditionalExpression = new LikeExpression($pathExpression, '%' . $field->data);
+                    $conditionalExpression = new LikeExpression(
+                            $pathExpression, 
+                            new Literal(Literal::STRING, '%' . $field->data)
+                    );
                     $conditionalExpression->not = true;
                     break;
                 case 'cn':
                 case 'contains':
-                    $conditionalExpression = new LikeExpression($pathExpression, '%' . $field->data . '%');
+                    $conditionalExpression = new LikeExpression(
+                            $pathExpression, 
+                            new Literal(Literal::STRING, '%' . $field->data . '%')
+                    );
                     break;
                 case 'nc':
                 case 'does not contain':
-                    $conditionalExpression = new LikeExpression($pathExpression, '%' . $field->data . '%');
+                    $conditionalExpression = new LikeExpression(
+                            $pathExpression, 
+                            new Literal(Literal::STRING, '%' . $field->data . '%')
+                    );
                     $conditionalExpression->not = true;
                     break;
             }
