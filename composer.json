@@ -27,7 +27,8 @@
     "autoload":     {
         "psr-0": {
             "doctrine/doctrine2" : "lib/",
-            "breerly/zf1" : "library/"            
+            "breerly/zf1" : "library/",
+            "Pike_" : "lib/"
         }
     },
     "target-dir": "php-pike/pike"
