@@ -7,7 +7,10 @@ if(false === is_dir(__DIR__ . '/../vendor')) {
 
 // Define path to application directory
 defined('APPLICATION_PATH')
-    || define('APPLICATION_PATH', realpath(__DIR__ . '/./application'));
+    || define('APPLICATION_PATH', realpath(__DIR__ . '/../application'));
+
+defined('LIBRARY_PATH')
+    || define('LIBRARY_PATH', realpath(__DIR__ . '/../lib'));
 
 define('APPLICATION_ENV', 'testing');
 
