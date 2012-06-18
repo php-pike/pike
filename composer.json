@@ -30,6 +30,5 @@
             "breerly/zf1" : "library/",
             "Pike_" : "lib/"
         }
-    },
-    "target-dir": "php-pike/pike"
+    }
 }
