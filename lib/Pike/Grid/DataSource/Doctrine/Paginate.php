@@ -76,10 +76,39 @@ class Pike_Grid_DataSource_Doctrine_Paginate
         if (null !== $countQuery->getAST()->groupByClause
             || null !== $countQuery->getAST()->havingClause
         ) {
+            $walker = function($node, &$keys, $walker) {
+                    foreach ($node as $key => $value) {
+                        if (is_array($value) || $value instanceof \Doctrine\ORM\Query\AST\Node) {
+                            $walker($value, $keys, $walker);
+                        }
+                        if ($value instanceof \Doctrine\ORM\Query\AST\InputParameter && $value->isNamed) {
+                            $keys[] = $value->name;
+                        }
+                    }
+                };
+
+            $ast = $countQuery->getAST();
+
+            $keys = array();
+            foreach (array('fromClause', 'whereClause', 'havingClause') as $clause) {
+                if (isset($ast->$clause)) {
+                    $clause = $walker($ast->$clause, $keys, $walker);
+                }
+            }
+
+            $parameters = $countQuery->getParameters();
+
+            $values = array();
+            foreach ($keys as $key) {
+                if (isset($parameters[$key])) {
+                    $values[] = $parameters[$key];
+                }
+            }
+
             $sql = 'SELECT COUNT(*) FROM (' . $countQuery->getSQL() . ') results';
 
             $stmt = $countQuery->getEntityManager()->getConnection()
-                ->executeQuery($sql, array_values($countQuery->getParameters()));
+                ->executeQuery($sql, $values);
 
             $count = $stmt->fetchColumn();
         } else {
