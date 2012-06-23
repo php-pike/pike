@@ -103,7 +103,13 @@ class Pike_Reflection_Resource
 
                 // Initialize the reflection of the controller class
                 require_once $file->getPathname();
-                $className = $file->getBasename('.php');
+                                
+                if ('default' == $moduleName) {
+                    $className = $file->getBasename('.php');
+                } else {
+                    $className = $moduleName . '_' . $file->getBasename('.php');
+                }
+                                
                 $controllerName = $this->_getInflectedName($file->getBasename('Controller.php'));
                 $classReflection = new Zend_Reflection_Class($className);
 
