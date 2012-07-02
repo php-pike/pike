@@ -150,11 +150,7 @@ class Pike_Form_Decorator_Composite
         }
 
         if (in_array($element->getType(), array('Zend_Form_Element_Submit', 'Zend_Form_Element_Button', 'Zend_Form_Element_Reset'))) {
-            $value = $element->getLabel();
-            $attributes['class'] .= ' ui-button ui-widget ui-state-default ui-corner-all';
-            if ($element->getType() == 'Zend_Form_Element_Button') {
-                $attributes['class'] .= ' ui-button-text-only';
-            }
+            $value = $element->getLabel();            
         } else {
             $value = $element->getValue();
         }
