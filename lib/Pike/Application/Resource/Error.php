@@ -40,6 +40,8 @@
  * resources.log.php.writerParams.stream = APPLICATION_PATH "/../data/logs/php_errors.log"
  * resources.log.php.writerParams.mode = "a"
  * resources.log.php.writerParams.permission = "666"
+ * resources.log.php.writerParams.owner = "www-data"
+ * resources.log.php.writerParams.group = "www-data" 
  * resources.log.php.filterName = "Priority"
  * resources.log.php.filterParams.priority = 7
  * resources.log.php.formatterName = "Simple"
@@ -72,6 +74,16 @@ class Pike_Application_Resource_Error extends Zend_Application_Resource_Resource
             if (isset($config['writerParams']['permission'])) {
                 // Set the correct permissions on the log file
                 @chmod($config['writerParams']['stream'], octdec('0'. $config['writerParams']['permission']));
+            }
+        
+            if (isset($config['writerParams']['owner'])) {
+                // Set the correct owner on the log file
+                @chown($config['writerParams']['stream'], $config['writerParams']['owner']);
+            }
+
+            if (isset($config['writerParams']['group'])) {
+                // Set the correct group on the log file
+                @chgrp($config['writerParams']['stream'], $config['writerParams']['group']);
             }
 
             $logger = new Zend_Log();
