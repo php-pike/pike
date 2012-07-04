@@ -41,6 +41,8 @@
  * resources.log.translate.writerName = "Stream"
  * resources.log.translate.writerParams.stream = APPLICATION_PATH "/../data/logs/translate.log"
  * resources.log.translate.writerParams.permission = 660
+ * resources.log.translate.writerParams.owner = "www-data"
+ * resources.log.translate.writerParams.group = "www-data"
  * resources.log.translate.writerParams.mode = "a"
  * resources.log.translate.filterName = "Priority"
  * resources.log.translate.filterParams.priority = 7
@@ -134,6 +136,22 @@ class Pike_Application_Resource_MultiTranslate extends Zend_Application_Resource
                     // Set the correct permissions on the log file
                     @chmod($loggerOptions['writerParams']['stream'],
                         octdec('0'. $loggerOptions['writerParams']['permission']));
+                }
+                
+                if (isset($loggerOptions['writerParams']['stream'])
+                    && isset($loggerOptions['writerParams']['owner'])
+                ) {
+                    // Set the correct owner on the log file
+                    @chown($loggerOptions['writerParams']['stream'],
+                        $loggerOptions['writerParams']['owner']);
+                }
+                
+                if (isset($loggerOptions['writerParams']['stream'])
+                    && isset($loggerOptions['writerParams']['group'])
+                ) {
+                    // Set the correct group on the log file
+                    @chgrp($loggerOptions['writerParams']['stream'],
+                        $loggerOptions['writerParams']['group']);
                 }
 
                 $logger = new Zend_Log();
