@@ -225,12 +225,24 @@ class Pike_Controller_Plugin_Language extends Zend_Controller_Plugin_Abstract
                         $loggerOptions = array();
                     }
 
-                    if (isset($loggerOptions['writerParams']['stream'])
-                        && isset($loggerOptions['writerParams']['permission'])
-                    ) {
-                        // Set the correct permissions on the log file
-                        @chmod($loggerOptions['writerParams']['stream'],
-                            octdec('0'. $loggerOptions['writerParams']['permission']));
+                    if (isset($loggerOptions['writerParams']['stream'])) {
+                        if (isset($loggerOptions['writerParams']['permission']) {                    
+                            // Set the correct permissions on the log file
+                            @chmod($loggerOptions['writerParams']['stream'],
+                                octdec('0'. $loggerOptions['writerParams']['permission']));
+                        }
+                        
+                        if (isset($loggerOptions['writerParams']['owner']) {                    
+                            // Set the correct owner on the log file
+                            @chown($loggerOptions['writerParams']['stream'],
+                                $loggerOptions['writerParams']['owner']);
+                        }
+                        
+                        if (isset($loggerOptions['writerParams']['group']) {                    
+                            // Set the correct group on the log file
+                            @chgrp($loggerOptions['writerParams']['stream'],
+                                $loggerOptions['writerParams']['group']);
+                        }
                     }
 
                     $logger = new Zend_Log();
