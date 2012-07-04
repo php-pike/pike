@@ -247,6 +247,14 @@ class Pike_Controller_Plugin_Toolbar extends Zend_Controller_Plugin_Abstract
             }
             @chmod($log, octdec('0'. $chmod));
 
+            if (isset(Zend_Registry::get('config')->pike->permission->owner)) {
+                @chown(Zend_Registry::get('config')->pike->permission->owner);
+            }
+            
+            if (isset(Zend_Registry::get('config')->pike->permission->group)) {
+                @chgrp(Zend_Registry::get('config')->pike->permission->group);
+            }
+
             // Write to log
             $content = null;
 
