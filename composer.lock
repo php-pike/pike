@@ -1,66 +1,28 @@
 {
-    "hash": "a27187f9831eade2c1fca1c485a578ff",
+    "hash": "96e65e511759d4647b91bf8018b7abce",
     "packages": [
         {
-            "package": "breerly/zf1",
-            "version": "1.11.11"
-        },
-        {
             "package": "doctrine/common",
-            "version": "dev-master",
-            "source-reference": "f0b548aa55bb7dac36d79061270a085dd38635b4"
-        },
-        {
-            "package": "doctrine/common",
-            "version": "dev-master",
-            "alias-pretty-version": "2.3.x-dev",
-            "alias-version": "2.3.9999999.9999999-dev"
+            "version": "2.2.2"
         },
         {
             "package": "doctrine/dbal",
-            "version": "dev-master",
-            "alias-pretty-version": "2.3.x-dev",
-            "alias-version": "2.3.9999999.9999999-dev"
-        },
-        {
-            "package": "doctrine/dbal",
-            "version": "dev-master",
-            "source-reference": "2cac730bf48b384e3fdb4daf7d7847e3e42c5684"
+            "version": "2.2.2"
         },
         {
             "package": "doctrine/orm",
-            "version": "dev-master",
-            "alias-pretty-version": "2.3.x-dev",
-            "alias-version": "2.3.9999999.9999999-dev"
+            "version": "2.2.2"
         },
         {
-            "package": "doctrine/orm",
-            "version": "dev-master",
-            "source-reference": "a3210e78aa1dc461ac59b2ba8f4cc9da328392dd"
-        },
-        {
-            "package": "doctrine/orm",
-            "version": "dev-master",
-            "alias-pretty-version": "2.3.x-dev",
-            "alias-version": "2.3.9999999.9999999-dev"
-        },
-        {
-            "package": "symfony/console",
-            "version": "dev-master",
-            "source-reference": "afc5ecf2967bf3510363535c0389ddc0f6284784"
-        },
-        {
-            "package": "symfony/console",
-            "version": "dev-master",
-            "alias-pretty-version": "2.1.x-dev",
-            "alias-version": "2.1.9999999.9999999-dev"
+            "package": "zendframework/zendframework1",
+            "version": "1.11.12"
         }
     ],
     "packages-dev": null,
     "aliases": [
 
     ],
-    "minimum-stability": "dev",
+    "minimum-stability": "stable",
     "stability-flags": [
 
     ]
