@@ -189,7 +189,8 @@ class Pike_View_Helper_Navigation_PikeMenu extends Zend_View_Helper_Navigation_M
      * @link http://framework.zend.com/issues/browse/ZF-9300
      * 
      * Added support for markup list item
-     *
+     * Added RAW label
+     * 
      * @param  Zend_Navigation_Page $page  page to generate HTML for
      * @return string                      HTML string for the given page
      */
@@ -239,8 +240,10 @@ class Pike_View_Helper_Navigation_PikeMenu extends Zend_View_Helper_Navigation_M
             $element = 'span';
         }
 
+        $label = '' != $page->get('rawLabel') ? $page->get('rawLabel') : $this->view->escape($label);
+        
         return '<' . $element . $this->_htmlAttribs($attribs) . '>'
-             . $this->view->escape($label)
+             . $label
              . '</' . $element . '>';
     }
     
