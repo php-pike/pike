@@ -27,8 +27,10 @@
     "autoload":     {
         "psr-0": {
             "doctrine/doctrine2" : "lib/",
-            "breerly/zf1" : "library/",
+            "zendframework/zendframework1" : "library/",
             "Pike_" : "lib/"
         }
-    }
+    },
+    
+    "include_path" : ["lib/"]
 }
