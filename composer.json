@@ -32,5 +32,5 @@
         }
     },
     
-    "include_path" : ["lib/"]
+    "include-path" : ["lib/"]
 }
