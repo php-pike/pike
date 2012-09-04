@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Copyright (C) 2011 by Pieter Vogelaar (pietervogelaar.nl) and Kees Schepers (keesschepers.nl)
  *
@@ -69,6 +70,7 @@
  */
 class Pike_Application_Resource_MultiTranslate extends Zend_Application_Resource_ResourceAbstract
 {
+
     /**
      * Loggers
      *
@@ -83,6 +85,14 @@ class Pike_Application_Resource_MultiTranslate extends Zend_Application_Resource
      */
     public function init()
     {
+        if ($this->getBootstrap()->hasPluginResource('cachemanager')) {
+            $this->getBootstrap()->bootstrap("cachemanager");
+
+            $cacheManager = $this->getBootstrap()->getResource('cachemanager');
+            /* @var $cacheManager Zend_Cache_Manager */
+        }
+
+
         $options = $this->getOptions();
         $translateLogger = $this->getLogger('default');
 
@@ -90,6 +100,14 @@ class Pike_Application_Resource_MultiTranslate extends Zend_Application_Resource
         if (null !== $translateLogger) {
             $options['default']['log'] = $translateLogger;
         }
+
+        if (array_key_exists('cache', $options['default'])
+                && isset($cacheManager)) {
+
+            $options['default']['cache'] = $cacheManager
+                    ->getCache($options['default']['cache']);
+        }
+
         $translate = new Zend_Translate($options['default']);
 
         unset($options['logger']);
@@ -97,7 +115,9 @@ class Pike_Application_Resource_MultiTranslate extends Zend_Application_Resource
 
         // Add additional translate sources
         foreach ($options as $translateSourceName => $translateSettings) {
-            $translateSettings['content'] = str_replace('%locale%', $translate->getLocale(), $translateSettings['content']);
+            $translateSettings['content'] = str_replace(
+                    '%locale%', $translate->getLocale(), $translateSettings['content']
+            );
 
             if (file_exists($translateSettings['content'])) {
                 $translateLogger = $this->getLogger($translateSourceName);
@@ -131,27 +151,24 @@ class Pike_Application_Resource_MultiTranslate extends Zend_Application_Resource
                 $loggerOptions = $applicationConfig['resources']['log'][$options['logger']];
 
                 if (isset($loggerOptions['writerParams']['stream'])
-                    && isset($loggerOptions['writerParams']['permission'])
+                        && isset($loggerOptions['writerParams']['permission'])
                 ) {
                     // Set the correct permissions on the log file
-                    @chmod($loggerOptions['writerParams']['stream'],
-                        octdec('0'. $loggerOptions['writerParams']['permission']));
+                    @chmod($loggerOptions['writerParams']['stream'], octdec('0' . $loggerOptions['writerParams']['permission']));
                 }
-                
+
                 if (isset($loggerOptions['writerParams']['stream'])
-                    && isset($loggerOptions['writerParams']['owner'])
+                        && isset($loggerOptions['writerParams']['owner'])
                 ) {
                     // Set the correct owner on the log file
-                    @chown($loggerOptions['writerParams']['stream'],
-                        $loggerOptions['writerParams']['owner']);
+                    @chown($loggerOptions['writerParams']['stream'], $loggerOptions['writerParams']['owner']);
                 }
-                
+
                 if (isset($loggerOptions['writerParams']['stream'])
-                    && isset($loggerOptions['writerParams']['group'])
+                        && isset($loggerOptions['writerParams']['group'])
                 ) {
                     // Set the correct group on the log file
-                    @chgrp($loggerOptions['writerParams']['stream'],
-                        $loggerOptions['writerParams']['group']);
+                    @chgrp($loggerOptions['writerParams']['stream'], $loggerOptions['writerParams']['group']);
                 }
 
                 $logger = new Zend_Log();
@@ -163,4 +180,5 @@ class Pike_Application_Resource_MultiTranslate extends Zend_Application_Resource
 
         return $this->_loggers[$namespace];
     }
+
 }
