@@ -26,7 +26,8 @@
  * neccasary javascript and JSON for drawing a grid with jqGrid.
  *
  * Dependecies: jqGrid, Zend Framework
- *
+ * 
+ * @author     Nico Vogelaar
  * @category   PiKe
  * @copyright  Copyright (C) 2011 by Pieter Vogelaar (pietervogelaar.nl) and Kees Schepers (keesschepers.nl)
  * @license    MIT
