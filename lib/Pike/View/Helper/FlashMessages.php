@@ -92,6 +92,11 @@ class Pike_View_Helper_FlashMessages extends Zend_View_Helper_Abstract
         $namespaces = array('default', 'warning', 'error'))
     {
         $this->_flashMessenger = Zend_Controller_Action_HelperBroker::getStaticHelper('FlashMessenger');
+        
+        if(null === $translator && Zend_Registry::isRegistered('Zend_Translate')) {
+            $translator = Zend_Registry::get('Zend_Translate');
+        }
+        
         $this->_translator = $translator;
 
         $output = null;
