@@ -21,7 +21,7 @@
     "require": {
         "php": ">=5.3",
         "doctrine/orm": "2.*",
-	"zendframework/zendframework1" : "1.11.*"
+	"zendframework/zendframework1" : ">=1.11.11"
     },
     
     "autoload":     {
