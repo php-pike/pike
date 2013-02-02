@@ -1,10 +1,17 @@
 {
     "name": "php-pike/pike2",
-    "version": "0.1",
     "description": "PiKe is a extension library for ZendFramework2/Doctrine2 projects. PiKe has out-of-the-box support for building complete DataTables (jqGrid/Gebo) and many more cool stuff. Just check it out.",
-    "keywords": ["datagrid", "zendframework2", "zf2", "jquery", "doctrine2", "datatable", "grid"],
     "type": "library",
     "license": "MIT",
+    "keywords": [
+        "datagrid",
+        "zendframework2",
+        "zf2",
+        "jquery",
+        "doctrine2",
+        "datatable",
+        "grid"
+    ],
     "authors": [
     {
         "name": "Kees Schepers",
@@ -21,10 +28,16 @@
         "email": "nico@nicovogelaar.nl",
         "homepage": "http://nicovogelaar.nl/"
     }
-    ],   
+    ],
+    "minimum-stability": "dev",
+    "autoload": {
+        "psr-0": {
+            "Pike\\": "src/"
+        }
+    },
     "require": {
-        "php": ">=5.3",
+        "php": ">=5.3.3",
         "doctrine/orm": "2.3.*",
 	"zendframework/zendframework2" : ">=2.0.*"
-    }   
+    }
 }
