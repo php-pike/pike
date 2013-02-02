@@ -38,6 +38,6 @@
     "require": {
         "php": ">=5.3.3",
         "doctrine/orm": "2.3.*",
-	"zendframework/zendframework2" : ">=2.0.*"
+	"zendframework/zendframework2" : "2.0.*"
     }
 }
