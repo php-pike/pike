@@ -80,6 +80,21 @@ class Doctrine extends AbstractDataSource implements DataSourceInterface
     }
 
     /**
+     * @param integer $offset
+     * @param integer $limit
+     */
+    public function getItems($offset, $limit)
+    {
+        $hints = $this->getQueryHints();
+
+        $paginateQuery = Doctrine\Paginate::getPaginateQuery(
+                        $this->query, $offset, $limit, $hints
+        );
+
+        return $paginateQuery->getResult();
+    }
+
+    /**
      * @return integer
      */
     public function count()
@@ -122,7 +137,7 @@ class Doctrine extends AbstractDataSource implements DataSourceInterface
                     }
 
                     return array(
-                        \Doctrine\ORM\Query::HINT_CUSTOM_TREE_WALKERS => array('Pike_Grid_DataSource_Doctrine_WhereLikeWalker'),
+                        \Doctrine\ORM\Query::HINT_CUSTOM_TREE_WALKERS => array('Pike\DataTable\DataSource\Doctrine\WhereLikeWalker'),
                         'operator' => $filters->groupOp,
                         'fields' => $filters->rules,
                     );
@@ -274,21 +289,6 @@ class Doctrine extends AbstractDataSource implements DataSourceInterface
 //        }
 
         return $hints;
-    }
-
-    /**
-     * @param integer $offset
-     * @param integer $limit
-     */
-    public function getItems($offset, $limit)
-    {
-        $hints = $this->getQueryHints();
-
-        $paginateQuery = Doctrine\Paginate::getPaginateQuery(
-                        $this->query, $offset, $limit, $hints
-        );
-
-        return $paginateQuery->getResult();
     }
 
     /**

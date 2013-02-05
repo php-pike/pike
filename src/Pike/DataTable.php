@@ -4,6 +4,8 @@ namespace Pike;
 
 use Pike\DataTable\Adapter\AdapterInterface;
 use Pike\DataTable\DataSource\DataSourceInterface;
+use Zend\ServiceManager\ServiceManager;
+use Zend\View\Model\ViewModel;
 
 class DataTable
 {
@@ -19,44 +21,24 @@ class DataTable
     protected $dataSource;
 
     /**
-     * Item count per page
      *
-     * @var int
+     * @var \Zend\ServiceManager\ServiceManager
      */
-    protected $itemCountPerPage = 10;
-
-    /**
-     * Current page items
-     *
-     * @var Traversable
-     */
-    protected $currentItems = null;
-
-    /**
-     * Current page number (starting from 1)
-     *
-     * @var integer
-     */
-    protected $currentPageNumber = 1;
-
-    /**
-     * Number of pages
-     *
-     * @var integer
-     */
-    protected $pageCount = null;
+    protected $sm;
 
     /**
      * Constructor
      * 
      * @param AdapterInterface    $adapter
      * @param DataSourceInterface $dataSource
+     * @param ServiceManager      $sm
      */
     public function __construct(AdapterInterface $adapter,
-            DataSourceInterface $dataSource
+            DataSourceInterface $dataSource, ServiceManager $sm
     ) {
         $this->adapter = $adapter;
         $this->dataSource = $dataSource;
+        $this->sm = $sm;
     }
 
     /**
@@ -80,6 +62,16 @@ class DataTable
     }
 
     /**
+     * Returns the service manager
+     * 
+     * @return ServiceManager
+     */
+    public function getServiceManager()
+    {
+        return $this->sm;
+    }
+
+    /**
      * @return mixed
      */
     public function getResponse()
@@ -92,7 +84,12 @@ class DataTable
      */
     public function render()
     {
-        return $this->adapter->render($this);
+        $response = $this->adapter->render($this);
+        if ($response instanceof ViewModel) {
+            $response = $this->sm->get('ViewRenderer')->render($response);
+        }
+
+        return $response;
     }
 
     /**
@@ -101,71 +98,6 @@ class DataTable
     public function __toString()
     {
         return $this->render();
-    }
-
-    /**
-     * Returns the total number of items available.
-     *
-     * @return integer
-     */
-    public function getTotalItemCount()
-    {
-        return count($this->adapter);
-    }
-
-    /**
-     * Returns the number of items per page
-     * 
-     * @return integer
-     */
-    public function getItemCountPerPage()
-    {
-        return $this->itemCountPerPage;
-    }
-
-    /**
-     * Sets the number of items per page
-     * 
-     * @return integer
-     */
-    public function setItemCountPerPage($itemCountPerPage)
-    {
-        $this->itemCountPerPage = $itemCountPerPage;
-    }
-
-    /**
-     * Returns the number of items for the current page.
-     *
-     * @return integer
-     */
-    public function getCurrentItemCount()
-    {
-        return count($this->currentItems);
-    }
-
-    /**
-     * Returns the items for the current page.
-     *
-     * @return Traversable
-     */
-    public function getCurrentItems()
-    {
-
-        return $this->currentItems;
-    }
-
-    /**
-     * Sets the current page number.
-     *
-     * @param  integer   $pageNumber Page number
-     * @return Paginator $this
-     */
-    public function setCurrentPageNumber($pageNumber)
-    {
-        $this->currentPageNumber = (integer) $pageNumber;
-        $this->currentItems = null;
-
-        return $this;
     }
 
 }

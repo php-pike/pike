@@ -8,6 +8,7 @@ interface AdapterInterface
 {
 
     /**
+     * @param  \Pike\DataTable\Adapter\DataTable $dataTable
      * @return string
      */
     public function render(DataTable $dataTable);
@@ -22,6 +23,7 @@ interface AdapterInterface
     /**
      * Response for the data table (probably \Zend\View\Model\JsonModel)
      * 
+     * @param  \Pike\DataTable\Adapter\DataTable $dataTable
      * @return mixed
      */
     public function getResponse(DataTable $dataTable);
