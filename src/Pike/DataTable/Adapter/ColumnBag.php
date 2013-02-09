@@ -193,7 +193,7 @@ class ColumnBag implements \IteratorAggregate
 
         $columns = array_slice($this->columns, $offset, 1);
         if (count($columns) < 1) {
-            throw new \Pike\Exception('Ćolumn with offset "' . $offset . '" not found');
+            throw new \Pike\Exception('Ćolumn for offset "' . $offset . '" not found');
         }
 
         return current($columns);

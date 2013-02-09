@@ -28,11 +28,16 @@ abstract class AbstractAdapter implements AdapterInterface
     protected $options = array();
 
     /**
-     * Filter chain
+     * Filters
      * 
      * @var array
      */
     protected $filters = array();
+
+    /**
+     * @var boolean
+     */
+    protected $filtersPrepared = false;
 
     /**
      * @var ViewModel 
@@ -146,7 +151,7 @@ abstract class AbstractAdapter implements AdapterInterface
      */
     public function setFilter($name, \Closure $filter, $priority = 0)
     {
-        $this->filter[$name] = array('filter' => $filter, 'priority' => $priority);
+        $this->filters[$name] = array('filter' => $filter, 'priority' => $priority);
     }
 
     /**
@@ -158,11 +163,11 @@ abstract class AbstractAdapter implements AdapterInterface
      */
     public function getFilter($name)
     {
-        if (!isset($this->filter[$name])) {
+        if (!isset($this->filters[$name])) {
             throw new \Pike\Exception(sprintf('Cannot find a filter with the name "%s"', $name));
         }
 
-        return $this->filter[$name]['filter'];
+        return $this->filters[$name]['filter'];
     }
 
     /**
@@ -176,7 +181,7 @@ abstract class AbstractAdapter implements AdapterInterface
         $adapter = $this;
 
         $filter = function($string, array $column) use ($adapter) {
-                    if (!in_array($column['name'], $adapter->getExcludedColumnsForEscaping())) {
+                    if (!in_array($column['column'], $adapter->getExcludedColumnsForEscaping())) {
                         return htmlspecialchars($string, ENT_COMPAT, 'UTF-8');
                     }
                 };
@@ -228,12 +233,51 @@ abstract class AbstractAdapter implements AdapterInterface
     }
 
     /**
+     * Executes the filters on the (output) data
+     * 
+     * @param  string $string
+     * @param  array  $column
+     * @return string
+     */
+    protected function filter($string, array $column)
+    {
+        if (!$this->filtersPrepared) {
+            $this->prepareFilters();
+        }
+
+        foreach ($this->filters as $filter) {
+            $closure = $filter['filter'];
+            $string = $closure($string, $column);
+        }
+
+        return $string;
+    }
+
+    /**
+     * Prepare the filters by sorting the filter chain by priority
+     */
+    protected function prepareFilters()
+    {
+        $priorities = array();
+        foreach ($this->filters as $index => $filter) {
+            $priorities[$index] = $filter['priority'];
+        }
+        // Sort filter chain based on priority
+        array_multisort($priorities, SORT_ASC, $this->filters);
+        $this->filtersPrepared = true;
+    }
+
+    /**
      * Event that fires on filtering
+     * 
+     * @param DataSourceInterface $dataSource
      */
     abstract protected function onFilterEvent(DataSourceInterface $dataSource);
 
     /**
      * Event that fires on sorting
+     * 
+     * @param DataSourceInterface $dataSource
      */
     abstract protected function onSortEvent(DataSourceInterface $dataSource);
 }

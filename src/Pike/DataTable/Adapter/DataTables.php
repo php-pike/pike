@@ -75,7 +75,11 @@ class DataTables extends AbstractAdapter
         $data['aaData'] = array();
 
         foreach ($items as $item) {
-            $data['aaData'][] = array_values($item);
+            $row = array();
+            foreach (array_values($item) as $index => $string) {
+                $row[] = $this->filter($string, $this->columnBag->getOffset($index));
+            }
+            $data['aaData'][] = $row;
         }
 
         return new JsonModel($data);
