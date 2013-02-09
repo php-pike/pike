@@ -43,51 +43,21 @@ abstract class AbstractDataSource implements \Countable
     protected $columnBag;
 
     /**
+     * @var array
+     */
+    public $filters = array();
+
+    /**
+     * @var array
+     */
+    protected $sorts = array();
+
+    /**
      * If set, this column tells the data table how each row can be identified
      *
      * @var array
      */
     protected $identifierColumn;
-
-    /**
-     * Event that fires on filtering
-     *
-     * @var Closesure
-     */
-    protected $onFilter;
-
-    /**
-     * Event that fires on ordering the grid
-     *
-     * @var type Closure
-     */
-    protected $onOrder;
-
-    /**
-     * Closure for auto escaping column strings in the grid result
-     *
-     * @var closure
-     */
-    protected $autoEscapeClosure;
-
-    /**
-     * Columns that must not be escaped by the auto escape closure
-     *
-     * @var array
-     */
-    protected $excludedColumnsFromEscaping = array();
-
-    /**
-     * Constructor
-     *
-     * @param mixed $source
-     */
-    public function __construct()
-    {
-        $this->setAutoEscapeClosure(function($string) {
-                    return htmlspecialchars($string, ENT_COMPAT, 'UTF-8');
-                });
-    }
 
     /**
      * Sets a column name which identifies every row in the grid.
@@ -107,66 +77,58 @@ abstract class AbstractDataSource implements \Countable
     }
 
     /**
-     * Sets the closure for auto escaping column strings in the grid result
-     *
-     * @param  Closure $closure
-     * @return DataSourceInterface
+     * Adds filters to the data source for filtering results
+     * 
+     * @param array $filters
      */
-    public function setAutoEscapeClosure(\Closure $closure)
+    public function setFilters(array $filters)
     {
-        $this->autoEscapeClosure = $closure;
-        return $this;
-    }
-
-    /**
-     * Exludes columns from escaping
-     *
-     * The specified columns will not be escaped by the auto escape closure.
-     * This is relevant for columns that contain an image for example. Make sure that you do
-     * escaping for the content inside that column by yourself, otherwise you'll be vulnerable
-     * for XSS attacks!
-     *
-     * @param array $columns
-     */
-    public function excludeColumnsFromEscaping(array $columns)
-    {
-        foreach ($columns as $column) {
-            $this->excludedColumnsFromEscaping[] = $column;
+        foreach ($filters as $filter) {
+            $operator = isset($filter['operator']) ? $filter['operator'] : null;
+            $this->addFilter($filter['field'], $filter['data'], $operator);
         }
-
-        return $this;
     }
 
     /**
-     * Resets the entire list of columns to be excluded from escaping. This will set
-     * the datasource to normal behavior.
-     *
-     * @return DataSourceInterface
+     * Adds a filter to the data source for filtering the results
+     * 
+     * @param string $field
+     * @param string $data
+     * @param string $operator
      */
-    public function resetExcludeColumnsFromEscaping()
+    public function addFilter($field, $data, $operator = null)
     {
-        $this->excludedColumnsFromEscaping = array();
-
-        return $this;
+        $this->filters[] = array(
+            'field' => $field,
+            'data' => $data,
+            'operator' => 'OR' === $operator ? $operator : 'AND'
+        );
     }
 
     /**
-     * Escapes a string if the auto escape closure is defined
-     *
-     * @param  string $string
-     * @param  string $columnName
-     * @return string
+     * Adds sorts to the data source for sorting the results
+     * 
+     * @param array $sorts
      */
-    protected function escape($string, $columName = null)
+    public function setSorts(array $sorts)
     {
-        if (null !== $this->autoEscapeClosure) {
-            if (null === $columName || !in_array($columName, $this->excludedColumnsFromEscaping)) {
-                $autoEscapeClosure = $this->autoEscapeClosure;
-                $string = $autoEscapeClosure($string);
-            }
+        foreach ($sorts as $sort) {
+            $this->addFilter($sort['field'], $sort['direction']);
         }
+    }
 
-        return $string;
+    /**
+     * Adds a sort to the data source for sorting the results
+     * 
+     * @param string $field
+     * @param string $direction     ASC or DESC
+     */
+    public function addSort($field, $direction)
+    {
+        $this->sorts[] = array(
+            'field' => $field,
+            'direction' => $direction
+        );
     }
 
 }

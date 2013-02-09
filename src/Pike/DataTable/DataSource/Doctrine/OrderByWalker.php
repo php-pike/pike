@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Copyright (C) 2011 by Pieter Vogelaar (pietervogelaar.nl) and Kees Schepers (keesschepers.nl)
  *
@@ -41,6 +42,7 @@ use Doctrine\ORM\Query\TreeWalkerAdapter,
  */
 class OrderByWalker extends TreeWalkerAdapter
 {
+
     /**
      * Walks down a SelectStatement AST node, modify the orderby clause if the user
      * wants to sort his results.
@@ -50,26 +52,26 @@ class OrderByWalker extends TreeWalkerAdapter
      */
     public function walkSelectStatement(SelectStatement $AST)
     {
-        $sidx = $this->_getQuery()->getHint('sidx');
-        $sord = $this->_getQuery()->getHint('sord');
+        $fieldName = $this->_getQuery()->getHint('fieldName');
+        $direction = $this->_getQuery()->getHint('direction');
 
-        if(strpos($sidx, '.') !== false) {
-            $parts = explode('.', $sidx);
-            $sidx = $parts[1];
+        if (strpos($fieldName, '.') !== false) {
+            $parts = explode('.', $fieldName);
+            $fieldName = $parts[1];
             $alias = $parts[0];
         } else {
             $alias = null;
         }
 
         $pathExpression = new PathExpression(
-                PathExpression::TYPE_STATE_FIELD | PathExpression::TYPE_SINGLE_VALUED_ASSOCIATION,
-                $alias,
-                $sidx
+                        PathExpression::TYPE_STATE_FIELD | PathExpression::TYPE_SINGLE_VALUED_ASSOCIATION,
+                        $alias,
+                        $fieldName
         );
         $pathExpression->type = PathExpression::TYPE_STATE_FIELD;
 
         $orderByItem = new orderByItem($pathExpression);
-        $orderByItem->type = $sord;
+        $orderByItem->type = $direction;
 
         $orderByItems = array($orderByItem);
 
@@ -82,4 +84,5 @@ class OrderByWalker extends TreeWalkerAdapter
             $AST->orderByClause->orderByItems = $orderByItems;
         }
     }
+
 }

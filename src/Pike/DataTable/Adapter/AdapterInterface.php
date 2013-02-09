@@ -18,7 +18,7 @@ interface AdapterInterface
      * 
      * @param array $parameters
      */
-    public function setParameters(array $parameters = array());
+    public function setParameters(array $parameters);
 
     /**
      * Response for the data table (probably \Zend\View\Model\JsonModel)

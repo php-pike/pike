@@ -39,19 +39,17 @@ class Doctrine extends AbstractDataSource implements DataSourceInterface
 {
 
     /**
-     * @var $query Doctrine\ORM\Query
+     * @var $query \Doctrine\ORM\Query
      */
     protected $query;
 
     /**
      * Constructor
-     *
+     * 
      * @param mixed $source
      */
     public function __construct($source)
     {
-        parent::__construct();
-
         switch ($source) {
             case ($source instanceof \Doctrine\ORM\QueryBuilder) :
                 $this->query = $source->getQuery();
@@ -66,27 +64,15 @@ class Doctrine extends AbstractDataSource implements DataSourceInterface
                 throw new \Pike\Exception('Unknown source given, source must either be an entity, query or querybuilder object.');
                 break;
         }
-
-        $this->setColumns();
-        $this->initEvents();
     }
 
     /**
-     * @return Doctrine\ORM\Query
-     */
-    public function getQuery()
-    {
-        return $this->query;
-    }
-
-    /**
-     * @param integer $offset
-     * @param integer $limit
+     * {@inheritdoc}
      */
     public function getItems($offset, $limit)
     {
         $hints = $this->getQueryHints();
-
+        //var_dump($hints);exit();
         $paginateQuery = Doctrine\Paginate::getPaginateQuery(
                         $this->query, $offset, $limit, $hints
         );
@@ -103,58 +89,16 @@ class Doctrine extends AbstractDataSource implements DataSourceInterface
     }
 
     /**
-     * Initializes default behavior for sorting, filtering, etc.
-     *
-     * @return void
-     */
-    private function initEvents()
-    {
-        $onOrder = function(array $params, Pike_Grid_DataSource_Interface $dataSource) {
-                    $columns = $dataSource->getColumnBag()->all();
-
-                    $sidx = $dataSource->getSidx($params['sidx']);
-
-                    $sord = (in_array(strtoupper($params['sord']), array('ASC', 'DESC')) ? strtoupper($params['sord']) : 'ASC');
-
-                    return array(
-                        \Doctrine\ORM\Query::HINT_CUSTOM_TREE_WALKERS => array('Pike_Grid_DataSource_Doctrine_OrderByWalker'),
-                        'sidx' => $sidx,
-                        'sord' => $sord,
-                    );
-                };
-
-        $this->onOrder = $onOrder;
-
-        $onFilter = function(array $params, Pike_Grid_DataSource_Interface $dataSource) {
-                    $filters = json_decode($params['filters']);
-                    foreach ($filters->rules as $index => $rule) {
-                        $fieldName = $dataSource->getFieldName($rule->field);
-                        if ($fieldName) {
-                            $rule->field = $fieldName;
-                        } else {
-                            unset($filters->rules[$index]);
-                        }
-                    }
-
-                    return array(
-                        \Doctrine\ORM\Query::HINT_CUSTOM_TREE_WALKERS => array('Pike\DataTable\DataSource\Doctrine\WhereLikeWalker'),
-                        'operator' => $filters->groupOp,
-                        'fields' => $filters->rules,
-                    );
-                };
-
-        $this->onFilter = $onFilter;
-    }
-
-    /**
+     * {@inheritdoc}
+     * 
      * Looks up in the AST what select expression we use and analyses which
-     * fields are used. This is passed thru the datagrid for displaying fieldnames.
+     * fields are used.
      *
      * @return array
      */
-    private function setColumns()
+    public function getFields()
     {
-        $this->columns = new ColumnBag();
+        $fields = array();
 
         $selectClause = $this->query->getAST()->selectClause;
         if (count($selectClause->selectExpressions) == 0) {
@@ -188,54 +132,22 @@ class Doctrine extends AbstractDataSource implements DataSourceInterface
              */
             $expr = $selExpr->expression;
 
-            /* @var $expr Doctrine\ORM\Query\AST\PathExpression */
-            if ($expr instanceof Doctrine\ORM\Query\AST\PathExpression) {
+            /* @var $expr \Doctrine\ORM\Query\AST\PathExpression */
+            if ($expr instanceof \Doctrine\ORM\Query\AST\PathExpression) {
                 // Check if field alias is available
                 if (null !== $selExpr->fieldIdentificationVariable) {
-                    // Set field alias as column name
-                    $name = $selExpr->fieldIdentificationVariable;
-
-                    // Set field alias as label
-                    $label = $selExpr->fieldIdentificationVariable;
+                    $field = $selExpr->fieldIdentificationVariable;
                 } else {
-                    // Set field name as column name
-                    $name = $expr->field;
-
-                    // Set field name as label
-                    $label = $expr->field;
+                    $field = $expr->field;
                 }
-
-                $sidx = $name;
             } else {
-                $name = $selExpr->fieldIdentificationVariable;
-                $label = $name;
-                $sidx = null;
+                $field = $selExpr->fieldIdentificationVariable;
             }
 
-            $this->columns->add($name, $label, $sidx);
+            $fields[] = $field;
         }
-    }
 
-    /**
-     * Defines what happends when the grid is sorted by the server. Must return a array
-     * with query hints!
-     *
-     * @return array
-     */
-    public function setEventSort(Closure $onOrder)
-    {
-        $this->onOrder = $onOrder;
-    }
-
-    /**
-     * Defines what happends when the user filters data with jqGrid and send to the server. Must
-     * return an array with query hints!
-     *
-     * @return array
-     */
-    public function setEventFilter(Closure $onFilter)
-    {
-        $this->onFilter = $onFilter;
+        return $fields;
     }
 
     /**
@@ -246,6 +158,8 @@ class Doctrine extends AbstractDataSource implements DataSourceInterface
      */
     public function getDefaultSorting()
     {
+        $sort = array();
+
         if (null !== $this->query->getAST()->orderByClause) {
             //support for 1 field only
             $orderByClause = $this->query->getAST()->orderByClause;
@@ -254,69 +168,104 @@ class Doctrine extends AbstractDataSource implements DataSourceInterface
             $orderByItem = $orderByClause->orderByItems[0];
 
             if ($orderByItem->expression instanceof \Doctrine\ORM\Query\AST\PathExpression) {
-                $data['index'] = $orderByItem->expression->field;
-                $data['direction'] = $orderByItem->type;
-
-                return $data;
+                $sort['field'] = $orderByItem->expression->field;
+                $sort['direction'] = $orderByItem->type;
             }
+        }
+
+        return $sort;
+    }
+
+    /**
+     * Returns the initialized query hints based on the user-interface parameters
+     *
+     * @return array    Doctrine compatible hints array
+     */
+    private function getQueryHints()
+    {
+        $hints = array();
+
+        $sortQueryHints = $this->getSortQueryHints();
+        if ($sortQueryHints) {
+            $hints = array_merge_recursive($hints, $sortQueryHints);
+        }
+
+        $filterQueryHints = $this->getFilterQueryHints();
+        if ($filterQueryHints) {
+            $hints = array_merge_recursive($hints, $filterQueryHints);
+        }
+
+        return $hints;
+    }
+
+    /**
+     * Returns a Doctrine compatible hints array for the filtering
+     * 
+     * @return array
+     */
+    protected function getFilterQueryHints()
+    {
+        $fields = array();
+
+        foreach ($this->filters as $filter) {
+            $fieldName = $this->getFieldName($filter['field']);
+            if ($fieldName) {
+                $fields[] = array('name' => $fieldName, 'data' => $filter['data']);
+            }
+        }
+
+        if (count($fields)) {
+            return array(
+                \Doctrine\ORM\Query::HINT_CUSTOM_TREE_WALKERS => array(
+                    '\Pike\DataTable\DataSource\Doctrine\WhereLikeWalker'),
+                'fields' => $fields
+            );
         }
 
         return null;
     }
 
     /**
-     * Returns the initialized query hints based on the user-interface jqgrid parameters
-     *
-     * @return array Doctrine compatible hints array
+     * Returns a Doctrine compatible hints array for the sorting
+     * 
+     * TODO: multiple sort columns
+     * @return array
      */
-    private function getQueryHints()
+    protected function getSortQueryHints()
     {
-        $hints = array();
+        $sort = $this->sorts[0];
 
-        // Set sorting if defined
-//        if (array_key_exists('sidx', $this->params) && strlen($this->params['sidx']) > 0
-//                && $this->getSidx($this->params['sidx'])
-//        ) {
-//            $onSort = $this->onOrder;
-//            $hints = array_merge_recursive($hints, $onSort($this->params, $this));
-//        }
-//
-//        if (array_key_exists('filters', $this->params) && (array_key_exists('_search', $this->params)
-//                && $this->params['_search'] == true)) {
-//
-//            $onFilter = $this->onFilter;
-//            $hints = array_merge_recursive($hints, $onFilter($this->params, $this));
-//        }
+        $fieldName = $this->getFieldName($sort['field']);
+        $direction = in_array(strtoupper($sort['direction']), array('ASC', 'DESC')) ? strtoupper($sort['direction']) : 'ASC';
 
-        return $hints;
-    }
-
-    /**
-     * Returns the actual field name for the specified column name (field alias,
-     * actual field name, or sidx)
-     *
-     * @param  string $sidx
-     * @return string|boolean
-     */
-    public function getSidx($sidx)
-    {
-        if (strpos($sidx, '.') === false) {
-            $sidx = $this->getFieldName($sidx);
+        if ($fieldName && $direction) {
+            return array(
+                \Doctrine\ORM\Query::HINT_CUSTOM_TREE_WALKERS => array(
+                    '\Pike\DataTable\DataSource\Doctrine\OrderByWalker'),
+                'fieldName' => $fieldName,
+                'direction' => $direction,
+            );
         }
-        return $sidx;
+
+        return null;
     }
 
     /**
-     * Returns the actual field name for the specified column name (field alias or actual field name)
+     * Returns the actual field name for the specified column name (field alias
+     * or actual field name)
      *
      * The field alias is used if available, otherwise the composition
      * of "identification variable" and "field".
      *
-     * @param  string $alias
+     * @param  string $name
      * @return string|boolean
      */
-    public function getFieldName($alias)
+    public function getFieldName($name)
     {
+        if (strpos($name, '.') !== false) {
+            return $name;
+        }
+
         $field = false;
 
         /* @var $selExpr Doctrine\ORM\Query\AST\SelectExpression */
@@ -329,10 +278,12 @@ class Doctrine extends AbstractDataSource implements DataSourceInterface
             }
 
             // Check if field alias exists
-            if ($alias == $selExpr->fieldIdentificationVariable) {
+            if ($name == $selExpr->fieldIdentificationVariable) {
                 $field = $expr->identificationVariable . '.' . $expr->field;
                 break;
-            } elseif (isset($expr->field) && $alias == $expr->field && '' == $selExpr->fieldIdentificationVariable) {
+            } elseif (isset($expr->field) && $name == $expr->field
+                    && '' == $selExpr->fieldIdentificationVariable
+            ) {
                 $field = $expr->identificationVariable . '.' . $expr->field;
             }
         }

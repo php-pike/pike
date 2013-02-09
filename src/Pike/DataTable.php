@@ -21,7 +21,6 @@ class DataTable
     protected $dataSource;
 
     /**
-     *
      * @var \Zend\ServiceManager\ServiceManager
      */
     protected $sm;
@@ -39,6 +38,11 @@ class DataTable
         $this->adapter = $adapter;
         $this->dataSource = $dataSource;
         $this->sm = $sm;
+
+        $columnBag = $this->adapter->getColumnBag();
+        foreach ($this->dataSource->getFields() as $field) {
+            $columnBag->add($field);
+        }
     }
 
     /**

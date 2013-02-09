@@ -1,5 +1,17 @@
+<table id="<?= $id; ?>">
+    <thead>
+        <tr>
+            <?php foreach ($columns as $column): ?>
+                <th><?= $column['label']; ?></th>
+            <?php endforeach; ?>
+        </tr>
+    </thead>
+    <tbody>
+    </tbody>
+</table>
+
 <script type="text/javascript">
     $(document).ready(function () {
-        $('#test').dataTable(<?php echo json_encode($options); ?>);
+        $('#<?= $id; ?>').dataTable(<?= json_encode($options); ?>);
     });
 </script>

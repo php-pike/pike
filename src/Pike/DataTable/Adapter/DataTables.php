@@ -6,71 +6,70 @@ use Pike\DataTable;
 use Pike\DataTable\DataSource\DataSourceInterface;
 use Zend\View\Model\JsonModel;
 
-class DataTables extends AbstractAdapter implements AdapterInterface
+class DataTables extends AbstractAdapter
 {
 
     /**
-     * Number of rows to display on a single page when using pagination
-     *
-     * @var integer
+     * {@inheritdoc}
      */
-    protected $displayLength = 10;
+    public function __construct()
+    {
+        parent::__construct();
 
-    /**
-     * @var string
-     * @see http://datatables.net/release-datatables/examples/basic_init/dom.html
-     */
-    protected $dom = '<"top"iflp<"clear">>rt<"bottom"iflp<"clear">>';
+        $this->viewModel->setTemplate('dataTable/dataTables');
 
-    /**
-     * When enabled DataTables will not make a request to the server for the
-     * first page draw - rather it will use the data already on the
-     * page (no sorting etc will be applied to it), thus saving on an
-     * XHR at load time.
-     * 
-     * @var integer 
-     */
-    protected $deferLoading;
+        $this->options = array(
+            'iDisplayLength' => 10,
+            'sDom' => '<"top"iflp<"clear">>rt<"bottom"iflp<"clear">>',
+            'bProcessing' => 'true',
+            'bServerSide' => 'true',
+            'sAjaxSource' => '',
+            'sServerMethod' => 'POST'
+        );
+    }
 
     /**
      * @return string
      */
     public function render(DataTable $dataTable)
     {
-        $options = array(
-            'iDisplayLength' => $this->displayLength,
-            'sDom' => $this->dom,
-            'bProcessing' => 'true',
-            'bServerSide' => 'true',
-            'sAjaxSource' => '',
-            'sServerMethod' => 'POST'
-        );
+        $this->viewModel->setVariable('id', $this->id);
+        $this->viewModel->setVariable('options', $this->options);
+        $this->viewModel->setVariable('columns', $this->getColumnBag());
 
-        if ($this->deferLoading) {
-            $options['iDeferLoading'] = $this->deferLoading;
-        }
-
-        $this->viewModel->setVariable('options', $options);
         return $this->viewModel;
     }
 
     /**
+     * Returns the JSON response to populate the data table
+     * 
      * @param  DataSourceInterface $dataSource
      * @return JsonModel
      */
     public function getResponse(DataTable $dataTable)
     {
-        $params = $this->parameterBag->all();
-
-        $offset = $params['iDisplayStart'];
-        $limit = $params['iDisplayLength'];
-
         $dataSource = $dataTable->getDataSource();
+
+        foreach ($this->parameters as $key => $value) {
+            if (strpos($key, 'sSearch') === 0 && '' != $value) {
+                $this->onFilterEvent($dataSource);
+                break;
+            }
+        }
+
+        // Check if the first sort column is set
+        if (isset($this->parameters['iSortCol_0'])) {
+            $this->onSortEvent($dataSource);
+        }
+
+        $offset = $this->parameters['iDisplayStart'];
+        $limit = $this->parameters['iDisplayLength'];
+
         $count = count($dataSource);
         $items = $dataSource->getItems($offset, $limit);
 
         $data = array();
-        $data['sEcho'] = (int) $params['sEcho'];
+        $data['sEcho'] = (int) $this->parameters['sEcho'];
         $data['iTotalRecords'] = $count;
         $data['iTotalDisplayRecords'] = $count;
         $data['aaData'] = array();
@@ -83,27 +82,42 @@ class DataTables extends AbstractAdapter implements AdapterInterface
     }
 
     /**
-     * @return integer
+     * {@inheritdoc}
      */
-    public function getDisplayLength()
+    protected function onFilterEvent(DataSourceInterface $dataSource)
     {
-        return $this->displayLength;
+        // Global search on all columns
+        if (isset($this->parameters['sSearch'])) {
+            $data = $this->parameters['sSearch'];
+            foreach ($this->columnBag->getVisible() as $column) {
+                $dataSource->addFilter($column['field'], $data);
+                break; // TODO: search on multiple columns with OR clause
+            }
+        } else {
+            // Search per column
+            foreach ($this->columnBag->getVisible() as $index => $column) {
+                if (isset($this->parameters['sSearch_' . $index])) {
+                    $data = $this->parameters['sSearch_' . $index];
+                    $dataSource->addFilter($column['field'], $data);
+                }
+            }
+        }
     }
 
     /**
-     * @param integer $displayLength
+     * {@inheritdoc}
      */
-    public function setDisplayLength($displayLength)
+    protected function onSortEvent(DataSourceInterface $dataSource)
     {
-        $this->displayLength = $displayLength;
-    }
+        for ($i = 0; $i < count($this->columnBag->getVisible()); $i++) {
+            if (isset($this->parameters['iSortCol_' . $i])) {
+                $offset = $this->parameters['iSortCol_' . $i];
+                $direction = $this->parameters['sSortDir_' . $i];
 
-    /**
-     * @return string
-     */
-    public function getName()
-    {
-        return 'dataTables';
+                $column = $this->columnBag->getOffset($offset);
+                $dataSource->addSort($column['field'], $direction);
+            }
+        }
     }
 
 }
