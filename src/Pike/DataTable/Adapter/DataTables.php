@@ -5,6 +5,7 @@ namespace Pike\DataTable\Adapter;
 use Pike\DataTable;
 use Pike\DataTable\DataSource\DataSourceInterface;
 use Zend\View\Model\JsonModel;
+use Zend\Json;
 
 class DataTables extends AbstractAdapter
 {
@@ -20,11 +21,15 @@ class DataTables extends AbstractAdapter
 
         $this->options = array(
             'iDisplayLength' => 10,
+            'iDeferLoading' => 10,
             'sDom' => '<"top"iflp<"clear">>rt<"bottom"iflp<"clear">>',
             'bProcessing' => 'true',
             'bServerSide' => 'true',
             'sAjaxSource' => '',
-            'sServerMethod' => 'POST'
+            'sServerMethod' => 'POST',
+            'fnServerParams' => new Json\Expr('function (aoData) {
+                    aoData.push(' . Json\Json::encode(array('id' => $this->id)) . ');
+                }')
         );
     }
 
@@ -33,9 +38,20 @@ class DataTables extends AbstractAdapter
      */
     public function render(DataTable $dataTable)
     {
+        $optionsEncoded = Json\Json::encode($this->options, false, array(
+                    'enableJsonExprFinder' => true
+                ));
+
         $this->viewModel->setVariable('id', $this->id);
         $this->viewModel->setVariable('options', $this->options);
+        $this->viewModel->setVariable('optionsEncoded', $optionsEncoded);
         $this->viewModel->setVariable('columns', $this->getColumnBag());
+
+        if ($this->getOption('iDeferLoading')) {
+            $items = $dataTable->getDataSource()->getItems(0, $this->getOption('iDeferLoading'));
+            $items = $this->filterItems($items);
+            $this->viewModel->setVariable('items', $items);
+        }
 
         return $this->viewModel;
     }
@@ -50,6 +66,9 @@ class DataTables extends AbstractAdapter
     {
         $dataSource = $dataTable->getDataSource();
 
+        $offset = $this->parameters['iDisplayStart'];
+        $limit = $this->parameters['iDisplayLength'];
+
         foreach ($this->parameters as $key => $value) {
             if (strpos($key, 'sSearch') === 0 && '' != $value) {
                 $this->onFilterEvent($dataSource);
@@ -62,9 +81,6 @@ class DataTables extends AbstractAdapter
             $this->onSortEvent($dataSource);
         }
 
-        $offset = $this->parameters['iDisplayStart'];
-        $limit = $this->parameters['iDisplayLength'];
-
         $count = count($dataSource);
         $items = $dataSource->getItems($offset, $limit);
 
@@ -72,17 +88,24 @@ class DataTables extends AbstractAdapter
         $data['sEcho'] = (int) $this->parameters['sEcho'];
         $data['iTotalRecords'] = $count;
         $data['iTotalDisplayRecords'] = $count;
-        $data['aaData'] = array();
-
-        foreach ($items as $item) {
-            $row = array();
-            foreach (array_values($item) as $index => $string) {
-                $row[] = $this->filter($string, $this->columnBag->getOffset($index));
-            }
-            $data['aaData'][] = $row;
-        }
+        $data['aaData'] = $this->filterItems($items);
 
         return new JsonModel($data);
+    }
+
+    /**
+     * @param  array $items
+     * @return array
+     */
+    protected function filterItems($items)
+    {
+        foreach ($items as &$item) {
+            foreach (array_values($item) as $index => $string) {
+                $item[$index] = $this->filter($string, $this->columnBag->getOffset($index));
+            }
+        }
+
+        return $items;
     }
 
     /**
