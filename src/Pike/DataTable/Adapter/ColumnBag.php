@@ -51,9 +51,9 @@ class ColumnBag implements \IteratorAggregate
 
     /**
      * Sets the label for the specified column
-     * 
-     * @param  string $column
-     * @param  string $label
+     *
+     * @param  string    $column
+     * @param  string    $label
      * @return ColumnBag
      */
     public function setLabel($column, $label)
@@ -67,7 +67,7 @@ class ColumnBag implements \IteratorAggregate
 
     /**
      * Returns the label for the specified column
-     * 
+     *
      * @param  string $column
      * @return string
      */
@@ -80,9 +80,9 @@ class ColumnBag implements \IteratorAggregate
 
     /**
      * Sets the field for the specified column
-     * 
-     * @param  string $column
-     * @param  string $field
+     *
+     * @param  string    $column
+     * @param  string    $field
      * @return ColumnBag
      */
     public function setField($column, $field)
@@ -96,7 +96,7 @@ class ColumnBag implements \IteratorAggregate
 
     /**
      * Returns the field for the specified column
-     * 
+     *
      * @param  string $column
      * @return string
      */
@@ -109,9 +109,9 @@ class ColumnBag implements \IteratorAggregate
 
     /**
      * Sets the position for the specified column
-     * 
-     * @param  string  $column
-     * @param  integer $position
+     *
+     * @param  string    $column
+     * @param  integer   $position
      * @return ColumnBag
      */
     public function setPosition($column, $position)
@@ -125,7 +125,7 @@ class ColumnBag implements \IteratorAggregate
 
     /**
      * Returns the position for the specified column
-     * 
+     *
      * @param  string $column
      * @return string
      */
@@ -138,9 +138,9 @@ class ColumnBag implements \IteratorAggregate
 
     /**
      * Sets the show for the specified column
-     * 
-     * @param  string  $column
-     * @param  boolean $field
+     *
+     * @param  string    $column
+     * @param  boolean   $field
      * @return ColumnBag
      */
     public function setDisplay($column, $display)
@@ -154,8 +154,8 @@ class ColumnBag implements \IteratorAggregate
 
     /**
      * Returns the display for the specified column
-     * 
-     * @param  string $column
+     *
+     * @param  string  $column
      * @return boolean
      */
     public function getDisplay($column)
@@ -167,8 +167,8 @@ class ColumnBag implements \IteratorAggregate
 
     /**
      * Returns the specified column
-     * 
-     * @param  string $column
+     *
+     * @param  string          $column
      * @return array
      * @throws \Pike\Exception
      */
@@ -183,7 +183,7 @@ class ColumnBag implements \IteratorAggregate
 
     /**
      * Returns the column for the specified offset
-     * 
+     *
      * @param  integer $offset
      * @return array
      */
@@ -201,7 +201,7 @@ class ColumnBag implements \IteratorAggregate
 
     /**
      * Returns all columns
-     * 
+     *
      * @return array
      */
     public function all()
@@ -213,8 +213,8 @@ class ColumnBag implements \IteratorAggregate
 
     /**
      * Checks if the specified column exists
-     * 
-     * @param  string $column
+     *
+     * @param  string  $column
      * @return boolean
      */
     public function has($column)
@@ -224,7 +224,7 @@ class ColumnBag implements \IteratorAggregate
 
     /**
      * Returns a list of column names
-     * 
+     *
      * @return array
      */
     public function keys()
@@ -283,7 +283,7 @@ class ColumnBag implements \IteratorAggregate
 
     /**
      * Returns the visible columns
-     * 
+     *
      * @return array
      */
     public function getVisible()

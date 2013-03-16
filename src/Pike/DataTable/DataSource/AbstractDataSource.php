@@ -62,7 +62,7 @@ abstract class AbstractDataSource implements \Countable
     /**
      * Sets a column name which identifies every row in the grid.
      *
-     * @param  string $column
+     * @param  string              $column
      * @return DataSourceInterface
      */
     public function setIdentifierColumn($column)
@@ -78,7 +78,7 @@ abstract class AbstractDataSource implements \Countable
 
     /**
      * Adds filters to the data source for filtering results
-     * 
+     *
      * @param array $filters
      */
     public function setFilters(array $filters)
@@ -91,7 +91,7 @@ abstract class AbstractDataSource implements \Countable
 
     /**
      * Adds a filter to the data source for filtering the results
-     * 
+     *
      * @param string $field
      * @param string $data
      * @param string $operator
@@ -107,7 +107,7 @@ abstract class AbstractDataSource implements \Countable
 
     /**
      * Adds sorts to the data source for sorting the results
-     * 
+     *
      * @param array $sorts
      */
     public function setSorts(array $sorts)
@@ -119,9 +119,9 @@ abstract class AbstractDataSource implements \Countable
 
     /**
      * Adds a sort to the data source for sorting the results
-     * 
+     *
      * @param string $field
-     * @param string $direction     ASC or DESC
+     * @param string $direction ASC or DESC
      */
     public function addSort($field, $direction)
     {

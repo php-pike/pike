@@ -45,7 +45,7 @@ class Doctrine extends AbstractDataSource implements DataSourceInterface
 
     /**
      * Constructor
-     * 
+     *
      * @param mixed $source
      */
     public function __construct($source)
@@ -90,7 +90,7 @@ class Doctrine extends AbstractDataSource implements DataSourceInterface
 
     /**
      * {@inheritdoc}
-     * 
+     *
      * Looks up in the AST what select expression we use and analyses which
      * fields are used.
      *
@@ -179,7 +179,7 @@ class Doctrine extends AbstractDataSource implements DataSourceInterface
     /**
      * Returns the initialized query hints based on the user-interface parameters
      *
-     * @return array    Doctrine compatible hints array
+     * @return array Doctrine compatible hints array
      */
     private function getQueryHints()
     {
@@ -200,7 +200,7 @@ class Doctrine extends AbstractDataSource implements DataSourceInterface
 
     /**
      * Returns a Doctrine compatible hints array for the filtering
-     * 
+     *
      * @return array
      */
     protected function getFilterQueryHints()
@@ -227,7 +227,7 @@ class Doctrine extends AbstractDataSource implements DataSourceInterface
 
     /**
      * Returns a Doctrine compatible hints array for the sorting
-     * 
+     *
      * TODO: multiple sort columns
      * @return array
      */
@@ -257,7 +257,7 @@ class Doctrine extends AbstractDataSource implements DataSourceInterface
      * The field alias is used if available, otherwise the composition
      * of "identification variable" and "field".
      *
-     * @param  string $name
+     * @param  string         $name
      * @return string|boolean
      */
     public function getFieldName($name)

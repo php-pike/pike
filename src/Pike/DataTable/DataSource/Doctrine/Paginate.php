@@ -56,7 +56,7 @@ class Paginate
      * query wrapped in the from component. Both situations give back the total number of records
      * found.
      *
-     * @param  Query $query
+     * @param  Query   $query
      * @return integer
      */
     public static function getTotalQueryResults(Query $query,

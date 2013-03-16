@@ -39,16 +39,17 @@ class DataTables extends AbstractAdapter
     public function render(DataTable $dataTable)
     {
         $optionsEncoded = Json\Json::encode($this->options, false, array(
-                    'enableJsonExprFinder' => true
-                ));
+                'enableJsonExprFinder' => true
+            ));
 
         $this->viewModel->setVariable('id', $this->id);
         $this->viewModel->setVariable('options', $this->options);
         $this->viewModel->setVariable('optionsEncoded', $optionsEncoded);
         $this->viewModel->setVariable('columns', $this->getColumnBag());
 
-        if ($this->getOption('iDeferLoading')) {
-            $items = $dataTable->getDataSource()->getItems(0, $this->getOption('iDeferLoading'));
+        if (null !== $this->getOption('iDeferLoading')) {
+            $items = $dataTable->getDataSource()
+                ->getItems(0, $this->getOption('iDeferLoading'));
             $items = $this->filterItems($items);
             $this->viewModel->setVariable('items', $items);
         }
@@ -58,7 +59,7 @@ class DataTables extends AbstractAdapter
 
     /**
      * Returns the JSON response to populate the data table
-     * 
+     *
      * @param  DataSourceInterface $dataSource
      * @return JsonModel
      */

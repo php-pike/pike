@@ -27,7 +27,7 @@ class DataTable
 
     /**
      * Constructor
-     * 
+     *
      * @param AdapterInterface    $adapter
      * @param DataSourceInterface $dataSource
      * @param ServiceManager      $sm
@@ -67,7 +67,7 @@ class DataTable
 
     /**
      * Returns the service manager
-     * 
+     *
      * @return ServiceManager
      */
     public function getServiceManager()
