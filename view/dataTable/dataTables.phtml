@@ -7,11 +7,22 @@
         </tr>
     </thead>
     <tbody>
+        <?php foreach ($items as $item): ?>
+            <tr>
+                <?php foreach ($item as $key => $value): ?>
+                    <?php if (is_string($key)): ?>
+                        <td><?= $value; ?></td>
+                    <?php endif; ?>
+                <?php endforeach; ?>
+            </tr>
+        <?php endforeach; ?>
     </tbody>
 </table>
 
-<script type="text/javascript">
-    $(document).ready(function () {
-        $('#<?= $id; ?>').dataTable(<?= json_encode($options); ?>);
-    });
-</script>
+<?php
+$this->headScript()->appendScript(<<<EOF
+$(document).ready(function () {
+    $('#{$id}').dataTable({$optionsEncoded});
+});
+EOF
+);

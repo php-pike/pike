@@ -27,7 +27,7 @@
  * @license    MIT
  */
 
-namespace Pike\Paginator\Adapter\Doctrine;
+namespace Pike\Paginator\Adapter;
 
 use Zend\Paginator\Adapter\AdapterInterface;
 
@@ -70,14 +70,15 @@ class Doctrine implements AdapterInterface
     /**
      * Returns an array of items for a page
      *
-     * @param  integer $offset Page offset
-     * @param  integer $itemCountPerPage Number of items per page
+     * @param  integer        $offset           Page offset
+     * @param  integer        $itemCountPerPage Number of items per page
      * @return \ArrayIterator
      */
     public function getItems($offset, $itemCountPerPage)
     {
         $this->query->setFirstResult($offset)
                 ->setMaxResults($itemCountPerPage);
+
         return $this->paginator->getIterator();
     }
 

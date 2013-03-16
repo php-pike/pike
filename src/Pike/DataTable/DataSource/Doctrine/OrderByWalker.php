@@ -47,7 +47,7 @@ class OrderByWalker extends TreeWalkerAdapter
      * Walks down a SelectStatement AST node, modify the orderby clause if the user
      * wants to sort his results.
      *
-     * @param SelectStatement $AST
+     * @param  SelectStatement $AST
      * @return void
      */
     public function walkSelectStatement(SelectStatement $AST)
