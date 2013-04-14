@@ -9,27 +9,27 @@ abstract class AbstractAdapter implements AdapterInterface
 {
 
     /**
-     * @var string 
+     * @var string
      */
     protected $id;
 
     /**
      * Response parameters
-     * 
+     *
      * @var array
      */
     protected $parameters = array();
 
     /**
      * Data table options
-     * 
+     *
      * @var array
      */
     protected $options = array();
 
     /**
      * Filters
-     * 
+     *
      * @var array
      */
     protected $filters = array();
@@ -40,7 +40,7 @@ abstract class AbstractAdapter implements AdapterInterface
     protected $filtersPrepared = false;
 
     /**
-     * @var ViewModel 
+     * @var ViewModel
      */
     protected $viewModel;
 
@@ -144,7 +144,7 @@ abstract class AbstractAdapter implements AdapterInterface
 
     /**
      * Sets a filter
-     * 
+     *
      * @param string   $name
      * @param \Closure $filter
      * @param integer  $priority
@@ -156,8 +156,8 @@ abstract class AbstractAdapter implements AdapterInterface
 
     /**
      * Returns a filter
-     * 
-     * @param  string $name
+     *
+     * @param  string          $name
      * @return \Closure
      * @throws \Pike\Exception
      */
@@ -173,7 +173,7 @@ abstract class AbstractAdapter implements AdapterInterface
     /**
      * Sets the filter for auto escaping column strings
      *
-     * @param  integer $priority
+     * @param  integer          $priority
      * @return AdapterInterface
      */
     public function setAutoEscapeFilter($priority = 25)
@@ -199,7 +199,7 @@ abstract class AbstractAdapter implements AdapterInterface
      * that you do escaping for the content inside that column by yourself,
      * otherwise you'll be vulnerable for XSS attacks!
      *
-     * @param  array $columns
+     * @param  array            $columns
      * @return AdapterInterface
      */
     public function excludeColumnsFromEscaping(array $columns)
@@ -224,7 +224,7 @@ abstract class AbstractAdapter implements AdapterInterface
 
     /**
      * Returns a list of columns that are excluded for escaping
-     * 
+     *
      * @return array
      */
     public function getExcludedColumnsForEscaping()
@@ -234,7 +234,7 @@ abstract class AbstractAdapter implements AdapterInterface
 
     /**
      * Executes the filters on the (output) data
-     * 
+     *
      * @param  string $string
      * @param  array  $column
      * @return string
@@ -269,14 +269,14 @@ abstract class AbstractAdapter implements AdapterInterface
 
     /**
      * Event that fires on filtering
-     * 
+     *
      * @param DataSourceInterface $dataSource
      */
     abstract protected function onFilterEvent(DataSourceInterface $dataSource);
 
     /**
      * Event that fires on sorting
-     * 
+     *
      * @param DataSourceInterface $dataSource
      */
     abstract protected function onSortEvent(DataSourceInterface $dataSource);
