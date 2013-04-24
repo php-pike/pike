@@ -1,5 +1,5 @@
 {
-    "name": "php-pike/pike2",
+    "name": "php-pike/pike",
     "description": "PiKe is a extension library for ZendFramework2/Doctrine2 projects. PiKe has out-of-the-box support for building complete DataTables (jqGrid/Gebo) and many more cool stuff. Just check it out.",
     "type": "library",
     "license": "MIT",
@@ -38,6 +38,6 @@
     "require": {
         "php": ">=5.3.3",
         "doctrine/orm": "2.3.*",
-	"zendframework/zendframework" : ">2.0"
+        "zendframework/zendframework" : ">2.0"
     }
 }

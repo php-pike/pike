@@ -1,4 +1,4 @@
-<table id="<?= $id; ?>">
+<table <?php foreach($attributes as $key => $value) echo $key . '="' . $value . '"'?>>
     <thead>
         <tr>
             <?php foreach ($columns as $column): ?>
@@ -7,22 +7,24 @@
         </tr>
     </thead>
     <tbody>
-        <?php foreach ($items as $item): ?>
-            <tr>
-                <?php foreach ($item as $key => $value): ?>
-                    <?php if (is_string($key)): ?>
-                        <td><?= $value; ?></td>
-                    <?php endif; ?>
-                <?php endforeach; ?>
-            </tr>
-        <?php endforeach; ?>
+        <?php if (isset($items) && count($items) > 0) :?>
+            <?php foreach ($items as $item): ?>
+                <tr>
+                    <?php foreach ($item as $key => $value): ?>
+                        <?php if (is_string($key)): ?>
+                            <td><?= $value; ?></td>
+                        <?php endif; ?>
+                    <?php endforeach; ?>
+                </tr>
+            <?php endforeach; ?>
+        <?php endif; ?>
     </tbody>
 </table>
 
 <?php
 $this->headScript()->appendScript(<<<EOF
 $(document).ready(function () {
-    $('#{$id}').dataTable({$optionsEncoded});
+    $('#{$attributes['id']}').dataTable({$optionsEncoded});
 });
 EOF
 );
