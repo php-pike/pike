@@ -72,12 +72,11 @@ class Doctrine extends AbstractDataSource implements DataSourceInterface
     public function getItems($offset, $limit)
     {
         $hints = $this->getQueryHints();
-        //var_dump($hints);exit();
         $paginateQuery = Doctrine\Paginate::getPaginateQuery(
                         $this->query, $offset, $limit, $hints
         );
 
-        return $paginateQuery->getResult();
+        return $paginateQuery->getArrayResult();
     }
 
     /**
@@ -228,12 +227,18 @@ class Doctrine extends AbstractDataSource implements DataSourceInterface
     /**
      * Returns a Doctrine compatible hints array for the sorting
      *
-     * TODO: multiple sort columns
+     * @todo: multiple sort columns
      * @return array
      */
     protected function getSortQueryHints()
     {
-        $sort = $this->sorts[0];
+        $sorts = $this->getSorts();
+
+        if (count($sorts) === 0) {
+            return null;
+        }
+
+        $sort = $sorts[0];
 
         $fieldName = $this->getFieldName($sort['field']);
         $direction = in_array(strtoupper($sort['direction']), array('ASC', 'DESC')) ? strtoupper($sort['direction']) : 'ASC';
