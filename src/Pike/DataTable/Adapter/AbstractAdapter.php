@@ -181,10 +181,10 @@ abstract class AbstractAdapter implements AdapterInterface
         $adapter = $this;
 
         $filter = function($string, array $column) use ($adapter) {
-                    if (!in_array($column['column'], $adapter->getExcludedColumnsForEscaping())) {
-                        return htmlspecialchars($string, ENT_COMPAT, 'UTF-8');
-                    }
-                };
+            if (!in_array($column['column'], $adapter->getExcludedColumnsForEscaping())) {
+                return htmlspecialchars($string, ENT_COMPAT, 'UTF-8');
+            }
+        };
 
         $this->setFilter('escape', $filter, $priority);
 

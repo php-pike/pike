@@ -22,15 +22,15 @@ class DataTables extends AbstractAdapter
 
         $this->options = array(
             'iDisplayLength' => 10,
-            'iDeferLoading' => 10,
-            'sDom' => '<"top"iflp<"clear">>rt<"bottom"iflp<"clear">>',
-            'bProcessing' => 'true',
-            'bServerSide' => 'true',
-            'sAjaxSource' => '',
-            'sServerMethod' => 'POST',
+            'iDeferLoading'  => null,
+            'sDom'           => '<"top"iflp<"clear">>rt<"bottom"iflp<"clear">>',
+            'bProcessing'    => 'true',
+            'bServerSide'    => 'true',
+            'sAjaxSource'    => '',
+            'sServerMethod'  => 'POST',
             'fnServerParams' => new Json\Expr('function (aoData) {
-                    aoData.push(' . Json\Json::encode(array('id' => $this->id)) . ');
-                }')
+                aoData.push(' . Json\Json::encode(array('id' => $this->id)) . ');
+            }'),
         );
     }
 
