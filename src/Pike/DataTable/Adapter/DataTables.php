@@ -9,6 +9,7 @@ use Zend\Json;
 
 class DataTables extends AbstractAdapter
 {
+    protected $attributes = array();
 
     /**
      * {@inheritdoc}
@@ -39,13 +40,13 @@ class DataTables extends AbstractAdapter
     public function render(DataTable $dataTable)
     {
         $optionsEncoded = Json\Json::encode($this->options, false, array(
-                'enableJsonExprFinder' => true
-            ));
+            'enableJsonExprFinder' => true
+        ));
 
-        $this->viewModel->setVariable('id', $this->id);
         $this->viewModel->setVariable('options', $this->options);
         $this->viewModel->setVariable('optionsEncoded', $optionsEncoded);
         $this->viewModel->setVariable('columns', $this->getColumnBag());
+        $this->viewModel->setVariable('attributes', $this->getAttributes());
 
         if (null !== $this->getOption('iDeferLoading')) {
             $items = $dataTable->getDataSource()
@@ -146,6 +147,41 @@ class DataTables extends AbstractAdapter
                 $dataSource->addSort($column['field'], $direction);
             }
         }
+    }
+
+    /**
+     * You can set HTML(5) attributes for the table tag here.
+     *
+     * @param string $name
+     * @param string $value
+     */
+    public function setAttribute($name, $value)
+    {
+        $this->attributes[$name] = $value;
+    }
+
+    /**
+     * Set all attributes at once, this will override the current ones.
+     *
+     * @param array $params
+     */
+    public function setAttributes(array $params)
+    {
+        foreach($params as $name => $value) {
+            $this->setAttribute($name, $value);
+        }
+    }
+
+    /**
+     * Retrieve the complete array with attributes including the id.
+     *
+     * @return array
+     */
+    public function getAttributes()
+    {
+        $this->attributes['id'] = $this->getId();
+
+        return $this->attributes;
     }
 
 }
