@@ -1,6 +1,6 @@
 <?php
 
-namespace Pike\DataTable\Adapter;
+namespace Pike\DataTable;
 
 class ColumnBag implements \IteratorAggregate
 {
@@ -277,7 +277,7 @@ class ColumnBag implements \IteratorAggregate
                 $positions[$name] = $column['position'];
             }
 
-            array_multisort($names, SORT_ASC, $positions, SORT_ASC, $this->columns);
+            array_multisort($positions, SORT_ASC, $names, SORT_ASC, $this->columns);
         }
     }
 

@@ -4,6 +4,7 @@ namespace Pike\DataTable\Adapter;
 
 use Zend\View\Model\ViewModel;
 use Pike\DataTable\DataSource\DataSourceInterface;
+use Pike\DataTable\ColumnBag;
 
 abstract class AbstractAdapter implements AdapterInterface
 {
