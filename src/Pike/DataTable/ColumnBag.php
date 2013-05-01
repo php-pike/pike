@@ -27,26 +27,47 @@ class ColumnBag implements \IteratorAggregate
     /**
      * Adds a column to the column bag
      *
-     * @param string  $column   The column name
-     * @param string  $label    The friendly name used for this column as heading
-     * @param string  $field    The field name to be used when sorting is isseud
-     * @param integer $position The position number, can be any number
-     * @param boolean $display  Show column
+     * @param string  $columnName The column name
+     * @param string  $label      The friendly name used for this column as heading
+     * @param string  $field      The field name to be used when sorting is isseud
+     * @param integer $position   The position number, can be any number
+     * @param boolean $display    Show column
+     * @param Closure $data       A callback which called everyrow this column needs to be drawed with row data as argument
      */
-    public function add($column, $label = null, $field = null, $position = null,
-            $display = true
+    public function add($columnName, $label = null, $field = null, $position = null,
+            $display = true, \Closure $data = null
     ) {
-        $label = isset($label) ? $label : $column;
-        $field = isset($field) ? $field : $column;
+        $label = isset($label) ? $label : $columnName;
+        $field = isset($field) ? $field : $columnName;
         $position = isset($position) ? $position : count($this->columns) + 1;
 
-        $this->columns[$column] = array(
-            'column' => $column,
+        $column = array(
+            'column' => $columnName,
             'label' => $label,
             'field' => $field,
             'position' => $position,
             'display' => $display
         );
+
+        if (!is_callable($data)) {
+            $column['data'] = function($row) use ($columnName, $data) {
+                if (is_string($data) || is_integer($data)) {
+                    return $data;
+                }
+
+                if ($row[$columnName] instanceof \DateTime) {
+                    return $row[$columnName]->format(\DateTime::ISO8601);
+                }
+
+                return $row[$columnName];
+            };
+        }
+
+        if ($this->has($columnName)) {
+            $column = array_merge($column,$this->get($columnName));
+        }
+
+        $this->columns[$columnName] = $column;
     }
 
     /**
@@ -60,7 +81,7 @@ class ColumnBag implements \IteratorAggregate
     {
         $this->get($column);
 
-        $this->columns[$column] = $label;
+        $this->columns[$column]['label'] = $label;
 
         return $this;
     }
@@ -89,7 +110,7 @@ class ColumnBag implements \IteratorAggregate
     {
         $this->get($column);
 
-        $this->columns[$column] = $field;
+        $this->columns[$column]['field'] = $field;
 
         return $this;
     }
@@ -118,7 +139,7 @@ class ColumnBag implements \IteratorAggregate
     {
         $this->get($column);
 
-        $this->columns[$column] = $position;
+        $this->columns[$column]['position'] = $position;
 
         return $this;
     }
@@ -147,7 +168,7 @@ class ColumnBag implements \IteratorAggregate
     {
         $this->get($column);
 
-        $this->columns[$column] = $display;
+        $this->columns[$column]['display'] = $display;
 
         return $this;
     }
@@ -156,6 +177,7 @@ class ColumnBag implements \IteratorAggregate
      * Returns the display for the specified column
      *
      * @param  string  $column
+     *
      * @return boolean
      */
     public function getDisplay($column)
@@ -168,8 +190,10 @@ class ColumnBag implements \IteratorAggregate
     /**
      * Returns the specified column
      *
-     * @param  string          $column
+     * @param  string $column
+     *
      * @return array
+     *
      * @throws \Pike\Exception
      */
     public function get($column)
@@ -185,6 +209,7 @@ class ColumnBag implements \IteratorAggregate
      * Returns the column for the specified offset
      *
      * @param  integer $offset
+     *
      * @return array
      */
     public function getOffset($offset)
@@ -197,6 +222,33 @@ class ColumnBag implements \IteratorAggregate
         }
 
         return current($columns);
+    }
+
+    /**
+     * Set the callback for a specific column.
+     *
+     * @param string  $column
+     * @param \Closure $callback
+     *
+     * @return ColumnBag
+     */
+    public function setDataCallback($column, \Closure $callback)
+    {
+        $this->columns[$column]['data'] = $callback;
+
+        return $this;
+    }
+
+    /**
+     * Get the closure for a given column.
+     *
+     * @return \Closure
+     */
+    public function getDataCallback($column)
+    {
+        $column = $this->get($column);
+
+        return $column['data'];
     }
 
     /**

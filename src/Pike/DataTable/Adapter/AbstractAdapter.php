@@ -5,6 +5,7 @@ namespace Pike\DataTable\Adapter;
 use Zend\View\Model\ViewModel;
 use Pike\DataTable\DataSource\DataSourceInterface;
 use Pike\DataTable\ColumnBag;
+use Pike\DataTable;
 
 abstract class AbstractAdapter implements AdapterInterface
 {
@@ -67,6 +68,44 @@ abstract class AbstractAdapter implements AdapterInterface
         $this->columnBag = new ColumnBag();
 
         $this->setAutoEscapeFilter();
+    }
+
+    /**
+     * Get items should return the current page datatable
+     * data with callbacks and filters already being processed.
+     *
+     * @return array
+     */
+    protected function getItems(DataTable $dataTable, $offset, $limit)
+    {
+        $items = $dataTable->getDataSource()->getItems($offset, $limit);
+
+        foreach($items as &$row) {
+            foreach($row as $columnName => &$value) {
+                $callback = $this->getColumnBag()->getDataCallback($columnName);
+                $value = $callback($row);
+            }
+        }
+
+        $items = $this->filterItems($items);
+
+        return $items;
+    }
+
+    /**
+     * @param  array $items
+     *
+     * @return array
+     */
+    protected function filterItems($items)
+    {
+        foreach ($items as &$item) {
+            foreach (array_values($item) as $index => $string) {
+                $item[$index] = $this->filter($string, $this->columnBag->getOffset($index));
+            }
+        }
+
+        return $items;
     }
 
     /**

@@ -5,6 +5,7 @@ namespace Pike\DataTable\Adapter;
 use Pike\DataTable;
 use Pike\DataTable\DataSource\DataSourceInterface;
 use Zend\View\Model\JsonModel;
+use Zend\View\Model\ViewModel;
 use Zend\Json;
 
 class DataTables extends AbstractAdapter
@@ -35,7 +36,7 @@ class DataTables extends AbstractAdapter
     }
 
     /**
-     * @return string
+     * @return ViewModel
      */
     public function render(DataTable $dataTable)
     {
@@ -49,10 +50,7 @@ class DataTables extends AbstractAdapter
         $this->viewModel->setVariable('attributes', $this->getAttributes());
 
         if (null !== $this->getOption('iDeferLoading')) {
-            $items = $dataTable->getDataSource()
-                ->getItems(0, $this->getOption('iDeferLoading'));
-            $items = $this->filterItems($items);
-            $this->viewModel->setVariable('items', $items);
+            $this->viewModel->setVariable('items', $this->getItems($dataTable, 0, $this->getOption('iDeferLoading')));
         }
 
         return $this->viewModel;
@@ -84,31 +82,17 @@ class DataTables extends AbstractAdapter
         }
 
         $count = count($dataSource);
-        $items = $dataSource->getItems($offset, $limit);
+        $items = $this->getItems($dataTable, $offset, $limit);
 
         $data = array();
         $data['sEcho'] = (int) $this->parameters['sEcho'];
         $data['iTotalRecords'] = $count;
         $data['iTotalDisplayRecords'] = $count;
-        $data['aaData'] = $this->filterItems($items);
+        $data['aaData'] = $items;
 
         return new JsonModel($data);
     }
 
-    /**
-     * @param  array $items
-     * @return array
-     */
-    protected function filterItems($items)
-    {
-        foreach ($items as &$item) {
-            foreach (array_values($item) as $index => $string) {
-                $item[$index] = $this->filter($string, $this->columnBag->getOffset($index));
-            }
-        }
-
-        return $items;
-    }
 
     /**
      * {@inheritdoc}
