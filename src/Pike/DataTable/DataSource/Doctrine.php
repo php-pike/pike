@@ -78,12 +78,6 @@ class Doctrine extends AbstractDataSource implements DataSourceInterface
 
         $data = $paginateQuery->getArrayResult();
 
-        array_walk_recursive($data, function(&$item, $key) {
-            if ($item instanceof \DateTime) {
-                $item = $item->format('c');
-            }
-        });
-
         return $data;
     }
 
