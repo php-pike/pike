@@ -46,7 +46,8 @@ class ColumnBag implements \IteratorAggregate
             'label' => $label,
             'field' => $field,
             'position' => $position,
-            'display' => $display
+            'display' => $display,
+            'data' => $data,
         );
 
         if (!is_callable($data)) {

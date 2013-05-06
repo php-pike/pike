@@ -80,11 +80,14 @@ abstract class AbstractAdapter implements AdapterInterface
     {
         $items = $dataTable->getDataSource()->getItems($offset, $limit);
 
-        foreach($items as &$row) {
-            foreach($row as $columnName => &$value) {
-                $callback = $this->getColumnBag()->getDataCallback($columnName);
-                $value = $callback($row);
+        foreach ($items as &$row) {
+            $newRow = array();
+
+            foreach ($this->columnBag as $columnName => $column) {
+                $newRow[$columnName] = $column['data']($row);
             }
+
+            $row = $newRow;
         }
 
         $items = $this->filterItems($items);
