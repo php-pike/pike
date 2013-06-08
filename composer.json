@@ -1,5 +1,5 @@
 {
-    "name": "php-pike/Pike",
+    "name": "php-pike/pike",
     "version": "1.4.0",
     "description": "Pike is a extension library for ZendFramework1/Doctrine2 projects. Pike has out-of-the-box support for building complete DataGrids (jqGrid), Default variable escaping, reflection for resources, nice toolbar, EntityAudit, Paginator, Sessions with Doctrine, and many more cool stuff. Just check it out.",
     "keywords": ["datagrid", "zendframework", "jquery", "doctrine2", "grid", "EntityAudit", "Forms", "Toolbar", "Reflection"],
