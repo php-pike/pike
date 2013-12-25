@@ -156,8 +156,9 @@ class Pike_Session_SaveHandler_Doctrine implements Zend_Session_SaveHandler_Inte
             } else {
                 $modified = new DateTime($entity->getModified());
             }
-
-            if ($modified->diff(new DateTime('now'))->s < $this->_lifetime) {
+            
+            $duration = (new DateTime('now'))->getTimestamp() - $modified->getTimestamp();
+            if ($duration < $this->_lifetime) {
                 $return = $entity->getData();
             } else {
                 self::$em->remove($entity);
