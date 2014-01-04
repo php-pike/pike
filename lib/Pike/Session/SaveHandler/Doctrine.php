@@ -38,7 +38,7 @@
  *
  * 3. Configure Zend_Application_Resource_Session to make it use this save handler and set some other cool options:
  * resources.session.saveHandler.class = "Pike_Session_SaveHandler_Doctrine"
- * resources.session.saveHandler.options.lifetime = 3600
+ * resources.session.remember_me_seconds = 3600
  * resources.session.saveHandler.options.entityName = "Namespace\To\Your\Entity\Session"
  *
  * And you can enjoy Doctrine even more!
@@ -93,7 +93,10 @@ class Pike_Session_SaveHandler_Doctrine implements Zend_Session_SaveHandler_Inte
             }
         }
 
-        $this->_lifetime = Zend_Session::getOptions('gc_maxlifetime');
+        $this->_lifetime = Zend_Session::getOptions('remember_me_seconds');
+        if(empty($this->_lifetime)){
+            $this->_lifetime = Zend_Session::getOptions('gc_maxlifetime');
+        }
     }
 
     /**
