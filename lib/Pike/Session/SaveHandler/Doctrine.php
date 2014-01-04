@@ -92,13 +92,14 @@ class Pike_Session_SaveHandler_Doctrine implements Zend_Session_SaveHandler_Inte
                     break;
                 case 'lifetime' :
                     $this->_lifetime = $value;
-                    if(empty($this->_lifetime)){
-                         $this->_lifetime = Zend_Session::getOptions('gc_maxlifetime');
-                    }
                     break;
             }
         }
-
+        
+        if(empty($this->_lifetime)){
+            $this->_lifetime = Zend_Session::getOptions('gc_maxlifetime');
+        }
+        
     }
 
     /**
