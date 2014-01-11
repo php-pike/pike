@@ -90,10 +90,16 @@ class Pike_Session_SaveHandler_Doctrine implements Zend_Session_SaveHandler_Inte
                 case 'entityname' :
                     $this->_entityName = $value;
                     break;
+                case 'lifetime' :
+                    $this->_lifetime = $value;
+                    break;
             }
         }
-
-        $this->_lifetime = Zend_Session::getOptions('gc_maxlifetime');
+        
+        if(empty($this->_lifetime)){
+            $this->_lifetime = Zend_Session::getOptions('gc_maxlifetime');
+        }
+        
     }
 
     /**
