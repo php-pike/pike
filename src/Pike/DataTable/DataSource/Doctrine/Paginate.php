@@ -81,7 +81,7 @@ class Paginate
         if (null !== $countQuery->getAST()->groupByClause
                 || null !== $countQuery->getAST()->havingClause
         ) {
-            $walker = function($node, &$keys, $walker) {
+            $walker = function ($node, &$keys, $walker) {
                         foreach ($node as $key => $value) {
                             if (is_array($value) || $value instanceof \Doctrine\ORM\Query\AST\Node) {
                                 $walker($value, $keys, $walker);

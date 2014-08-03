@@ -30,7 +30,6 @@
 namespace Pike\DataTable\Service;
 
 use Zend\ServiceManager\FactoryInterface;
-use Zend\ServiceManager\ServiceLocatorAwareInterface;
 use Zend\ServiceManager\ServiceLocatorInterface;
 use Pike\DataTable;
 
@@ -61,7 +60,7 @@ abstract class AbstractDataTableService implements FactoryInterface
     abstract public function getName();
 
     /**
-     * @param ServiceLocatorInterface|ServiceManager $serviceLocator
+     * @param  ServiceLocatorInterface|ServiceManager $serviceLocator
      * @return DataTable
      */
     public function createService(ServiceLocatorInterface $serviceLocator)
