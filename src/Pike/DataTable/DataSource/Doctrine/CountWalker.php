@@ -71,7 +71,7 @@ class CountWalker extends TreeWalkerAdapter
         /**
          * Find the identifier field of the root entity (at the FROM component)
          */
-        foreach ($this->_getQueryComponents() AS $dqlAlias => $qComp) {
+        foreach ($this->_getQueryComponents() as $dqlAlias => $qComp) {
 
             // skip mixed data in query
             if (isset($qComp['resultVariable'])) {

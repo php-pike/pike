@@ -167,7 +167,7 @@ class DataTables extends AbstractAdapter
      */
     public function setAttributes(array $params)
     {
-        foreach($params as $name => $value) {
+        foreach ($params as $name => $value) {
             $this->setAttribute($name, $value);
         }
     }

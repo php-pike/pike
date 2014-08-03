@@ -181,7 +181,7 @@ abstract class AbstractAdapter implements AdapterInterface
     {
         $adapter = $this;
 
-        $filter = function($string, array $column) use ($adapter) {
+        $filter = function ($string, array $column) use ($adapter) {
             if (!in_array($column['column'], $adapter->getExcludedColumnsForEscaping())) {
                 return htmlspecialchars($string, ENT_COMPAT, 'UTF-8');
             }

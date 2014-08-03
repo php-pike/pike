@@ -76,6 +76,7 @@ class DataTableHelper extends AbstractHelper implements ServiceLocatorAwareInter
             $attributes = array_merge($service->getAdapter()->getAttributes(), $attributes);
             $service->getAdapter()->setAttributes($attributes);
         }
+
         return $service->render();
     }
 
