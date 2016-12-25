@@ -168,7 +168,7 @@ class Pike_Session_SaveHandler_Doctrine implements Zend_Session_SaveHandler_Inte
                 $return = $entity->getData();
             } else {
                 self::$em->remove($entity);
-                self::$em->flush();
+                self::$em->flush($this->_entityName);
             }
         }
 
@@ -193,7 +193,7 @@ class Pike_Session_SaveHandler_Doctrine implements Zend_Session_SaveHandler_Inte
         $entity->setModified(new DateTime('now'));
 
         self::$em->persist($entity);
-        self::$em->flush();
+        self::$em->flush($this->_entityName);
 
         return true;
     }
@@ -210,7 +210,7 @@ class Pike_Session_SaveHandler_Doctrine implements Zend_Session_SaveHandler_Inte
 
         if ($entity instanceof Pike_Session_Entity_Interface) {
             self::$em->remove($entity);
-            self::$em->flush();
+            self::$em->flush($this->_entityName);
 
             return true;
         }
